@@ -1,6 +1,7 @@
 import { makeStyles, ToggleButton, Tooltip, tokens } from '@fluentui/react-components';
 import { CursorRegular, HandRightRegular, ZoomFitRegular } from '@fluentui/react-icons';
 import type { ReactElement } from 'react';
+import { UndoButtons } from '../history/UndoButtons';
 import { type ToolId, useUiStore } from '../ui/uiStore';
 
 const useStyles = makeStyles({
@@ -9,7 +10,12 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     gap: tokens.spacingVerticalXS,
+    height: '100%',
+    boxSizing: 'border-box',
     paddingBlock: tokens.spacingVerticalS,
+  },
+  spacer: {
+    flexGrow: 1,
   },
 });
 
@@ -65,6 +71,8 @@ export function ToolRail() {
           onClick={toggleLoupe}
         />
       </Tooltip>
+      <div className={styles.spacer} />
+      <UndoButtons />
     </div>
   );
 }

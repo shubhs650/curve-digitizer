@@ -1,7 +1,9 @@
 import { FluentProvider, makeStyles, tokens } from '@fluentui/react-components';
 import { useEffect, useState } from 'react';
 import { GraphCanvas } from './canvas/GraphCanvas';
+import { useUndoShortcuts } from './history/useUndoShortcuts';
 import { HomeScreen } from './home/HomeScreen';
+import { DatasetsPanel } from './inspector/DatasetsPanel';
 import { useImageInput } from './input/useImageInput';
 import { ProjectSidebar } from './project/ProjectSidebar';
 import { ProjectEmpty } from './project/ProjectEmpty';
@@ -73,6 +75,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
   const graph = useActiveGraph();
   useProjectList();
   useToolShortcuts();
+  useUndoShortcuts();
 
   return (
     <div className={styles.shell}>
@@ -89,6 +92,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
         sidebarOpen={sidebarOpen}
         sidebar={<ProjectSidebar onFiles={onFiles} />}
         rail={project !== null && <ToolRail />}
+        inspector={graph !== null && <DatasetsPanel key={graph.id} graph={graph} />}
         canvas={
           project === null ? (
             <HomeScreen onFiles={onFiles} />

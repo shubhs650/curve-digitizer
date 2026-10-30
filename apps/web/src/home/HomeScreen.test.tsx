@@ -2,25 +2,12 @@ import { cleanup, render, screen, waitFor, within } from '@testing-library/react
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '../App';
-import { Workspace } from '../session/workspace';
-import { MemoryRepository } from '../storage/memory';
+import { testWorkspace, TINY_PNG as PNG } from '../test/workspace';
 
 afterEach(cleanup);
 
-const PNG = new Uint8Array([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52, 0, 0, 0, 3, 0, 0, 0, 2,
-  8, 2, 0, 0, 0,
-]);
-
 function setup() {
-  let id = 0;
-  const workspace = new Workspace({
-    repo: new MemoryRepository(),
-    encodePng: () => Promise.reject(new Error('not used')),
-    newId: () => `id${String(++id)}`,
-    now: () => new Date().toISOString(),
-    appVersion: 'test',
-  });
+  const workspace = testWorkspace();
   const user = userEvent.setup();
   render(<App workspace={workspace} />);
   return { workspace, user };

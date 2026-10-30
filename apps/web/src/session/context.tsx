@@ -1,5 +1,6 @@
-import type { Graph, Project } from '@cd/core';
-import { createContext, type ReactNode, useContext, useSyncExternalStore } from 'react';
+import type { Command, Dataset, Graph, Project } from '@cd/core';
+import { createContext, type ReactNode, useCallback, useContext, useSyncExternalStore } from 'react';
+import { useNotify } from '../ui/notices';
 import { useUiStore } from '../ui/uiStore';
 import type { Workspace, WorkspaceState } from './workspace';
 
@@ -40,4 +41,37 @@ export function useActiveGraph(): Graph | null {
   const activeGraphId = useUiStore((s) => s.activeGraphId);
   if (!project) return null;
   return project.graphs.find((g) => g.id === activeGraphId) ?? project.graphs[0] ?? null;
+}
+
+/** The dataset new points go into: the one picked in the inspector, else the graph's first. */
+export function useActiveDataset(graph: Graph | null): Dataset | null {
+  const picked = useUiStore((s) => (graph ? s.activeDatasetIds[graph.id] : undefined));
+  if (!graph) return null;
+  return graph.datasets.find((d) => d.id === picked) ?? graph.datasets[0] ?? null;
+}
+
+/**
+ * Dispatches a command to the open project. A command that no longer applies (its target was deleted
+ * meanwhile) is reported instead of thrown into React.
+ */
+export function useDispatch(): (command: Command) => boolean {
+  const { store } = useWorkspaceState();
+  const notify = useNotify();
+  return useCallback(
+    (command: Command) => {
+      if (!store) return false;
+      try {
+        store.dispatch(command);
+        return true;
+      } catch (error) {
+        notify({
+          intent: 'error',
+          title: `Could not ${command.label.toLowerCase()}`,
+          body: error instanceof Error ? error.message : String(error),
+        });
+        return false;
+      }
+    },
+    [store, notify],
+  );
 }
