@@ -51,3 +51,33 @@ export function renameGraph(graphId: string, name: string): Command {
     invert: (before) => renameGraph(graphId, (before.graphs[indexOfGraph(before, graphId)] as Graph).name),
   };
 }
+
+/** What re-rendering a PDF crop changes: the render and everything measured in its pixels. */
+export interface GraphRender {
+  readonly source: Graph['source'];
+  readonly image: Graph['image'];
+  readonly calibration: Graph['calibration'];
+  readonly datasets: Graph['datasets'];
+}
+
+/**
+ * Swaps a graph's render for a new one, e.g. the same crop at a higher DPI ("Re-render at higher DPI"). The
+ * caller rescales every pixel position into the new render; the inverse swaps the old render back, whose
+ * image file is still in the project.
+ */
+export function replaceGraphRender(graphId: string, render: GraphRender): Command {
+  return {
+    label: 'Re-render graph',
+    apply: (project) => {
+      const index = indexOfGraph(project, graphId);
+      return {
+        ...project,
+        graphs: project.graphs.map((g, i) => (i === index ? { ...g, ...render } : g)),
+      };
+    },
+    invert: (before) => {
+      const { source, image, calibration, datasets } = before.graphs[indexOfGraph(before, graphId)] as Graph;
+      return replaceGraphRender(graphId, { source, image, calibration, datasets });
+    },
+  };
+}

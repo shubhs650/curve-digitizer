@@ -1,5 +1,8 @@
 import type { PdfOpenOutput, RgbaImage } from '@cd/workers';
-import type { PdfBackend } from '../session/pdf';
+import { cropPixelSize } from '@cd/pdf/geometry';
+import type { PdfCropInput } from '@cd/workers';
+import type { PdfBackend, PdfCropPng } from '../session/pdf';
+import { TINY_PNG } from './workspace';
 
 /** The password of {@link LOCKED_PDF}. */
 export const FAKE_PASSWORD = 'pw';
@@ -46,6 +49,17 @@ export class FakePdfBackend implements PdfBackend {
     if (!this.open_.has(key)) return Promise.reject(new Error(`The PDF "${key}" is not open`));
     const width = Math.round((maxSide * 595) / 842);
     return Promise.resolve({ width, height: maxSide, rgba: new Uint8Array(width * maxSide * 4).fill(255) });
+  }
+
+  /** Every crop asked for, in order. */
+  readonly crops: PdfCropInput[] = [];
+
+  /** Reports the crop's real pixel size but returns a tiny PNG: the workspace stores the bytes as they are. */
+  cropPng(request: PdfCropInput): Promise<PdfCropPng> {
+    if (!this.open_.has(request.key)) return Promise.reject(new Error(`The PDF "${request.key}" is not open`));
+    this.crops.push(request);
+    const { width, height } = cropPixelSize(request.rectPt, request.dpi, request.rotation);
+    return Promise.resolve({ png: TINY_PNG, width, height, renderMs: 1 });
   }
 
   close(key: string): Promise<void> {
