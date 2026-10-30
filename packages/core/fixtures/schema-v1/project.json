@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "app": { "name": "curve-digitizer", "version": "0.3.0" },
+  "id": "6f1c2a9e-3b7d-4e0a-9c55-0d2f8e1b7a44",
+  "name": "ASME VIII-2 fatigue curves",
+  "created": "2026-11-02T10:12:00Z",
+  "modified": "2026-11-02T11:40:00Z",
+  "settings": { "units": "SI", "defaultDpi": 300, "snapRadiusPx": 8 },
+  "sources": [
+    {
+      "id": "src1",
+      "kind": "pdf",
+      "fileName": "ASME_VIII_2.pdf",
+      "sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+      "pageCount": 1200,
+      "embedded": false
+    }
+  ],
+  "graphs": [
+    {
+      "id": "g1",
+      "name": "Fig 3-F.1 Carbon steel",
+      "source": {
+        "kind": "pdfCrop",
+        "sourceId": "src1",
+        "pageIndex": 412,
+        "rectPt": [72.0, 310.5, 480.2, 640.0],
+        "dpi": 400,
+        "rotation": 0
+      },
+      "image": { "path": "graphs/g1/original.png", "width": 2267, "height": 1830 },
+      "processing": [
+        { "op": "grayscale" },
+        { "op": "despeckle", "radius": 1 },
+        { "op": "gridSuppress", "minRunPx": 200, "tolerance": 2 },
+        { "op": "contrast", "value": 1.3 }
+      ],
+      "calibration": {
+        "xAxis": { "type": "log10", "label": "Cycles N" },
+        "yAxis": { "type": "linear", "label": "Stress amplitude", "unit": "MPa" },
+        "model": "affine",
+        "points": [
+          { "px": [102.3, 1702.1], "axis": [1, 0] },
+          { "px": [2140.8, 1703.4], "axis": [6, 0] },
+          { "px": [101.9, 1700.0], "axis": [1, 0] },
+          { "px": [103.0, 112.4], "axis": [1, 700] }
+        ],
+        "matrix": [0.002453, 0.0000012, 0.749, 0.00031, -0.44034, 749.5, 0, 0, 1],
+        "residualPx": 0.21,
+        "resolution": { "xUnitsPerPx": 0.00245, "yUnitsPerPx": 0.44 },
+        "warnings": []
+      },
+      "datasets": [
+        {
+          "id": "d1",
+          "name": "T = 300 °C",
+          "color": "#1f77b4",
+          "mode": "function",
+          "param": { "name": "Temperature", "value": 300, "unit": "°C" },
+          "xUnit": "cycles",
+          "yUnit": "MPa",
+          "sourceRef": "ASME BPVC VIII-2 (2023) Fig 3-F.1",
+          "notes": "",
+          "points": [
+            {
+              "id": "p1",
+              "px": [210.4, 410.2],
+              "value": [125, 520.3],
+              "sigma": [0.004, 0.9],
+              "excludedFromFit": false,
+              "outOfRange": false,
+              "origin": "trace",
+              "lineWidthPx": 3.1
+            },
+            {
+              "id": "p2",
+              "px": [612.0, 902.7],
+              "value": [1250, 303.5],
+              "sigma": [0.004, 0.9],
+              "excludedFromFit": true,
+              "outOfRange": false,
+              "origin": "manual"
+            }
+          ]
+        }
+      ],
+      "fits": [
+        {
+          "id": "f1",
+          "datasetId": "d1",
+          "model": "power",
+          "space": { "x": "log", "y": "lin" },
+          "params": { "a": 1850.2, "b": -0.1123 },
+          "domain": [100, 1000000],
+          "stats": { "n": 42, "r2": 0.9987, "rmse": 2.1, "aicc": -120.4 },
+          "recommended": true
+        }
+      ],
+      "view": { "zoom": 1.0, "pan": [0, 0] }
+    },
+    {
+      "id": "g2",
+      "name": "Pump curve screenshot",
+      "source": { "kind": "image", "fileName": "pump.png" },
+      "image": { "path": "graphs/g2/original.png", "width": 800, "height": 600 },
+      "processing": [],
+      "calibration": null,
+      "datasets": [],
+      "fits": [],
+      "view": { "zoom": 1.5, "pan": [-20, 10] }
+    }
+  ],
+  "history": { "op": "trace", "params": { "density": 40, "gapPx": 6 } }
+}

@@ -1,8 +1,33 @@
 import { describe, expect, it } from 'vitest';
-import { packageName } from './index.ts';
+import * as core from './index.ts';
 
-describe('@cd/core', () => {
-  it('exposes its package name', () => {
-    expect(packageName).toBe('@cd/core');
+describe('@cd/core public API', () => {
+  it('exports the store, commands, serialization and migrations', () => {
+    expect(Object.keys(core).sort()).toEqual([
+      'CURRENT_SCHEMA_VERSION',
+      'CdzFormatError',
+      'CommandError',
+      'DEFAULT_SETTINGS',
+      'MIGRATIONS',
+      'ProjectFormatError',
+      'ProjectStore',
+      'UNDO_LIMIT',
+      'addGraph',
+      'createAudit',
+      'createProject',
+      'isObj',
+      'migrate',
+      'parseProject',
+      'readCdz',
+      'removeGraph',
+      'renameGraph',
+      'renameProject',
+      'runMigrations',
+      'serializeAudit',
+      'serializeProject',
+      'sha256Hex',
+      'updateSettings',
+      'writeCdz',
+    ]);
   });
 });
