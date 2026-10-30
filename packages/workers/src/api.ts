@@ -13,7 +13,10 @@ export type ProgressCallback = (progress: Progress) => void;
 export interface TaskContext {
   /** True once the caller cancelled. Cheap enough for inner loops. */
   readonly cancelled: boolean;
-  /** Throws `CancelledError` once the caller cancelled. For tight synchronous loops. */
+  /**
+   * Throws `CancelledError` once the caller cancelled. For tight synchronous loops between checkpoints.
+   * Without a shared cancel flag (page not cross-origin isolated) it only sees a cancel after a `checkpoint()`.
+   */
   throwIfCancelled(): void;
   /** Reports progress, throttled so a chatty loop cannot flood the main thread. Values are clamped into [0, 1]. */
   progress(fraction: number, message?: string): void;
