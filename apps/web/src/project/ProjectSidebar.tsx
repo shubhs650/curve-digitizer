@@ -1,5 +1,6 @@
 import { Button, Caption1, Caption1Strong, makeStyles, Text, tokens } from '@fluentui/react-components';
 import { ArrowLeftRegular, ImageRegular } from '@fluentui/react-icons';
+import { ExportMenu } from '../export/ExportMenu';
 import { OpenImageButton } from '../input/OpenImageButton';
 import { useActiveGraph, useProject, useWorkspace } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
@@ -86,6 +87,7 @@ export function ProjectSidebar({ onFiles }: ProjectSidebarProps) {
         </ul>
       )}
       <OpenImageButton label="Add image…" onFiles={onFiles} />
+      <ExportMenu project={project} graph={active} />
     </div>
   );
 }

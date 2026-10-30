@@ -112,7 +112,17 @@ importers:
         specifier: 0.8.3
         version: 0.8.3
 
-  packages/export: {}
+  packages/export:
+    dependencies:
+      '@cd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cd/math':
+        specifier: workspace:*
+        version: link:../math
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
 
   packages/fit: {}
 
@@ -126,6 +136,12 @@ importers:
 
   packages/workers:
     dependencies:
+      '@cd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cd/export':
+        specifier: workspace:*
+        version: link:../export
       comlink:
         specifier: ^4.4.2
         version: 4.4.2

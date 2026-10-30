@@ -9,6 +9,8 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@cd/core": "workspace:*",
+    "@cd/export": "workspace:*",
     "comlink": "^4.4.2"
   }
 }

@@ -1,0 +1,15 @@
+# Curve Digitizer 0.1.0-test export, 2026-10-30T12:00:00.000Z
+# Project: Pump curves, "rev B"
+# Graph: Pump A <250 mm>
+# X axis: Flow rate Q [m³/h] (linear)
+# Y axis: Head H [m] (linear)
+# Calibration: affine, residual 1.399606873320082e-13 px RMS
+# Dataset "n = 1450, "rpm"": function; Speed = 1450 rpm; units x: m³/h, y: m; source: Catalogue p. 12, Fig 3; 2 points with equal X averaged
+# Dataset "Loop": path
+# sigma = standard uncertainty in data units (pixel resolution and line width through the calibration)
+dataset,param,x,y,sigma_x,sigma_y,excluded_from_fit,out_of_range
+"n = 1450, ""rpm""",1450,10.025000000000002,49.975,0.05590169943749475,0.05590169943749474,true,false
+"n = 1450, ""rpm""",1450,25.025,47.47500000000001,0.10307764064044152,0.1030776406404415,false,false
+"n = 1450, ""rpm""",1450,40.025000000000006,39.47500000000001,0.03952847075210474,0.03952847075210474,false,true
+Loop,,35,27.500000000000014,0.05590169943749475,0.05590169943749474,false,false
+Loop,,30,32.5,0.05590169943749475,0.05590169943749474,false,false
