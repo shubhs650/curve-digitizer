@@ -1,10 +1,9 @@
 import { Button, Caption1Strong, makeStyles, tokens } from '@fluentui/react-components';
 import { ChevronDownRegular, ChevronUpRegular } from '@fluentui/react-icons';
-import { useId, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
 import { SIDEBAR_ID } from './AppHeader';
 
 // PRD §4.11 / ADR 9: sidebar → tool rail → canvas → inspector, with a collapsible bottom dock.
-// The regions are empty until their M1 tasks fill them.
 const useStyles = makeStyles({
   body: {
     display: 'flex',
@@ -37,8 +36,10 @@ const useStyles = makeStyles({
     borderRight: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   canvas: {
+    position: 'relative',
     flexGrow: 1,
     minWidth: 0,
+    overflow: 'auto',
     backgroundColor: tokens.colorNeutralBackground1,
   },
   inspector: {
@@ -70,9 +71,13 @@ const useStyles = makeStyles({
 
 export interface ShellLayoutProps {
   readonly sidebarOpen: boolean;
+  readonly sidebar?: ReactNode;
+  readonly canvas?: ReactNode;
+  readonly inspector?: ReactNode;
+  readonly dock?: ReactNode;
 }
 
-export function ShellLayout({ sidebarOpen }: ShellLayoutProps) {
+export function ShellLayout({ sidebarOpen, sidebar, canvas, inspector, dock }: ShellLayoutProps) {
   const styles = useStyles();
   const [dockOpen, setDockOpen] = useState(true);
   const dockBodyId = useId();
@@ -84,16 +89,20 @@ export function ShellLayout({ sidebarOpen }: ShellLayoutProps) {
           <div className={styles.panelHeader}>
             <Caption1Strong>Project</Caption1Strong>
           </div>
+          {sidebar}
         </aside>
       )}
       <div className={styles.work}>
         <div className={styles.row}>
           <div role="region" aria-label="Tools" className={styles.rail} />
-          <main aria-label="Canvas" className={styles.canvas} />
+          <main aria-label="Canvas" className={styles.canvas}>
+            {canvas}
+          </main>
           <aside aria-label="Inspector" className={styles.inspector}>
             <div className={styles.panelHeader}>
               <Caption1Strong>Inspector</Caption1Strong>
             </div>
+            {inspector}
           </aside>
         </div>
         <section aria-label="Data dock" className={styles.dock}>
@@ -111,7 +120,11 @@ export function ShellLayout({ sidebarOpen }: ShellLayoutProps) {
               }}
             />
           </div>
-          {dockOpen && <div id={dockBodyId} className={styles.dockBody} />}
+          {dockOpen && (
+            <div id={dockBodyId} className={styles.dockBody}>
+              {dock}
+            </div>
+          )}
         </section>
       </div>
     </div>

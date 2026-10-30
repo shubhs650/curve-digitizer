@@ -17,3 +17,4 @@ export { computePoolSize, WorkerPool } from './pool.ts';
 export { createWorkerApi, type RunnerOptions } from './runner.ts';
 export { createComputePool, createRenderWorker } from './spawn.ts';
 export { computeTasks, renderTasks, type ComputeTasks, type RenderTasks } from './tasks.ts';
+export type { ImageToPngInput, ImageToPngOutput } from './tasks/image.ts';
