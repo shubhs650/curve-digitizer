@@ -214,6 +214,51 @@ def transform_cases():
     return cases
 
 
+def solve_crossings(x_picks, y_picks):
+    """Exact affine from two picks per axis with unknown crossings (task 1.3).
+
+    u = a·px + b·py + c with u(X1), u(X2) known and u(Y1) = u(Y2) = u_c unknown; likewise v with v_c.
+    Returns (v_c, u_c): the axis-space v the X picks lie on and the u the Y picks lie on.
+    """
+    (x1, u1), (x2, u2) = x_picks
+    (y1, v1), (y2, v2) = y_picks
+    a_u = np.array([[*x1, 1, 0], [*x2, 1, 0], [*y1, 1, -1], [*y2, 1, -1]], dtype=float)
+    u_c = np.linalg.solve(a_u, [u1, u2, 0, 0])[3]
+    a_v = np.array([[*y1, 1, 0], [*y2, 1, 0], [*x1, 1, -1], [*x2, 1, -1]], dtype=float)
+    v_c = np.linalg.solve(a_v, [v1, v2, 0, 0])[3]
+    return float(v_c), float(u_c)
+
+
+def crossing_cases():
+    cases = []
+    for name, theta_deg, skew_deg, crossing in (
+        ("upright", 0.0, 0.0, (0.0, 0.0)),
+        ("tilted-3deg-offset-origin", 3.0, 0.0, (20.0, 1.0)),
+        ("skewed-1.5deg", -1.0, 1.5, (-5.0, 2.5)),
+    ):
+        t = math.radians(theta_deg)
+        k = math.radians(skew_deg)
+        # Axis directions in px for one axis unit; y up on the chart is −py.
+        ex = np.array([math.cos(t), math.sin(t)]) * 21.2
+        ey = np.array([math.sin(t + k), -math.cos(t + k)]) * 18.4
+        origin = np.array([200.0, 1450.0])
+        u_c, v_c = crossing  # Y picks lie on u = u_c, X picks on v = v_c
+        px_of = lambda u, v: (origin + u * ex + v * ey).tolist()
+        x_picks = [(px_of(10.0, v_c), 10.0), (px_of(90.0, v_c), 90.0)]
+        y_picks = [(px_of(u_c, 10.0), 10.0), (px_of(u_c, 50.0), 50.0)]
+        got_v, got_u = solve_crossings(x_picks, y_picks)
+        cases.append(
+            {
+                "name": name,
+                "x": [{"px": p, "axis": a} for p, a in x_picks],
+                "y": [{"px": p, "axis": a} for p, a in y_picks],
+                "xAxisAt": got_v,
+                "yAxisAt": got_u,
+            }
+        )
+    return cases
+
+
 def linalg_cases():
     a = RNG.normal(size=(12, 5)) * np.array([1, 10, 1e3, 1e-2, 1])
     b = RNG.normal(size=12)
@@ -238,4 +283,5 @@ def write(name, data):
 if __name__ == "__main__":
     write("transforms.json", {"cases": transform_cases()})
     write("linalg.json", linalg_cases())
+    write("crossings.json", {"cases": crossing_cases()})
     print(f"wrote fixtures to {OUT}")

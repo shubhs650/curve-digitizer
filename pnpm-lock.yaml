@@ -11,6 +11,9 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.14.0
         version: 4.14.0(playwright-core@1.63.0)
+      '@cd/math':
+        specifier: workspace:*
+        version: link:packages/math
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.13.0)
@@ -50,6 +53,9 @@ importers:
       '@cd/image':
         specifier: workspace:*
         version: link:../../packages/image
+      '@cd/math':
+        specifier: workspace:*
+        version: link:../../packages/math
       '@cd/workers':
         specifier: workspace:*
         version: link:../../packages/workers

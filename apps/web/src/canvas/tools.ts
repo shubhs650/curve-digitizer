@@ -7,6 +7,8 @@ export interface CanvasPointer {
   readonly image: Vec2;
   /** CSS px from the canvas's top-left corner. */
   readonly screen: Vec2;
+  /** Screen px per image px at the current zoom, for hit radii in screen px. */
+  readonly scale: number;
   /** The overlay point under the pointer, if any. */
   readonly hit: OverlayPoint | null;
   readonly shiftKey: boolean;

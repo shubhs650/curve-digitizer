@@ -159,6 +159,7 @@ export function GraphCanvas({ graph, tool = SELECT_TOOL, selection = NO_SELECTIO
     return {
       screen,
       image,
+      scale: v.scale,
       hit: model.hits.nearest(image, HIT_RADIUS / v.scale),
       shiftKey: event.shiftKey,
       ctrlKey: event.ctrlKey || event.metaKey,
