@@ -1,0 +1,11 @@
+# Curve Digitizer 0.1.0-test export, 2026-10-30T12:00:00.000Z
+# Project: Pump curves, "rev B"
+# Graph: Log x
+# X axis: Flow rate Q (log10)
+# Y axis: Head H (linear)
+# Calibration: affine, residual 2.6963201038669064e-13 px RMS
+# Dataset "Decay": function; units x: cycles, y: MPa
+# sigma = standard uncertainty in data units (pixel resolution and line width through the calibration)
+dataset,param,x,y,sigma_x,sigma_y,excluded_from_fit,out_of_range
+Decay,,100,70.00000000000001,0.6435920989890449,0.1118033988749895,false,false
+Decay,,1000,50.000000000000014,6.43592098989045,0.1118033988749895,false,false
