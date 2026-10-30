@@ -1,5 +1,5 @@
 import { makeStyles, ToggleButton, Tooltip, tokens } from '@fluentui/react-components';
-import { CursorRegular, HandRightRegular, ZoomFitRegular } from '@fluentui/react-icons';
+import { CursorRegular, HandRightRegular, RulerRegular, ZoomFitRegular } from '@fluentui/react-icons';
 import type { ReactElement } from 'react';
 import { UndoButtons } from '../history/UndoButtons';
 import { type ToolId, useUiStore } from '../ui/uiStore';
@@ -30,6 +30,7 @@ interface RailTool {
 export const RAIL_TOOLS: readonly RailTool[] = [
   { id: 'select', label: 'Select', shortcut: 'V', icon: <CursorRegular /> },
   { id: 'pan', label: 'Pan', shortcut: 'H', icon: <HandRightRegular /> },
+  { id: 'calibrate', label: 'Calibrate', shortcut: 'C', icon: <RulerRegular /> },
 ];
 
 export function ToolRail() {

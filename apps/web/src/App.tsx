@@ -1,9 +1,8 @@
 import { FluentProvider, makeStyles, tokens } from '@fluentui/react-components';
 import { useEffect, useState } from 'react';
-import { GraphCanvas } from './canvas/GraphCanvas';
 import { useUndoShortcuts } from './history/useUndoShortcuts';
 import { HomeScreen } from './home/HomeScreen';
-import { DatasetsPanel } from './inspector/DatasetsPanel';
+import { Inspector } from './inspector/Inspector';
 import { useImageInput } from './input/useImageInput';
 import { PasswordDialog } from './pdf/PasswordDialog';
 import { ProjectSidebar } from './project/ProjectSidebar';
@@ -16,6 +15,7 @@ import { useImportFiles } from './session/useImportFiles';
 import type { Workspace } from './session/workspace';
 import { AppHeader } from './shell/AppHeader';
 import { ShellLayout } from './shell/ShellLayout';
+import { GraphEditor } from './tools/GraphEditor';
 import { ToolRail } from './tools/ToolRail';
 import { useToolShortcuts } from './tools/useToolShortcuts';
 import { DEFAULT_THEME, otherTheme, themes } from './theme';
@@ -93,14 +93,14 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
         sidebarOpen={sidebarOpen}
         sidebar={<ProjectSidebar onFiles={onFiles} />}
         rail={project !== null && <ToolRail />}
-        inspector={graph !== null && <DatasetsPanel key={graph.id} graph={graph} />}
+        inspector={graph !== null && <Inspector key={graph.id} graph={graph} />}
         canvas={
           project === null ? (
             <HomeScreen onFiles={onFiles} />
           ) : graph === null ? (
             <ProjectEmpty onFiles={onFiles} />
           ) : (
-            <GraphCanvas key={graph.id} graph={graph} />
+            <GraphEditor key={graph.id} graph={graph} />
           )
         }
       />

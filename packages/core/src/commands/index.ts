@@ -10,3 +10,4 @@ export {
   updateDataset,
 } from './dataset.ts';
 export { addSource, removeSource } from './source.ts';
+export { pointValuesOf, type PointValues, setCalibration } from './calibration.ts';

@@ -23,9 +23,19 @@ export interface TextFieldProps {
   readonly placeholder?: string;
   readonly multiline?: boolean;
   readonly hint?: string;
+  /** Shown as an error under the field. */
+  readonly error?: string;
 }
 
-export function TextField({ label, value, onChange, placeholder, multiline = false, hint }: TextFieldProps) {
+export function TextField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  multiline = false,
+  hint,
+  error,
+}: TextFieldProps) {
   const session = useEditSession();
   const common = {
     value,
@@ -33,7 +43,12 @@ export function TextField({ label, value, onChange, placeholder, multiline = fal
     ...(placeholder === undefined ? {} : { placeholder }),
   };
   return (
-    <Field label={label} size="small" {...(hint === undefined ? {} : { hint })}>
+    <Field
+      label={label}
+      size="small"
+      {...(hint === undefined ? {} : { hint })}
+      {...(error === undefined ? {} : { validationState: 'error' as const, validationMessage: error })}
+    >
       {multiline ? (
         <Textarea
           {...common}

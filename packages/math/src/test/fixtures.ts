@@ -1,5 +1,6 @@
 import { expect } from 'vitest';
 import linalgJson from '../../fixtures/linalg.json';
+import crossingsJson from '../../fixtures/crossings.json';
 import transformsJson from '../../fixtures/transforms.json';
 import type { AxisType, AxisTypes } from '../axis.ts';
 import type { TransformModel } from '../transform.ts';
@@ -97,3 +98,31 @@ export function expectAllClose(
     }
   });
 }
+
+export interface CrossingCase {
+  readonly name: string;
+  readonly x: readonly [AxisPickJson, AxisPickJson];
+  readonly y: readonly [AxisPickJson, AxisPickJson];
+  readonly xAxisAt: number;
+  readonly yAxisAt: number;
+}
+
+interface AxisPickJson {
+  readonly px: Vec2;
+  readonly axis: number;
+}
+
+function picks(a: readonly { px: readonly number[]; axis: number }[]): readonly [AxisPickJson, AxisPickJson] {
+  expect(a).toHaveLength(2);
+  const [p, q] = a.map((e) => ({ px: vec2(e.px), axis: e.axis }));
+  if (p === undefined || q === undefined) throw new Error('fixture: two picks per axis');
+  return [p, q];
+}
+
+export const crossingCases: readonly CrossingCase[] = crossingsJson.cases.map((c) => ({
+  name: c.name,
+  x: picks(c.x),
+  y: picks(c.y),
+  xAxisAt: c.xAxisAt,
+  yAxisAt: c.yAxisAt,
+}));

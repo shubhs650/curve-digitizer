@@ -1,6 +1,7 @@
 import type { Graph } from '@cd/core';
 import { Caption1, makeStyles, Spinner, tokens } from '@fluentui/react-components';
 import { type PointerEvent as ReactPointerEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { calibratedReadout } from '../calibration/format';
 import { useUiStore } from '../ui/uiStore';
 import { Loupe } from './Loupe';
 import { HIT_RADIUS, overlayModel, type OverlayState, paintOverlay } from './overlay';
@@ -69,6 +70,8 @@ export interface GraphCanvasProps {
   /** The active tool's primary-button behaviour; defaults to plain selection/hover. */
   readonly tool?: ToolHandlers;
   readonly selection?: ReadonlySet<string>;
+  /** Draws the active tool's own marks over the points, in CSS px; keep it stable between renders. */
+  readonly decorate?: (ctx: CanvasRenderingContext2D, view: ViewTransform) => void;
 }
 
 interface Drag {
@@ -81,7 +84,12 @@ interface Drag {
  * The graph image with zoom/pan, the overlay of points, hit-testing and the loupe (task 1.2). Rendering stays
  * on two canvases: the image layer redraws only when the view changes, the overlay on every hover too.
  */
-export function GraphCanvas({ graph, tool = SELECT_TOOL, selection = NO_SELECTION }: GraphCanvasProps) {
+export function GraphCanvas({
+  graph,
+  tool = SELECT_TOOL,
+  selection = NO_SELECTION,
+  decorate,
+}: GraphCanvasProps) {
   const styles = useStyles();
   const helpId = useId();
   const bitmapState = useGraphBitmap(graph);
@@ -132,8 +140,10 @@ export function GraphCanvas({ graph, tool = SELECT_TOOL, selection = NO_SELECTIO
       bitmap.height * view.scale,
     );
   });
-  useLayerPaint(overlayLayer, viewport, [model, overlay, view], (ctx) => {
-    if (view) paintOverlay(ctx, view, model, overlay);
+  useLayerPaint(overlayLayer, viewport, [model, overlay, view, decorate], (ctx) => {
+    if (!view) return;
+    paintOverlay(ctx, view, model, overlay);
+    decorate?.(ctx, view);
   });
 
   // Wheel zoom needs a non-passive listener to stop the page from scrolling.
@@ -159,6 +169,7 @@ export function GraphCanvas({ graph, tool = SELECT_TOOL, selection = NO_SELECTIO
     return {
       screen,
       image,
+      scale: v.scale,
       hit: model.hits.nearest(image, HIT_RADIUS / v.scale),
       shiftKey: event.shiftKey,
       ctrlKey: event.ctrlKey || event.metaKey,
@@ -302,6 +313,7 @@ export function GraphCanvas({ graph, tool = SELECT_TOOL, selection = NO_SELECTIO
       {cursorImage && (
         <Caption1 className={styles.readout} data-testid="cursor-readout">
           x {cursorImage[0].toFixed(1)} px · y {cursorImage[1].toFixed(1)} px
+          {graph.calibration !== null && ` · ${calibratedReadout(graph.calibration, cursorImage)}`}
         </Caption1>
       )}
       {view && viewport && (
