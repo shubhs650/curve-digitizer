@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+**/dist/
+coverage/
+playwright-report/
+test-results/
+# Prose docs are hand-formatted; Prettier would also rewrite the jsonc examples in them.
+**/*.md

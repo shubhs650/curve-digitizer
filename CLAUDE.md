@@ -32,6 +32,8 @@ pnpm test           # vitest, all packages
 pnpm test:samples   # replay samples/ against ground truth
 pnpm test:e2e       # playwright (installs browsers on first run: pnpm exec playwright install --with-deps)
 pnpm build          # vite build + size check
+pnpm size           # size budget only (ARCHITECTURE §9), on an existing apps/web/dist
+pnpm format         # prettier --write
 pnpm check          # lint + typecheck + test + build (run before every PR)
 ```
 
