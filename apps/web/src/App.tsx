@@ -1,5 +1,7 @@
 import { FluentProvider, makeStyles } from '@fluentui/react-components';
 import { useState } from 'react';
+import { UpdatePrompt } from './pwa/UpdatePrompt';
+import { usePwaUpdate } from './pwa/usePwaUpdate';
 import { AppHeader } from './shell/AppHeader';
 import { ShellLayout } from './shell/ShellLayout';
 import { DEFAULT_THEME, otherTheme, themes } from './theme';
@@ -20,6 +22,7 @@ export function App() {
   const styles = useStyles();
   const [theme, setTheme] = useState<ThemeName>(DEFAULT_THEME);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const update = usePwaUpdate();
 
   return (
     <FluentProvider theme={themes[theme]} data-theme={theme}>
@@ -34,6 +37,7 @@ export function App() {
             setSidebarOpen((open) => !open);
           }}
         />
+        <UpdatePrompt open={update.needRefresh} onReload={update.reload} onDismiss={update.dismiss} />
         <ShellLayout sidebarOpen={sidebarOpen} />
       </div>
     </FluentProvider>
