@@ -90,3 +90,11 @@ export async function pageXY(page: Page, px: readonly [number, number]): Promise
   const { view, left, top } = await canvasView(page);
   return [left + px[0] * view.scale + view.offset[0], top + px[1] * view.scale + view.offset[1]];
 }
+
+/**
+ * Waits for every running CSS or Web Animations animation to end. Fluent fades dialogs in; axe measuring
+ * contrast mid-fade sees blended, too-light text.
+ */
+export async function animationsSettled(page: Page): Promise<void> {
+  await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+}

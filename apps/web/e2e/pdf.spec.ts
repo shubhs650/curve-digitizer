@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { type BrowserContext, expect, type Page, test } from '@playwright/test';
+import { animationsSettled } from './fixtures';
 
 // Task 1.7: PDFs open through PDFium, which loads only on the first PDF (P2) and whose absence leaves the app
 // working image-only (R5); protected PDFs ask for their password and restricted ones say what they forbid (R6).
@@ -96,6 +97,7 @@ test.describe('PDF input', () => {
 
     await open(page, pdf('chart-password.pdf'));
     await expect(page.getByRole('dialog')).toBeVisible();
+    await animationsSettled(page);
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 });
