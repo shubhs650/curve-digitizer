@@ -5,6 +5,7 @@ import { useUndoShortcuts } from './history/useUndoShortcuts';
 import { HomeScreen } from './home/HomeScreen';
 import { DatasetsPanel } from './inspector/DatasetsPanel';
 import { useImageInput } from './input/useImageInput';
+import { PasswordDialog } from './pdf/PasswordDialog';
 import { ProjectSidebar } from './project/ProjectSidebar';
 import { ProjectEmpty } from './project/ProjectEmpty';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
@@ -103,6 +104,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
           )
         }
       />
+      <PasswordDialog />
       {dragging && <div className={styles.dropHint} aria-hidden="true" />}
     </div>
   );

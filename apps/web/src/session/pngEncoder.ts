@@ -1,14 +1,11 @@
 import { IMAGE_MIME_TYPES } from '@cd/image';
-import { createRenderWorker, type RenderTasks, type WorkerClient } from '@cd/workers';
+import { renderWorker } from './renderWorker';
 import type { PngEncoder } from './workspace';
-
-let worker: WorkerClient<RenderTasks> | null = null;
 
 /** Decodes and re-encodes in the render worker: a large JPEG takes far longer than the 50 ms main-thread budget. */
 export const workerPngEncoder: PngEncoder = async (bytes, type) => {
-  worker ??= createRenderWorker();
   const buffer = bytes.slice().buffer;
-  const outcome = await worker.run(
+  const outcome = await renderWorker().run(
     'imageToPng',
     { bytes: buffer, mimeType: IMAGE_MIME_TYPES[type] },
     { transfer: [buffer] },

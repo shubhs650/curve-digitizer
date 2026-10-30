@@ -9,3 +9,4 @@ export {
   setPointFlags,
   updateDataset,
 } from './dataset.ts';
+export { addSource, removeSource } from './source.ts';

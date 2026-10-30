@@ -2,7 +2,8 @@ import { renameProject } from '@cd/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryRepository } from '../storage/memory';
 import type { ProjectRepository } from '../storage/repository';
-import { baseName, type PngEncoder, Workspace } from './workspace';
+import { FAKE_PASSWORD, FakePdfBackend, LOCKED_PDF, NO_COPY_PDF, pdfFile, PLAIN_PDF } from '../test/fakePdf';
+import { baseName, type PngEncoder, sourcePath, Workspace } from './workspace';
 
 /** Signature + IHDR of a 3 × 2 PNG; enough for the workspace, which stores PNG bytes as they are. */
 const PNG = new Uint8Array([
@@ -15,14 +16,16 @@ function setup(repo: ProjectRepository = new MemoryRepository()) {
   let id = 0;
   let tick = 0;
   const encodePng = vi.fn<PngEncoder>(() => Promise.resolve({ png: PNG, width: 3, height: 2 }));
+  const pdf = new FakePdfBackend();
   const workspace = new Workspace({
     repo,
     encodePng,
+    pdf,
     newId: () => `id${String(++id)}`,
     now: () => new Date(Date.UTC(2026, 10, 1, 0, 0, tick++)).toISOString(),
     appVersion: '0.0.0-test',
   });
-  return { workspace, repo, encodePng };
+  return { workspace, repo, encodePng, pdf };
 }
 
 describe('baseName', () => {
@@ -157,5 +160,92 @@ describe('Workspace', () => {
     await workspace.createProject();
     expect(listener).toHaveBeenCalled();
     unsubscribe();
+  });
+});
+
+describe('Workspace PDFs', () => {
+  it('adds a PDF as a source of a new project named after it and keeps its bytes in storage', async () => {
+    const { workspace, repo, pdf } = setup();
+    const result = await workspace.importPdf(pdfFile(PLAIN_PDF, 'ASME VIII.pdf'));
+    expect(result).toEqual({ status: 'added', sourceId: 'id1' });
+    const project = workspace.state.store?.project;
+    expect(project?.name).toBe('ASME VIII');
+    expect(project?.sources).toEqual([
+      {
+        id: 'id1',
+        kind: 'pdf',
+        fileName: 'ASME VIII.pdf',
+        sha256: expect.any(String) as string,
+        pageCount: 2,
+        embedded: false,
+      },
+    ]);
+    expect(await repo.readFile(project?.id ?? '', sourcePath('id1'))).toEqual(PLAIN_PDF);
+    expect(await repo.loadProject(project?.id ?? '')).toEqual(project);
+    expect(workspace.state.pdf['id1']).toMatchObject({ status: 'open', permissions: { copy: true } });
+    expect(pdf.open_.has('id1')).toBe(true);
+  });
+
+  it('asks for a password and stores nothing until the PDF opens (R6)', async () => {
+    const { workspace } = setup();
+    const file = pdfFile(LOCKED_PDF);
+    expect(await workspace.importPdf(file)).toEqual({ status: 'needsPassword', wrong: false });
+    expect(workspace.state.store).toBeNull();
+    expect(await workspace.importPdf(file, 'guess')).toEqual({ status: 'needsPassword', wrong: true });
+    expect(await workspace.importPdf(file, FAKE_PASSWORD)).toMatchObject({ status: 'added' });
+    expect(workspace.state.store?.project.sources).toHaveLength(1);
+  });
+
+  it('reports a file that is not a PDF, and PDFium failing to load, without creating a project (R5)', async () => {
+    const { workspace, pdf } = setup();
+    expect(await workspace.importPdf(pdfFile(PNG, 'x.pdf'))).toEqual({
+      status: 'failed',
+      message: 'Not a PDF.',
+      unavailable: false,
+    });
+    pdf.unavailable = true;
+    expect(await workspace.importPdf(pdfFile(PLAIN_PDF))).toMatchObject({
+      status: 'failed',
+      unavailable: true,
+    });
+    expect(workspace.state.store).toBeNull();
+  });
+
+  it('keeps one source per PDF content', async () => {
+    const { workspace, pdf } = setup();
+    await workspace.importPdf(pdfFile(PLAIN_PDF));
+    expect(await workspace.importPdf(pdfFile(PLAIN_PDF, 'copy.pdf'))).toEqual({
+      status: 'existing',
+      sourceId: 'id1',
+    });
+    expect(workspace.state.store?.project.sources).toHaveLength(1);
+    expect([...pdf.open_]).toEqual(['id1']);
+  });
+
+  it('records the no-copy permission (R6)', async () => {
+    const { workspace } = setup();
+    const { sourceId } = (await workspace.importPdf(pdfFile(NO_COPY_PDF))) as { sourceId: string };
+    expect(workspace.state.pdf[sourceId]).toMatchObject({ status: 'open', permissions: { copy: false } });
+  });
+
+  it('reopens a stored PDF after the project is reopened, with its password again', async () => {
+    const { workspace, pdf } = setup();
+    await workspace.importPdf(pdfFile(LOCKED_PDF), FAKE_PASSWORD);
+    const projectId = workspace.state.store?.project.id ?? '';
+    workspace.closeProject();
+    expect(pdf.open_.size).toBe(0);
+    expect(workspace.state.pdf).toEqual({});
+
+    await workspace.openProject(projectId);
+    expect(await workspace.openSource('id1')).toEqual({ status: 'locked', wrong: false });
+    expect(await workspace.openSource('id1', 'nope')).toEqual({ status: 'locked', wrong: true });
+    expect(await workspace.openSource('id1', FAKE_PASSWORD)).toMatchObject({ status: 'open' });
+    expect(workspace.state.pdf['id1']).toMatchObject({ status: 'open' });
+  });
+
+  it('reports a source whose file is missing from storage', async () => {
+    const { workspace } = setup();
+    await workspace.createProject();
+    expect(await workspace.openSource('gone')).toMatchObject({ status: 'failed', unavailable: false });
   });
 });

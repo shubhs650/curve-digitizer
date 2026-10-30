@@ -60,6 +60,14 @@ export default defineConfig({
   build: {
     target: 'es2022',
   },
+  worker: {
+    // ES module workers can code-split, which keeps PDFium out of the render worker until a PDF is opened (P2).
+    format: 'es',
+  },
+  optimizeDeps: {
+    // The PDFium glue finds pdfium.wasm next to itself (new URL(..., import.meta.url)); pre-bundling would move it.
+    exclude: ['@embedpdf/pdfium'],
+  },
   server: {
     port: 5173,
     strictPort: true,

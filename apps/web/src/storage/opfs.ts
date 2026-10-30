@@ -67,9 +67,19 @@ export class OpfsRepository implements ProjectRepository {
     }
   }
 
+  async writeBlob(projectId: string, path: string, blob: Blob): Promise<void> {
+    const file = await this.#fileHandle(projectId, path, true);
+    const writable = await file.createWritable();
+    // pipeTo closes the writable on success (committing it) and aborts it on failure.
+    await blob.stream().pipeTo(writable);
+  }
+
   async readFile(projectId: string, path: string): Promise<Uint8Array> {
-    const file = await (await this.#fileHandle(projectId, path, false)).getFile();
-    return new Uint8Array(await file.arrayBuffer());
+    return new Uint8Array(await (await this.readBlob(projectId, path)).arrayBuffer());
+  }
+
+  async readBlob(projectId: string, path: string): Promise<Blob> {
+    return (await this.#fileHandle(projectId, path, false)).getFile();
   }
 
   async deleteProject(id: string): Promise<void> {

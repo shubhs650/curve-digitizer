@@ -15,7 +15,7 @@ import {
 } from '@fluentui/react-components';
 import { AddRegular, DeleteRegular, FolderOpenRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
-import { OpenImageButton } from '../input/OpenImageButton';
+import { OpenFileButton } from '../input/OpenFileButton';
 import { useWorkspace, useWorkspaceState } from '../session/context';
 import type { ProjectSummary } from '../storage/repository';
 import { useNotify } from '../ui/notices';
@@ -81,11 +81,11 @@ export function HomeScreen({ onFiles }: HomeScreenProps) {
     <div className={styles.home}>
       <Title2 as="h2">Projects</Title2>
       <Body1>
-        Open a PNG, JPEG or WebP image of a graph, drop it anywhere on this window, or paste it with Ctrl+V.
-        Everything stays on this device.
+        Open a PDF or a PNG, JPEG or WebP image of a graph, drop it anywhere on this window, or paste an image
+        with Ctrl+V. Everything stays on this device.
       </Body1>
       <div className={styles.actions}>
-        <OpenImageButton appearance="primary" onFiles={onFiles} />
+        <OpenFileButton appearance="primary" onFiles={onFiles} />
         <Button
           icon={<AddRegular />}
           onClick={() => {

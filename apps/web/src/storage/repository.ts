@@ -20,8 +20,15 @@ export interface ProjectRepository {
   loadProject(id: string): Promise<Project>;
   saveProject(project: Project): Promise<void>;
   writeFile(projectId: string, path: string, bytes: Uint8Array): Promise<void>;
+  /** Streams a possibly large file (a source PDF) to storage without reading it into memory first. */
+  writeBlob(projectId: string, path: string, blob: Blob): Promise<void>;
   /** @throws when the file does not exist. */
   readFile(projectId: string, path: string): Promise<Uint8Array>;
+  /**
+   * A handle on a stored file whose bytes are read only when used, e.g. by a worker it is posted to.
+   * @throws when the file does not exist.
+   */
+  readBlob(projectId: string, path: string): Promise<Blob>;
   deleteProject(id: string): Promise<void>;
 }
 

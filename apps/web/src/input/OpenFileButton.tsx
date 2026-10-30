@@ -1,26 +1,26 @@
 import { Button, type ButtonProps } from '@fluentui/react-components';
-import { ImageAddRegular } from '@fluentui/react-icons';
+import { DocumentAddRegular } from '@fluentui/react-icons';
 import { useRef } from 'react';
-import { IMAGE_ACCEPT } from './files';
+import { OPEN_ACCEPT } from './files';
 
-export interface OpenImageButtonProps {
+export interface OpenFileButtonProps {
   readonly onFiles: (files: File[]) => void;
   readonly label?: string;
   readonly appearance?: NonNullable<ButtonProps['appearance']>;
 }
 
-/** A button that opens the system file picker for images. */
-export function OpenImageButton({
+/** A button that opens the system file picker for PDFs and images. */
+export function OpenFileButton({
   onFiles,
-  label = 'Open image…',
+  label = 'Open PDF or image…',
   appearance = 'secondary',
-}: OpenImageButtonProps) {
+}: OpenFileButtonProps) {
   const input = useRef<HTMLInputElement>(null);
   return (
     <>
       <Button
         appearance={appearance}
-        icon={<ImageAddRegular />}
+        icon={<DocumentAddRegular />}
         onClick={() => {
           input.current?.click();
         }}
@@ -30,11 +30,11 @@ export function OpenImageButton({
       <input
         ref={input}
         type="file"
-        accept={IMAGE_ACCEPT}
+        accept={OPEN_ACCEPT}
         multiple
         hidden
-        aria-label="Image files"
-        data-testid="image-file-input"
+        aria-label="PDF or image files"
+        data-testid="open-file-input"
         onChange={(event) => {
           const files = [...(event.currentTarget.files ?? [])];
           // Clearing lets the same file be picked again.
