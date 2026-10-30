@@ -1,6 +1,6 @@
 import { FluentProvider, makeStyles, tokens } from '@fluentui/react-components';
 import { useEffect, useState } from 'react';
-import { GraphView } from './canvas/GraphView';
+import { GraphCanvas } from './canvas/GraphCanvas';
 import { HomeScreen } from './home/HomeScreen';
 import { useImageInput } from './input/useImageInput';
 import { ProjectSidebar } from './project/ProjectSidebar';
@@ -13,6 +13,8 @@ import { useImportFiles } from './session/useImportFiles';
 import type { Workspace } from './session/workspace';
 import { AppHeader } from './shell/AppHeader';
 import { ShellLayout } from './shell/ShellLayout';
+import { ToolRail } from './tools/ToolRail';
+import { useToolShortcuts } from './tools/useToolShortcuts';
 import { DEFAULT_THEME, otherTheme, themes } from './theme';
 import type { ThemeName } from './theme';
 import { Notices, useNotify } from './ui/notices';
@@ -70,6 +72,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
   const project = useProject();
   const graph = useActiveGraph();
   useProjectList();
+  useToolShortcuts();
 
   return (
     <div className={styles.shell}>
@@ -85,13 +88,14 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
       <ShellLayout
         sidebarOpen={sidebarOpen}
         sidebar={<ProjectSidebar onFiles={onFiles} />}
+        rail={project !== null && <ToolRail />}
         canvas={
           project === null ? (
             <HomeScreen onFiles={onFiles} />
           ) : graph === null ? (
             <ProjectEmpty onFiles={onFiles} />
           ) : (
-            <GraphView key={graph.id} graph={graph} />
+            <GraphCanvas key={graph.id} graph={graph} />
           )
         }
       />

@@ -5,6 +5,7 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 ## Unreleased
 
 ### Added
+- Graph canvas: zoom with the mouse wheel (about the cursor), the +/− keys or the zoom bar; 0 fits the image, 1 shows actual size. Pan with the pan tool (H), the middle mouse button, Space + drag or the arrow keys. A loupe (L) magnifies the pixels under the cursor with a crosshair, and the cursor position is shown in image pixels. Digitized points are drawn over the original image in their dataset colour and highlight under the cursor.
 - Open graph images (PNG, JPEG, WebP) with the file picker, by dropping them anywhere on the window, by pasting with Ctrl+V, or from the installed app's "Open with". Each image becomes a graph in a project; projects are saved on this device (origin private file system) and listed on the home screen, where they can be reopened or deleted.
 - Installable app that works offline after the first visit, opens `.cdz` projects and PNG/JPEG/WebP images from the operating system, and offers "New version available — Reload" when an update is ready (it never reloads by itself).
 - Strict Content Security Policy: the app can only talk to its own origin.
