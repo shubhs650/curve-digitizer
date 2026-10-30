@@ -22,10 +22,14 @@
     "workbox-build": "^7.4.1"
   },
   "dependencies": {
+    "@cd/core": "workspace:*",
+    "@cd/image": "workspace:*",
+    "@cd/workers": "workspace:*",
     "@fluentui/react-components": "^9.75.0",
     "@fluentui/react-icons": "^2.0.344",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "workbox-window": "^7.4.1"
+    "workbox-window": "^7.4.1",
+    "zustand": "^5.0.16"
   }
 }
