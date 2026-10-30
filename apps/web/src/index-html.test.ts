@@ -9,7 +9,7 @@ describe('index.html', () => {
 
   it('provides the #root mount point and the module entry', () => {
     expect(html).toContain('<div id="root"></div>');
-    expect(html).toContain('<script type="module" src="/src/main.ts"></script>');
+    expect(html).toContain('<script type="module" src="/src/main.tsx"></script>');
   });
 
   it('loads nothing from another origin', () => {
