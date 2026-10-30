@@ -3,6 +3,7 @@
 // acceptance targets as todo. Expected owners (docs/MILESTONES.md): calibrate 1.3, manualPick 1.4,
 // trace 2.3, colourMask 2.5, xStep 2.6.
 import { fitCalibration, valueToAxis } from '@cd/math';
+import { snapToCurve } from '@cd/trace';
 import type { Sample } from './sample.ts';
 import type { ReplayOutputs } from './score.ts';
 import type { Op, OpKind } from './truth.ts';
@@ -21,7 +22,18 @@ const calibrate: Replayer<'calibrate'> = (op, sample) => {
   return { residualPx: fitCalibration(op.model, points, axes).residuals.rmsPx };
 };
 
-export const replayers: ReplayerRegistry = { calibrate };
+/** The app's default snap radius (docs/PROJECT_SCHEMA.md `settings.snapRadiusPx`). */
+const SNAP_RADIUS_PX = 8;
+
+/** Task 1.4: each recorded click through magnetic snap, as the point tool places it. */
+const manualPick: Replayer<'manualPick'> = (op, sample) => {
+  const image = sample.image();
+  return {
+    points: op.clicks.map((click) => (op.snap ? (snapToCurve(image, click, SNAP_RADIUS_PX)?.px ?? click) : click)),
+  };
+};
+
+export const replayers: ReplayerRegistry = { calibrate, manualPick };
 
 /** The task in docs/MILESTONES.md that delivers each replayer, for the todo message. */
 export const REPLAYER_TASKS: Readonly<Record<OpKind, string>> = {
