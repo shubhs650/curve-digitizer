@@ -13,6 +13,8 @@ import {
 import { DocumentPdfRegular, LockClosedRegular } from '@fluentui/react-icons';
 import { useEffect } from 'react';
 import { useWorkspace, useWorkspaceState } from '../session/context';
+import { useUiStore } from '../ui/uiStore';
+import { useCropDraft } from './cropDraft';
 import { PdfThumbnail } from './PdfThumbnail';
 import { usePdfActions } from './usePdfActions';
 
@@ -41,10 +43,13 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     gap: tokens.spacingVerticalXXS,
+    minWidth: 0,
+    paddingBlock: tokens.spacingVerticalXS,
+    paddingInline: tokens.spacingHorizontalXS,
   },
 });
 
-/** The open project's source PDFs and their pages (PRD §4.1). Cropping a page into a graph comes in task 1.8. */
+/** The open project's source PDFs and their pages (PRD §4.1); a page opens in the crop view. */
 export function PdfSources({ sources }: { readonly sources: readonly SourceFile[] }) {
   if (sources.length === 0) return null;
   return (
@@ -62,6 +67,9 @@ function PdfSource({ source }: { readonly source: SourceFile }) {
   const workspace = useWorkspace();
   const state = useWorkspaceState().pdf[source.id];
   const { unlockSource } = usePdfActions();
+  const cropPage = useUiStore((s) => s.cropPage);
+  const setCropPage = useUiStore((s) => s.setCropPage);
+  const resetCrop = useCropDraft((s) => s.reset);
 
   // A reopened project opens its PDFs from storage on first view.
   useEffect(() => {
@@ -107,16 +115,31 @@ function PdfSource({ source }: { readonly source: SourceFile }) {
             </MessageBar>
           )}
           <ul className={styles.pages} aria-label={`Pages of ${source.fileName}`}>
-            {state.pages.map((_, i) => (
-              <li key={i} className={styles.page}>
-                <PdfThumbnail
-                  sourceId={source.id}
-                  pageIndex={i}
-                  label={`Page ${String(i + 1)} of ${source.fileName}`}
-                />
-                <Caption1 aria-hidden="true">{i + 1}</Caption1>
-              </li>
-            ))}
+            {state.pages.map((_, i) => {
+              const current = cropPage?.sourceId === source.id && cropPage.pageIndex === i;
+              return (
+                <li key={i}>
+                  <Button
+                    appearance={current ? 'secondary' : 'subtle'}
+                    className={styles.page}
+                    aria-current={current ? 'true' : undefined}
+                    title={`Crop from page ${String(i + 1)}`}
+                    onClick={() => {
+                      if (current) return;
+                      resetCrop();
+                      setCropPage({ sourceId: source.id, pageIndex: i });
+                    }}
+                  >
+                    <PdfThumbnail
+                      sourceId={source.id}
+                      pageIndex={i}
+                      label={`Page ${String(i + 1)} of ${source.fileName}`}
+                    />
+                    <Caption1 aria-hidden="true">{i + 1}</Caption1>
+                  </Button>
+                </li>
+              );
+            })}
           </ul>
         </>
       )}

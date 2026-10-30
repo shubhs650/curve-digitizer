@@ -12,6 +12,7 @@ my-project.cdz
 ├── graphs/
 │   ├── <graphId>/
 │   │   ├── original.png     # the crop / image at recorded DPI, lossless
+│   │   ├── render-<dpi>dpi.png  # a later re-render of a PDF crop ("Re-render at higher DPI"); `image.path` names the current one
 │   │   └── thumb.jpg        # 256 px preview
 ├── sources/                 # optional — only when "Embed source PDF" is ticked
 │   └── <sourceId>.pdf

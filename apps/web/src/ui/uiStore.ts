@@ -8,6 +8,13 @@ export type ToolId = 'select' | 'point' | 'pan' | 'calibrate';
 
 const NO_POINTS: ReadonlySet<string> = new Set();
 
+/** A page of a source PDF shown for cropping, in place of the active graph. */
+export interface CropPage {
+  readonly sourceId: string;
+  /** 0-based. */
+  readonly pageIndex: number;
+}
+
 export interface UiState {
   readonly activeGraphId: string | null;
   /** The dataset new points go into; per graph, so switching graphs keeps each graph's choice. */
@@ -18,12 +25,15 @@ export interface UiState {
   readonly snap: boolean;
   /** Selected points of the active graph, as overlay keys `${datasetId}/${pointId}`. */
   readonly selection: ReadonlySet<string>;
+  readonly cropPage: CropPage | null;
+  /** Shows a graph; also leaves the crop view. */
   readonly setActiveGraph: (graphId: string | null) => void;
   readonly setActiveDataset: (graphId: string, datasetId: string) => void;
   readonly setTool: (tool: ToolId) => void;
   readonly toggleLoupe: () => void;
   readonly toggleSnap: () => void;
   readonly setSelection: (selection: ReadonlySet<string>) => void;
+  readonly setCropPage: (page: CropPage | null) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -33,8 +43,13 @@ export const useUiStore = create<UiState>()((set) => ({
   loupe: true,
   snap: true,
   selection: NO_POINTS,
+  cropPage: null,
   setActiveGraph: (activeGraphId) => {
-    set((s) => (s.activeGraphId === activeGraphId ? s : { activeGraphId, selection: NO_POINTS }));
+    set((s) =>
+      s.activeGraphId === activeGraphId
+        ? { cropPage: null }
+        : { activeGraphId, selection: NO_POINTS, cropPage: null },
+    );
   },
   setActiveDataset: (graphId, datasetId) => {
     set((s) => ({ activeDatasetIds: { ...s.activeDatasetIds, [graphId]: datasetId } }));
@@ -50,5 +65,8 @@ export const useUiStore = create<UiState>()((set) => ({
   },
   setSelection: (selection) => {
     set({ selection });
+  },
+  setCropPage: (cropPage) => {
+    set({ cropPage });
   },
 }));

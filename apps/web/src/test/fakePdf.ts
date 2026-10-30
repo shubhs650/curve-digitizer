@@ -2,7 +2,7 @@ import type { PdfOpenOutput, RgbaImage } from '@cd/workers';
 import { cropPixelSize } from '@cd/pdf/geometry';
 import type { PdfCropInput } from '@cd/workers';
 import type { PdfBackend, PdfCropPng } from '../session/pdf';
-import { TINY_PNG } from './workspace';
+import { TINY_PNG } from './png';
 
 /** The password of {@link LOCKED_PDF}. */
 export const FAKE_PASSWORD = 'pw';
@@ -13,12 +13,14 @@ const ascii = (text: string) => Uint8Array.from(text, (c) => c.charCodeAt(0));
 export const PLAIN_PDF = ascii('%PDF-1.7 plain 2 pages');
 export const LOCKED_PDF = ascii('%PDF-1.7 locked');
 export const NO_COPY_PDF = ascii('%PDF-1.7 no-copy');
+/** Two A1 landscape pages: a whole page at 600 DPI is over the pixel budget (R7). */
+export const A1_PDF = ascii('%PDF-1.7 a1');
 
 export function pdfFile(bytes: Uint8Array, name = 'chart.pdf'): File {
   return new File([bytes as Uint8Array<ArrayBuffer>], name, { type: 'application/pdf' });
 }
 
-/** Stands in for PDFium in the render worker: two A4 pages, a password, a no-copy flag, or PDFium missing. */
+/** Stands in for PDFium in the render worker: two A4 (or A1) pages, a password, a no-copy flag, or PDFium missing. */
 export class FakePdfBackend implements PdfBackend {
   readonly open_ = new Set<string>();
   unavailable = false;
@@ -35,7 +37,9 @@ export class FakePdfBackend implements PdfBackend {
         : { status: 'failed', reason: 'wrongPassword', message: 'Wrong password.' };
     }
     this.open_.add(key);
-    const page = { width: 595, height: 842, rotation: 0 } as const;
+    const page = text.includes('a1')
+      ? ({ width: 2384, height: 1684, rotation: 0 } as const)
+      : ({ width: 595, height: 842, rotation: 0 } as const);
     return {
       status: 'opened',
       pages: [page, page],
@@ -56,7 +60,8 @@ export class FakePdfBackend implements PdfBackend {
 
   /** Reports the crop's real pixel size but returns a tiny PNG: the workspace stores the bytes as they are. */
   cropPng(request: PdfCropInput): Promise<PdfCropPng> {
-    if (!this.open_.has(request.key)) return Promise.reject(new Error(`The PDF "${request.key}" is not open`));
+    if (!this.open_.has(request.key))
+      return Promise.reject(new Error(`The PDF "${request.key}" is not open`));
     this.crops.push(request);
     const { width, height } = cropPixelSize(request.rectPt, request.dpi, request.rotation);
     return Promise.resolve({ png: TINY_PNG, width, height, renderMs: 1 });
