@@ -15,7 +15,7 @@ async function expectGraphShown(page: Page, name: string, size: string) {
     'aria-current',
     'true',
   );
-  const image = page.getByRole('img', { name: `Graph image: ${name}, ${size}` });
+  const image = page.getByRole('application', { name: `Graph image: ${name}, ${size}` });
   await expect(image).toHaveAttribute('data-state', 'ready');
 }
 

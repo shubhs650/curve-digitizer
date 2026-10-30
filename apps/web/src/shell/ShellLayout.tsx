@@ -72,12 +72,13 @@ const useStyles = makeStyles({
 export interface ShellLayoutProps {
   readonly sidebarOpen: boolean;
   readonly sidebar?: ReactNode;
+  readonly rail?: ReactNode;
   readonly canvas?: ReactNode;
   readonly inspector?: ReactNode;
   readonly dock?: ReactNode;
 }
 
-export function ShellLayout({ sidebarOpen, sidebar, canvas, inspector, dock }: ShellLayoutProps) {
+export function ShellLayout({ sidebarOpen, sidebar, rail, canvas, inspector, dock }: ShellLayoutProps) {
   const styles = useStyles();
   const [dockOpen, setDockOpen] = useState(true);
   const dockBodyId = useId();
@@ -94,7 +95,9 @@ export function ShellLayout({ sidebarOpen, sidebar, canvas, inspector, dock }: S
       )}
       <div className={styles.work}>
         <div className={styles.row}>
-          <div role="region" aria-label="Tools" className={styles.rail} />
+          <div role="region" aria-label="Tools" className={styles.rail}>
+            {rail}
+          </div>
           <main aria-label="Canvas" className={styles.canvas}>
             {canvas}
           </main>

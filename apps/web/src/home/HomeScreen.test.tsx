@@ -42,7 +42,7 @@ describe('home screen and image input', () => {
     const sidebar = within(screen.getByRole('complementary', { name: 'Project and pages' }));
     const graphs = within(await sidebar.findByRole('list', { name: 'Graphs' }));
     expect(graphs.getByRole('button', { name: 'pump-curve' }).getAttribute('aria-current')).toBe('true');
-    expect(screen.getByRole('img', { name: /Graph image: pump-curve, 3 × 2 px/ })).toBeTruthy();
+    expect(screen.getByRole('application', { name: /Graph image: pump-curve, 3 × 2 px/ })).toBeTruthy();
 
     await user.click(sidebar.getByRole('button', { name: 'All projects' }));
     const list = within(await screen.findByRole('list', { name: 'Saved projects' }));
