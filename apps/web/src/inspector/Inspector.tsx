@@ -1,6 +1,7 @@
 import type { Graph } from '@cd/core';
 import { makeStyles } from '@fluentui/react-components';
 import { CalibrationPanel } from '../calibration/CalibrationPanel';
+import { PointsPanel } from '../points/PointsPanel';
 import { DatasetsPanel } from './DatasetsPanel';
 
 const useStyles = makeStyles({
@@ -18,6 +19,7 @@ export function Inspector({ graph }: { graph: Graph }) {
     <div className={styles.scroll}>
       <CalibrationPanel graph={graph} />
       <DatasetsPanel graph={graph} />
+      <PointsPanel graph={graph} />
     </div>
   );
 }

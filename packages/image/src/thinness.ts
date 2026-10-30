@@ -7,7 +7,10 @@ import type { FloatImage, Mask } from './raster.ts';
  */
 export function otsuThreshold(image: FloatImage, bins = 256): number {
   const histogram = new Float64Array(bins);
-  for (const v of image.data) histogram[Math.min(bins - 1, Math.max(0, Math.floor(v * bins)))] += 1;
+  for (const v of image.data) {
+    const bin = Math.min(bins - 1, Math.max(0, Math.floor(v * bins)));
+    histogram[bin] = (histogram[bin] ?? 0) + 1;
+  }
   const total = image.data.length;
   let sumAll = 0;
   for (let i = 0; i < bins; i++) sumAll += (i + 0.5) * (histogram[i] ?? 0);

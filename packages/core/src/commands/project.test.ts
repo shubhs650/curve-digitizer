@@ -19,6 +19,8 @@ describe('updateSettings', () => {
     const after = command.apply(before);
     expect(after.settings).toEqual({ ...before.settings, snapRadiusPx: 12 });
     expect(command.invert(before).apply(after)).toEqual(before);
+    expect(command.coalesceKey).toBeUndefined();
+    expect(updateSettings({ snapRadiusPx: 3 }, 'radius#1').coalesceKey).toBe('radius#1');
   });
 
   it('inverts the inverse', () => {

@@ -1,5 +1,12 @@
 import { makeStyles, ToggleButton, Tooltip, tokens } from '@fluentui/react-components';
-import { CursorRegular, HandRightRegular, RulerRegular, ZoomFitRegular } from '@fluentui/react-icons';
+import {
+  CursorRegular,
+  HandRightRegular,
+  PinRegular,
+  RulerRegular,
+  TargetRegular,
+  ZoomFitRegular,
+} from '@fluentui/react-icons';
 import type { ReactElement } from 'react';
 import { UndoButtons } from '../history/UndoButtons';
 import { type ToolId, useUiStore } from '../ui/uiStore';
@@ -29,6 +36,7 @@ interface RailTool {
 /** Tools in rail order; their single-key shortcuts are handled by useToolShortcuts. */
 export const RAIL_TOOLS: readonly RailTool[] = [
   { id: 'select', label: 'Select', shortcut: 'V', icon: <CursorRegular /> },
+  { id: 'point', label: 'Add points', shortcut: 'P', icon: <TargetRegular /> },
   { id: 'pan', label: 'Pan', shortcut: 'H', icon: <HandRightRegular /> },
   { id: 'calibrate', label: 'Calibrate', shortcut: 'C', icon: <RulerRegular /> },
 ];
@@ -39,6 +47,8 @@ export function ToolRail() {
   const setTool = useUiStore((s) => s.setTool);
   const loupe = useUiStore((s) => s.loupe);
   const toggleLoupe = useUiStore((s) => s.toggleLoupe);
+  const snap = useUiStore((s) => s.snap);
+  const toggleSnap = useUiStore((s) => s.toggleSnap);
 
   // A plain toolbar of buttons: Fluent's Toolbar makes Tabster add focusable aria-hidden sentinels that axe flags.
   return (
@@ -70,6 +80,16 @@ export function ToolRail() {
           aria-label="Loupe"
           aria-keyshortcuts="L"
           onClick={toggleLoupe}
+        />
+      </Tooltip>
+      <Tooltip content="Magnetic snap (S)" relationship="description" positioning="after">
+        <ToggleButton
+          appearance="subtle"
+          checked={snap}
+          icon={<PinRegular />}
+          aria-label="Magnetic snap"
+          aria-keyshortcuts="S"
+          onClick={toggleSnap}
         />
       </Tooltip>
       <div className={styles.spacer} />

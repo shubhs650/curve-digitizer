@@ -62,6 +62,9 @@ importers:
       '@cd/math':
         specifier: workspace:*
         version: link:../../packages/math
+      '@cd/trace':
+        specifier: workspace:*
+        version: link:../../packages/trace
       '@cd/workers':
         specifier: workspace:*
         version: link:../../packages/workers

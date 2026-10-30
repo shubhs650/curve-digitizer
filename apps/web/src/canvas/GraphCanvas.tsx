@@ -6,7 +6,7 @@ import { useUiStore } from '../ui/uiStore';
 import { Loupe } from './Loupe';
 import { HIT_RADIUS, overlayModel, type OverlayState, paintOverlay } from './overlay';
 import { type CanvasPointer, SELECT_TOOL, type ToolHandlers } from './tools';
-import { useGraphBitmap } from './useGraphBitmap';
+import type { BitmapState } from './useGraphBitmap';
 import {
   actualSizeView,
   fitView,
@@ -67,6 +67,8 @@ const NO_SELECTION: ReadonlySet<string> = new Set();
 
 export interface GraphCanvasProps {
   readonly graph: Graph;
+  /** The graph's decoded image (`useGraphBitmap`); the caller owns it so tools can read its pixels. */
+  readonly bitmapState: BitmapState;
   /** The active tool's primary-button behaviour; defaults to plain selection/hover. */
   readonly tool?: ToolHandlers;
   readonly selection?: ReadonlySet<string>;
@@ -86,13 +88,13 @@ interface Drag {
  */
 export function GraphCanvas({
   graph,
+  bitmapState,
   tool = SELECT_TOOL,
   selection = NO_SELECTION,
   decorate,
 }: GraphCanvasProps) {
   const styles = useStyles();
   const helpId = useId();
-  const bitmapState = useGraphBitmap(graph);
   const bitmap = bitmapState.status === 'ready' ? bitmapState.bitmap : null;
   const panTool = useUiStore((s) => s.tool === 'pan');
   const loupeOn = useUiStore((s) => s.loupe);

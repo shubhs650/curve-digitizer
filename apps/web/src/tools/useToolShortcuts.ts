@@ -3,10 +3,11 @@ import { isEditableTarget } from '../input/files';
 import { useUiStore } from '../ui/uiStore';
 import { RAIL_TOOLS } from './ToolRail';
 
-/** Single-key tool shortcuts (V, H, C, L), ignored while typing in a field or with a modifier held. */
+/** Single-key tool shortcuts (V, P, H, C, L, S), ignored while typing in a field or with a modifier held. */
 export function useToolShortcuts(): void {
   const setTool = useUiStore((s) => s.setTool);
   const toggleLoupe = useUiStore((s) => s.toggleLoupe);
+  const toggleSnap = useUiStore((s) => s.toggleSnap);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -16,6 +17,7 @@ export function useToolShortcuts(): void {
       const tool = RAIL_TOOLS.find((t) => t.shortcut === key);
       if (tool) setTool(tool.id);
       else if (key === 'L') toggleLoupe();
+      else if (key === 'S') toggleSnap();
       else return;
       event.preventDefault();
     };
@@ -23,5 +25,5 @@ export function useToolShortcuts(): void {
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [setTool, toggleLoupe]);
+  }, [setTool, toggleLoupe, toggleSnap]);
 }

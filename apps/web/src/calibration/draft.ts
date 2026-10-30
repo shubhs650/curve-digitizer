@@ -6,10 +6,9 @@ import {
   fitCalibration,
   fromAxis,
   type CalibrationFit,
-  pixelToValue,
-  pointSigma,
   toAxis,
 } from '@cd/math';
+import { pointCache } from '../points/cache';
 
 // The calibration tool's editable state (PRD §4.3): four clicks, the values typed for them, the axes and the
 // model. It becomes a `Calibration` once complete and valid; `evaluateDraft` is the only place that decides that.
@@ -206,16 +205,7 @@ export function warningText(warning: CalibrationWarning, model: CalibrationModel
 
 /** The calibrated caches of a graph's points through `calibration`, for `setCalibration`. */
 export function pointValues(graph: Graph, calibration: Calibration): PointValues {
-  const axes = { x: calibration.xAxis.type, y: calibration.yAxis.type };
   return new Map(
-    graph.datasets.flatMap((d) =>
-      d.points.map((p) => [
-        p.id,
-        {
-          value: pixelToValue(calibration.matrix, axes, p.px),
-          sigma: pointSigma(calibration.matrix, axes, p.px, p.lineWidthPx),
-        },
-      ]),
-    ),
+    graph.datasets.flatMap((d) => d.points.map((p) => [p.id, pointCache(calibration, p.px, p.lineWidthPx)])),
   );
 }
