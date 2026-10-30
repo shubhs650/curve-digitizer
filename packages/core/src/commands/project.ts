@@ -9,9 +9,11 @@ export function renameProject(name: string): Command {
   };
 }
 
-export function updateSettings(patch: Partial<Settings>): Command {
+/** Edits with the same `coalesceKey` (one field focus) undo as one step. */
+export function updateSettings(patch: Partial<Settings>, coalesceKey?: string): Command {
   return {
     label: 'Change settings',
+    ...(coalesceKey === undefined ? {} : { coalesceKey }),
     apply: (project) => ({ ...project, settings: { ...project.settings, ...patch } }),
     invert: (before) => setSettings(before.settings),
   };

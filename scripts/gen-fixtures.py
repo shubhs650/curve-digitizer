@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Generate NumPy reference fixtures for packages/math.
+"""Generate NumPy reference fixtures for packages/math and packages/image.
 
 Run from the repository root:  python3 scripts/gen-fixtures.py
-Needs NumPy only. Output is deterministic (seeded) and written to packages/math/fixtures/.
+Needs NumPy only. Output is deterministic (seeded) and written to packages/math/fixtures/ and
+packages/image/fixtures/.
 
 The reference implementations below are deliberately written independently of the TypeScript code:
 affine uses np.linalg.lstsq on raw pixel coordinates, the DLT uses np.linalg.svd, the Jacobian is the
@@ -16,6 +17,7 @@ from pathlib import Path
 import numpy as np
 
 OUT = Path(__file__).resolve().parent.parent / "packages" / "math" / "fixtures"
+IMAGE_OUT = Path(__file__).resolve().parent.parent / "packages" / "image" / "fixtures"
 RNG = np.random.default_rng(20261030)
 PICK_SIGMA_PX = 0.5
 DEFAULT_LINE_WIDTH_PX = 2.0
@@ -274,14 +276,66 @@ def linalg_cases():
     }
 
 
-def write(name, data):
-    OUT.mkdir(parents=True, exist_ok=True)
+def brute_force_edt(mask):
+    """Distance from each set pixel centre to the nearest unset pixel centre, the image border counting as
+    unset: pad with a ring of zeros, then take the minimum over every unset pixel."""
+    padded = np.pad(mask, 1)
+    zy, zx = np.nonzero(padded == 0)
+    out = np.zeros(mask.shape)
+    for y, x in zip(*np.nonzero(mask)):
+        out[y, x] = np.sqrt(np.min((zy - (y + 1)) ** 2 + (zx - (x + 1)) ** 2))
+    return out
+
+
+def reference_otsu(values, bins=256):
+    """Otsu by exhaustive search over histogram splits, maximising w0 w1 (mu0 - mu1)^2."""
+    hist, _ = np.histogram(np.clip(np.floor(values * bins), 0, bins - 1), bins=bins, range=(0, bins))
+    centres = np.arange(bins) + 0.5
+    best, best_bin = -1.0, 0
+    for i in range(bins - 1):
+        w0, w1 = hist[: i + 1].sum(), hist[i + 1 :].sum()
+        if w0 == 0 or w1 == 0:
+            continue
+        mu0 = (hist[: i + 1] * centres[: i + 1]).sum() / w0
+        mu1 = (hist[i + 1 :] * centres[i + 1 :]).sum() / w1
+        between = w0 * w1 * (mu0 - mu1) ** 2
+        if between > best:
+            best, best_bin = between, i
+    return (best_bin + 1) / bins
+
+
+def image_cases():
+    rng = np.random.default_rng(20261031)
+    masks = {
+        "random": (rng.random((13, 17)) < 0.7).astype(np.uint8),
+        "stroke": np.zeros((15, 21), dtype=np.uint8),
+        "blob": np.zeros((16, 16), dtype=np.uint8),
+    }
+    masks["stroke"][5:8, :] = 1
+    masks["stroke"][:, 9:11] = 1
+    yy, xx = np.mgrid[0:16, 0:16]
+    masks["blob"][(yy - 7.5) ** 2 + (xx - 8.0) ** 2 <= 36] = 1
+    edt = [
+        {"name": name, "width": m.shape[1], "height": m.shape[0], "mask": m.flatten().tolist(),
+         "distance": brute_force_edt(m).flatten().tolist()}
+        for name, m in masks.items()
+    ]
+    paper = rng.normal(0.03, 0.02, 3000)
+    ink = rng.normal(0.6, 0.08, 400)
+    grid = rng.normal(0.17, 0.02, 300)
+    values = np.clip(np.concatenate([paper, ink, grid]), 0, 1)
+    return {"edt": edt, "otsu": {"values": values.tolist(), "threshold": reference_otsu(values)}}
+
+
+def write(name, data, out=OUT):
+    out.mkdir(parents=True, exist_ok=True)
     meta = {"generator": "scripts/gen-fixtures.py", "numpy": np.__version__}
-    (OUT / name).write_text(json.dumps({"meta": meta, **data}, indent=2) + "\n")
+    (out / name).write_text(json.dumps({"meta": meta, **data}, indent=2) + "\n")
 
 
 if __name__ == "__main__":
     write("transforms.json", {"cases": transform_cases()})
     write("linalg.json", linalg_cases())
     write("crossings.json", {"cases": crossing_cases()})
-    print(f"wrote fixtures to {OUT}")
+    write("thinness.json", image_cases(), IMAGE_OUT)
+    print(f"wrote fixtures to {OUT} and {IMAGE_OUT}")
