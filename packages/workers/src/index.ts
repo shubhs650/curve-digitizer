@@ -18,4 +18,11 @@ export { createWorkerApi, type RunnerOptions } from './runner.ts';
 export { createComputePool, createRenderWorker } from './spawn.ts';
 export { computeTasks, renderTasks, type ComputeTasks, type RenderTasks } from './tasks.ts';
 export type { ImageToPngInput, ImageToPngOutput } from './tasks/image.ts';
+export type {
+  PdfCloseInput,
+  PdfCropInput,
+  PdfOpenInput,
+  PdfOpenOutput,
+  PdfThumbnailInput,
+} from './tasks/pdf.ts';
 export type { ExportFileInput, ExportFileOutput, ExportFormat } from './tasks/export.ts';

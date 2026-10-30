@@ -130,7 +130,14 @@ importers:
 
   packages/math: {}
 
-  packages/pdf: {}
+  packages/pdf:
+    dependencies:
+      '@cd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@embedpdf/pdfium':
+        specifier: 2.15.1
+        version: 2.15.1
 
   packages/trace: {}
 
@@ -142,6 +149,9 @@ importers:
       '@cd/export':
         specifier: workspace:*
         version: link:../export
+      '@cd/pdf':
+        specifier: workspace:*
+        version: link:../pdf
       comlink:
         specifier: ^4.4.2
         version: 4.4.2
@@ -714,6 +724,9 @@ packages:
   '@csstools/css-tokenizer@4.0.2':
     resolution: {integrity: sha512-OoKoR0f76dCY666JlcbhmVTs2drYj1GUXZTYTcbUgJjh9Nv41aFfZ21bPQTERm5+L5cBDo466NltB2lplS5GBw==}
     engines: {node: '>=20.19.0'}
+
+  '@embedpdf/pdfium@2.15.1':
+    resolution: {integrity: sha512-qDH4gEkGSQT0iM+07Hpm3LyvoB7PEFbW3Qyk6+LPkEYLJYfHagkHM1OzYlDq2EDOhJRguykTkzdMOT3/w27x5Q==}
 
   '@emotion/hash@0.9.2':
     resolution: {integrity: sha512-MyqliTZGuOm3+5ZRSaaBGP3USLw6+EGykkwZns2EPC5g8jJ4z9OrdZY9apkl3+UP9+sdz76YYkwCKP5gh8iY3g==}
@@ -4094,6 +4107,8 @@ snapshots:
       css-tree: 3.2.1
 
   '@csstools/css-tokenizer@4.0.2': {}
+
+  '@embedpdf/pdfium@2.15.1': {}
 
   '@emotion/hash@0.9.2': {}
 
