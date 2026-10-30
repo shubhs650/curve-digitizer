@@ -27,3 +27,4 @@ export {
   serializeAudit,
 } from './audit.ts';
 export { sha256Hex } from './sha256.ts';
+export { DATASET_PALETTE, nextDatasetColor } from './palette.ts';
