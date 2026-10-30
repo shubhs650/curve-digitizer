@@ -6,8 +6,8 @@ import type { HtmlTagDescriptor } from 'vite';
 // - style-src: Fluent's Griffel appends *empty* <style> elements and fills them through CSSOM insertRule,
 //   which CSP does not inspect. Chromium still blocks the empty element unless allowed, so the policy allows
 //   exactly the hash of the empty string instead of 'unsafe-inline'; any <style> with content stays blocked.
-// Shipped as a <meta> tag so any static host (and `vite preview`) enforces it; frame-ancestors cannot be set
-// from a meta tag and belongs in the host's response headers.
+// Shipped as a <meta> tag so any static host (and `vite preview`) enforces it; config/headers.ts repeats it
+// as a response header with frame-ancestors, which a meta tag cannot carry.
 // base64(sha256(''))
 export const EMPTY_STYLE_HASH = "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='";
 

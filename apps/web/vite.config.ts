@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { cspMetaTag } from './config/csp.ts';
+import { CROSS_ORIGIN_ISOLATION_HEADERS, hostHeadersFile } from './config/headers.ts';
 import { manifest } from './config/manifest.ts';
 
 const pkg = JSON.parse(readFileSync(new URL('package.json', import.meta.url), 'utf8')) as { version: string };
@@ -15,10 +16,19 @@ const contentSecurityPolicy: Plugin = {
   transformIndexHtml: () => [cspMetaTag()],
 };
 
+const hostHeaders: Plugin = {
+  name: 'cd:host-headers',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: '_headers', source: hostHeadersFile() });
+  },
+};
+
 export default defineConfig({
   plugins: [
     react(),
     contentSecurityPolicy,
+    hostHeaders,
     VitePWA({
       // The app shows its own "New version available" prompt (src/pwa) through workbox-window.
       registerType: 'prompt',
@@ -53,9 +63,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    headers: CROSS_ORIGIN_ISOLATION_HEADERS,
   },
   preview: {
     port: 4173,
     strictPort: true,
+    headers: CROSS_ORIGIN_ISOLATION_HEADERS,
   },
 });

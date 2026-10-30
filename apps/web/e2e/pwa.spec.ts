@@ -33,6 +33,12 @@ test.describe('PWA', () => {
     }
   });
 
+  test('is cross-origin isolated, so workers can share a cancel flag', async ({ page }) => {
+    await page.goto('/');
+    expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
+    expect(await page.evaluate(() => typeof SharedArrayBuffer)).toBe('function');
+  });
+
   test('reloads offline after the first load', async ({ page, context }) => {
     await page.goto('/');
     await waitForServiceWorker(page);
@@ -41,6 +47,8 @@ test.describe('PWA', () => {
     await page.reload();
     await expect(page.getByRole('banner').getByText('Curve Digitizer')).toBeVisible();
     await expect(page.getByRole('main', { name: 'Canvas' })).toBeVisible();
+    // The precached response keeps COOP/COEP, so workers still get SharedArrayBuffer offline.
+    expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
 
     // Deep links fall back to the precached shell too.
     await page.goto('/docs');
