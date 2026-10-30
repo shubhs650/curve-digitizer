@@ -6,11 +6,14 @@ import { UpdatePrompt } from './UpdatePrompt';
 
 // Fluent's MessageBar measures itself with ResizeObserver, which jsdom does not implement.
 beforeAll(() => {
-  globalThis.ResizeObserver ??= class {
-    observe(): void {}
-    unobserve(): void {}
-    disconnect(): void {}
-  };
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    },
+  );
 });
 
 afterEach(cleanup);
