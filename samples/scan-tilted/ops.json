@@ -1,0 +1,50 @@
+{
+ "opsVersion": 1,
+ "sample": "scan-tilted",
+ "ops": [
+  {
+   "id": "calibrate",
+   "kind": "calibrate",
+   "targets": [],
+   "model": "affine",
+   "points": [
+    {
+     "px": [323.3, 990.2],
+     "value": [50, 0]
+    },
+    {
+     "px": [1458.9, 1022.0],
+     "value": [450, 0]
+    },
+    {
+     "px": [183.9, 872.5],
+     "value": [0, 20]
+    },
+    {
+     "px": [198.9, 189.5],
+     "value": [0, 140]
+    }
+   ]
+  },
+  {
+   "id": "trace-d1",
+   "kind": "trace",
+   "targets": [
+    "A3"
+   ],
+   "datasetId": "d1",
+   "start": [287.5, 203.5],
+   "end": [1519.5, 850.5]
+  },
+  {
+   "id": "trace-d2",
+   "kind": "trace",
+   "targets": [
+    "A3"
+   ],
+   "datasetId": "d2",
+   "start": [276.5, 545.0],
+   "end": [1517.0, 959.0]
+  }
+ ]
+}
