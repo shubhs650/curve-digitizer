@@ -1,0 +1,62 @@
+{
+ "opsVersion": 1,
+ "sample": "sn-family",
+ "ops": [
+  {
+   "id": "calibrate",
+   "kind": "calibrate",
+   "targets": [
+    "A1"
+   ],
+   "model": "affine",
+   "points": [
+    {
+     "px": [500.0, 1330.0],
+     "value": [100.0, 10]
+    },
+    {
+     "px": [1620.0, 1330.0],
+     "value": [1000000.0, 10]
+    },
+    {
+     "px": [220.0, 923.3],
+     "value": [10, 100.0]
+    },
+    {
+     "px": [220.0, 516.7],
+     "value": [10, 1000.0]
+    }
+   ]
+  },
+  {
+   "id": "trace-c1",
+   "kind": "trace",
+   "targets": [
+    "A4"
+   ],
+   "datasetId": "c1",
+   "start": [291.0, 282.0],
+   "end": [1820.5, 1142.0]
+  },
+  {
+   "id": "trace-c2",
+   "kind": "trace",
+   "targets": [
+    "A4"
+   ],
+   "datasetId": "c2",
+   "start": [291.5, 624.5],
+   "end": [1824.5, 798.0]
+  },
+  {
+   "id": "trace-c3",
+   "kind": "trace",
+   "targets": [
+    "A4"
+   ],
+   "datasetId": "c3",
+   "start": [285.5, 533.0],
+   "end": [1822.0, 962.5]
+  }
+ ]
+}

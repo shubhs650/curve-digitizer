@@ -19,7 +19,15 @@ export default defineConfig({
           environment: 'jsdom',
         },
       },
-      { test: { name: 'scripts', root: 'scripts', include: ['**/*.test.ts'] } },
+      {
+        test: {
+          name: 'scripts',
+          root: 'scripts',
+          include: ['**/*.test.ts'],
+          // The samples replay is `pnpm test:samples` (vitest.samples.config.ts).
+          exclude: ['**/*.samples.test.ts', '**/node_modules/**'],
+        },
+      },
     ],
   },
 });
