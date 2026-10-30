@@ -88,13 +88,18 @@ describe('evaluateDraft', () => {
       ],
       values: { ...CLEAN.values, xAxisAt: '', yAxisAt: '' },
     };
-    expect(evaluateDraft(stacked)).toMatchObject({ status: 'invalid', message: /do not define a calibration/ });
+    expect(evaluateDraft(stacked)).toMatchObject({
+      status: 'invalid',
+      message: /do not define a calibration/,
+    });
   });
 
   it('flags a wrong crossing with a warning sentence', () => {
     const { calibration } = ok({ ...CLEAN, values: { ...CLEAN.values, xAxisAt: '5' } });
     expect(calibration.residualPx).toBeGreaterThan(1);
-    expect(calibration.warnings).toContainEqual(expect.stringMatching(/check the typed values, where the axes cross/));
+    expect(calibration.warnings).toContainEqual(
+      expect.stringMatching(/check the typed values, where the axes cross/),
+    );
   });
 });
 

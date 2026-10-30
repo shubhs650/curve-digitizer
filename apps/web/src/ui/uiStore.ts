@@ -3,8 +3,8 @@ import { create } from 'zustand';
 // UI-only state (CLAUDE.md: Zustand for UI state only). Anything that must survive a reload or be undoable
 // belongs in the project, through ProjectStore.dispatch.
 
-/** Canvas tools on the tool rail; later tasks add calibrate and point. */
-export type ToolId = 'select' | 'pan';
+/** Canvas tools on the tool rail; task 1.4 adds point. */
+export type ToolId = 'select' | 'pan' | 'calibrate';
 
 export interface UiState {
   readonly activeGraphId: string | null;

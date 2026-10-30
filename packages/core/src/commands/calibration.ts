@@ -7,7 +7,9 @@ export type PointValues = ReadonlyMap<string, { readonly value: Vec2; readonly s
 
 /** The value and sigma caches of every point of a graph. */
 export function pointValuesOf(graph: Graph): PointValues {
-  return new Map(graph.datasets.flatMap((d) => d.points.map((p) => [p.id, { value: p.value, sigma: p.sigma }])));
+  return new Map(
+    graph.datasets.flatMap((d) => d.points.map((p) => [p.id, { value: p.value, sigma: p.sigma }])),
+  );
 }
 
 /**

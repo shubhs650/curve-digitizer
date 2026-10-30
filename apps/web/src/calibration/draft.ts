@@ -83,7 +83,11 @@ export function draftFromCalibration(calibration: Calibration | null): Calibrati
 }
 
 export type DraftEvaluation =
-  | { readonly status: 'incomplete'; readonly missingPicks: readonly PickIndex[]; readonly errors: FieldErrors }
+  | {
+      readonly status: 'incomplete';
+      readonly missingPicks: readonly PickIndex[];
+      readonly errors: FieldErrors;
+    }
   | { readonly status: 'invalid'; readonly errors: FieldErrors; readonly message?: string }
   | {
       readonly status: 'ok';

@@ -1,6 +1,12 @@
 import type { AxisTypes } from './axis.ts';
 import { lstsq } from './linalg.ts';
-import { type Correspondence, residuals, type Residuals, solveTransform, type TransformModel } from './transform.ts';
+import {
+  type Correspondence,
+  residuals,
+  type Residuals,
+  solveTransform,
+  type TransformModel,
+} from './transform.ts';
 import { DegenerateError, type Mat3, type Vec2 } from './types.ts';
 import { axisJacobian, valueJacobian } from './uncertainty.ts';
 
@@ -38,7 +44,8 @@ export function axisCrossings(
     const solution = lstsq(rows, rhs);
     // lstsq solves rank-deficient systems in the least-norm sense; a square system must be exactly satisfied.
     const misfit = rows.reduce(
-      (worst, row, i) => Math.max(worst, Math.abs(row.reduce((s, a, k) => s + a * (solution[k] ?? 0), 0) - (rhs[i] ?? 0))),
+      (worst, row, i) =>
+        Math.max(worst, Math.abs(row.reduce((s, a, k) => s + a * (solution[k] ?? 0), 0) - (rhs[i] ?? 0))),
       0,
     );
     const scale = Math.max(1, ...rhs.map(Math.abs));
@@ -100,13 +107,16 @@ export function fitCalibration(
   const warnings: CalibrationWarning[] = [];
   let closest = Infinity;
   points.forEach((a, i) => {
-    for (const b of points.slice(i + 1)) closest = Math.min(closest, Math.hypot(a.px[0] - b.px[0], a.px[1] - b.px[1]));
+    for (const b of points.slice(i + 1))
+      closest = Math.min(closest, Math.hypot(a.px[0] - b.px[0], a.px[1] - b.px[1]));
   });
-  if (closest < CALIBRATION_LIMITS.minPointDistancePx) warnings.push({ kind: 'pointsTooClose', distancePx: closest });
+  if (closest < CALIBRATION_LIMITS.minPointDistancePx)
+    warnings.push({ kind: 'pointsTooClose', distancePx: closest });
 
   const skew = skewDegrees(matrix, centroid);
   if (Math.abs(skew) > CALIBRATION_LIMITS.maxSkewDegrees) warnings.push({ kind: 'skew', degrees: skew });
-  if (fit.rmsPx > CALIBRATION_LIMITS.maxResidualPx) warnings.push({ kind: 'highResidual', residualPx: fit.rmsPx });
+  if (fit.rmsPx > CALIBRATION_LIMITS.maxResidualPx)
+    warnings.push({ kind: 'highResidual', residualPx: fit.rmsPx });
 
   return { matrix, residuals: fit, resolution, warnings };
 }

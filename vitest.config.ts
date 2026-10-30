@@ -18,6 +18,8 @@ export default defineConfig({
           include: ['src/**/*.test.{ts,tsx}', 'config/**/*.test.ts'],
           environment: 'jsdom',
           setupFiles: ['src/test/setup.ts'],
+          // user-event drives the whole app in jsdom; a long form test takes ~3 s alone and more on a busy runner.
+          testTimeout: 15_000,
         },
       },
       {

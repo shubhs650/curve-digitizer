@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { axisCrossings, CALIBRATION_LIMITS, fitCalibration, skewDegrees, type AxisPick } from './calibration.ts';
+import {
+  axisCrossings,
+  CALIBRATION_LIMITS,
+  fitCalibration,
+  skewDegrees,
+  type AxisPick,
+} from './calibration.ts';
 import { crossingCases } from './test/fixtures.ts';
 import type { Correspondence } from './transform.ts';
 import { DegenerateError, type Mat3 } from './types.ts';
@@ -75,7 +81,9 @@ describe('fitCalibration', () => {
 
   it('warns about a wrong crossing through the residual', () => {
     // The x axis really sits at y = 2, but the X picks claim y = 0.
-    const wrong = clean.map((p, i) => (i < 2 ? { px: [p.px[0], 1450 - 2 * 22.333] as const, axis: p.axis } : p));
+    const wrong = clean.map((p, i) =>
+      i < 2 ? { px: [p.px[0], 1450 - 2 * 22.333] as const, axis: p.axis } : p,
+    );
     const fit = fitCalibration('affine', wrong, LINEAR);
     expect(fit.residuals.rmsPx).toBeGreaterThan(CALIBRATION_LIMITS.maxResidualPx);
     expect(fit.warnings).toContainEqual({ kind: 'highResidual', residualPx: fit.residuals.rmsPx });
@@ -83,13 +91,19 @@ describe('fitCalibration', () => {
 
   it('warns about points too close together', () => {
     const close = [...clean, { px: [205, 1226.7] as const, axis: [5 / 21.2, 10] as const }];
-    expect(fitCalibration('affine', close, LINEAR).warnings).toContainEqual({ kind: 'pointsTooClose', distancePx: 5 });
+    expect(fitCalibration('affine', close, LINEAR).warnings).toContainEqual({
+      kind: 'pointsTooClose',
+      distancePx: 5,
+    });
   });
 
   it('warns about skewed axes', () => {
     // The y axis leans 2° right of perpendicular.
     const lean = Math.tan((2 * Math.PI) / 180);
-    const skewed = clean.map((p) => ({ px: [p.px[0] + lean * (1450 - p.px[1]), p.px[1]] as const, axis: p.axis }));
+    const skewed = clean.map((p) => ({
+      px: [p.px[0] + lean * (1450 - p.px[1]), p.px[1]] as const,
+      axis: p.axis,
+    }));
     const warning = fitCalibration('affine', skewed, LINEAR).warnings.find((w) => w.kind === 'skew');
     // The recorded clicks are rounded to 0.1 px, so the fitted skew is 2° to about 0.001°.
     expect(warning?.kind === 'skew' && Math.abs(warning.degrees)).toBeCloseTo(2, 2);

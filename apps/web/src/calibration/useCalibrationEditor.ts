@@ -33,6 +33,11 @@ const useEditorStore = create<EditorStore>()((set) => ({
   },
 }));
 
+/** Forgets every draft; for tests, whose graphs reuse ids. */
+export function resetCalibrationEditors(): void {
+  useEditorStore.setState({ entries: {} });
+}
+
 export interface CalibrationEditor {
   readonly draft: CalibrationDraft;
   readonly evaluation: DraftEvaluation;
@@ -103,7 +108,11 @@ export function useCalibrationEditor(graph: Graph): CalibrationEditor {
       picks[index] = px;
       const draft = { ...entry.draft, picks };
       // Placing walks through the missing picks; moving a placed one keeps the current choice.
-      save(draft, wasMissing || entry.active === index ? nextMissing(draft, index) : entry.active, coalesceKey);
+      save(
+        draft,
+        wasMissing || entry.active === index ? nextMissing(draft, index) : entry.active,
+        coalesceKey,
+      );
     },
     [save, entry],
   );
