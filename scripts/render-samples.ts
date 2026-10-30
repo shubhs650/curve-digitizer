@@ -1,5 +1,5 @@
 // Rasterizes samples/<name>/source.svg to source.png at 1 px per SVG unit with the Playwright Chromium the
-// repo already uses, so the image and ground-truth.json share one pixel grid (ADR 24). Called by
+// repo already uses, so the image and ground-truth.json share one pixel grid (ADR 25). Called by
 // scripts/gen-samples.py. Usage: node scripts/render-samples.ts <sample-dir>...
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

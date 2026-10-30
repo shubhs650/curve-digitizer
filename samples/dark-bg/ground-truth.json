@@ -3,7 +3,7 @@
  "sample": "dark-bg",
  "description": "Dark-background semi-log chart: two bright curves on a dark grid (linear x, log10 y).",
  "generator": "scripts/gen-samples.py",
- "pixelConvention": "px [0, 0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 24)",
+ "pixelConvention": "px [0, 0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 25)",
  "image": {
   "path": "source.png",
   "width": 1800,

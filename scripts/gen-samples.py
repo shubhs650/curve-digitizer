@@ -11,7 +11,7 @@ exactly the ground-truth centerline (after the sample's pixel transform), so not
 the rendered image. Output is deterministic (seeded). Ground truth is immutable once committed: changing it
 needs an ADR in docs/DECISIONS.md (CLAUDE.md).
 
-Pixel convention (ADR 24): px [0, 0] is the top-left corner of the image, x grows right, y grows down, and
+Pixel convention (ADR 25): px [0, 0] is the top-left corner of the image, x grows right, y grows down, and
 pixel (i, j) covers [i, i+1) x [j, j+1), so its centre is (i + 0.5, j + 0.5). SVG user space and canvas
 share this convention.
 """
@@ -377,7 +377,7 @@ def ground_truth(name, description, chart, datasets, centerlines, crossings):
         "sample": name,
         "description": description,
         "generator": "scripts/gen-samples.py",
-        "pixelConvention": "px [0,0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 24)",
+        "pixelConvention": "px [0,0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 25)",
         "image": {"path": "source.png", "width": chart.width, "height": chart.height},
         "axes": {"x": axis_json(chart.x), "y": axis_json(chart.y)},
         "axisToPx": [float(v) for v in chart.axis_to_px.flatten()],

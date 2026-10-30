@@ -11,7 +11,7 @@ export function hexToRgb(hex: string): Rgb {
   return [parseInt(m[1] ?? '', 16), parseInt(m[2] ?? '', 16), parseInt(m[3] ?? '', 16)];
 }
 
-/** Bilinear RGB at a sub-pixel position; pixel (i, j) has its value at (i + 0.5, j + 0.5) (ADR 24). */
+/** Bilinear RGB at a sub-pixel position; pixel (i, j) has its value at (i + 0.5, j + 0.5) (ADR 25). */
 export function bilinear(image: RasterImage, x: number, y: number): [number, number, number] {
   const { width, height, channels, data } = image;
   const fx = Math.min(width - 1, Math.max(0, x - 0.5));

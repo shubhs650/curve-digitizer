@@ -18,7 +18,7 @@ describe('ink probes', () => {
     expect(() => hexToRgb('blue')).toThrow(/#rrggbb/);
   });
 
-  it('interpolates between pixel centres (ADR 24)', () => {
+  it('interpolates between pixel centres (ADR 25)', () => {
     const img: RasterImage = { width: 2, height: 1, channels: 1, data: Uint8Array.from([0, 100]) };
     expect(bilinear(img, 0.5, 0.5)).toEqual([0, 0, 0]);
     expect(bilinear(img, 1.0, 0.5)).toEqual([50, 50, 50]);

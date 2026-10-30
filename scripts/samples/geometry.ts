@@ -1,4 +1,4 @@
-// Plane geometry for scoring replays against ground-truth centerlines. Pixel coordinates follow ADR 24.
+// Plane geometry for scoring replays against ground-truth centerlines. Pixel coordinates follow ADR 25.
 
 export type Vec2 = readonly [number, number];
 

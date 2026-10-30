@@ -3,7 +3,7 @@
  "sample": "vector-clean",
  "description": "Clean vector pump chart: three coloured, non-crossing curves on a light grid (linear axes).",
  "generator": "scripts/gen-samples.py",
- "pixelConvention": "px [0, 0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 24)",
+ "pixelConvention": "px [0, 0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 25)",
  "image": {
   "path": "source.png",
   "width": 2400,

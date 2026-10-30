@@ -3,7 +3,7 @@
  "sample": "scan-tilted",
  "description": "Tilted, blurred, grainy 1970s-style scan: two black curves (one dashed) on a dark printed grid.",
  "generator": "scripts/gen-samples.py",
- "pixelConvention": "px [0, 0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 24)",
+ "pixelConvention": "px [0, 0] is the image's top-left corner; pixel (i,j) has centre (i+0.5, j+0.5) (ADR 25)",
  "image": {
   "path": "source.png",
   "width": 1700,

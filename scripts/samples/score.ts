@@ -40,7 +40,7 @@ export const TARGETS: Readonly<Record<TargetId, TargetSpec>> = {
 };
 
 /**
- * Interpretation constants (ADR 24). A trace must follow the curve from start to end, not just stay near it:
+ * Interpretation constants (ADR 25). A trace must follow the curve from start to end, not just stay near it:
  * at least TRACE_MIN_COVERAGE of the arc between the picks must be covered, with gaps between consecutive points
  * of at most COVERAGE_GAP_PX. For A4 a point farther than WRONG_BRANCH_PX from its own curve is on a wrong branch,
  * and an intersection counts as crossed when coverage extends CROSSING_MARGIN_PX past it on both sides. For A5 a

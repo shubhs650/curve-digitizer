@@ -6,7 +6,7 @@ export function truthJson(): Record<string, unknown> {
     sample: 'tiny',
     description: 'A two-point line.',
     generator: 'test',
-    pixelConvention: 'ADR 24',
+    pixelConvention: 'ADR 25',
     image: { path: 'source.png', width: 100, height: 50 },
     axes: {
       x: { type: 'linear', label: 'X', min: 0, max: 10 },
