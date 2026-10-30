@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "outDir": "node_modules/.tsbuild/tools",
+    "tsBuildInfoFile": "node_modules/.tsbuild/tools/.tsbuildinfo"
+  },
+  "include": ["*.config.ts", "*.d.ts", "scripts/**/*.ts", "apps/web/vite.config.ts", "apps/web/e2e/**/*.ts"]
+}

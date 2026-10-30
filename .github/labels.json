@@ -1,0 +1,9 @@
+[
+  { "name": "M0", "color": "c5def5", "description": "Milestone 0: scaffold" },
+  { "name": "M1", "color": "bfd4f2", "description": "Milestone 1: manual core" },
+  { "name": "M2", "color": "a2c4f0", "description": "Milestone 2: smart tracing" },
+  { "name": "M3", "color": "7fa9e8", "description": "Milestone 3: fitting and extras" },
+  { "name": "decision", "color": "fbca04", "description": "Needs or records an ADR in docs/DECISIONS.md" },
+  { "name": "bug", "color": "d73a4a", "description": "Something isn't working" },
+  { "name": "enhancement", "color": "a2eeef", "description": "New feature or request (see docs/ROADMAP.md)" }
+]
