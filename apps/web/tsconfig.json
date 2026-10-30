@@ -5,7 +5,8 @@
     "types": ["vite/client"],
     "rootDir": "src",
     "outDir": "node_modules/.tsbuild",
-    "tsBuildInfoFile": "node_modules/.tsbuild/.tsbuildinfo"
+    "tsBuildInfoFile": "node_modules/.tsbuild/.tsbuildinfo",
+    "jsx": "react-jsx"
   },
   "include": ["src"]
 }
