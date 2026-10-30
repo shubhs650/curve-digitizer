@@ -1,20 +1,28 @@
 import { useCallback } from 'react';
-import { readInputFiles } from '../input/files';
+import { isPdfFile, readInputFiles } from '../input/files';
+import { usePdfActions } from '../pdf/usePdfActions';
 import { useNotify } from '../ui/notices';
 import { useUiStore } from '../ui/uiStore';
 import { useWorkspace } from './context';
 
-/** Imports files as Graphs, shows the last one and reports files that could not be opened. */
+/**
+ * Adds PDFs as sources and images as Graphs, shows the last new Graph and reports files that could not be
+ * opened. PDFs go one at a time, since each may ask for a password.
+ */
 export function useImportFiles(): (files: File[]) => void {
   const workspace = useWorkspace();
   const notify = useNotify();
   const setActiveGraph = useUiStore((s) => s.setActiveGraph);
+  const { importPdf } = usePdfActions();
 
   return useCallback(
     (files: File[]) => {
       void (async () => {
+        const images = files.filter((file) => !isPdfFile(file));
+        for (const pdf of files.filter(isPdfFile)) await importPdf(pdf);
+        if (images.length === 0) return;
         try {
-          const { graphIds, failures } = await workspace.importImages(await readInputFiles(files));
+          const { graphIds, failures } = await workspace.importImages(await readInputFiles(images));
           const last = graphIds.at(-1);
           if (last !== undefined) setActiveGraph(last);
           for (const failure of failures) {
@@ -29,6 +37,6 @@ export function useImportFiles(): (files: File[]) => void {
         }
       })();
     },
-    [workspace, notify, setActiveGraph],
+    [workspace, notify, setActiveGraph, importPdf],
   );
 }

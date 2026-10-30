@@ -23,7 +23,7 @@ describe('home screen and image input', () => {
   it('opens a picked image as a graph of a new project and goes back to the list', async () => {
     const { user } = setup();
     await user.upload(
-      screen.getByLabelText('Image files'),
+      screen.getByLabelText('PDF or image files'),
       new File([PNG], 'pump-curve.png', { type: 'image/png' }),
     );
     const sidebar = within(screen.getByRole('complementary', { name: 'Project and pages' }));
@@ -53,7 +53,7 @@ describe('home screen and image input', () => {
   it('reports a file that is not an image', async () => {
     const { user } = setup();
     await user.upload(
-      screen.getByLabelText('Image files'),
+      screen.getByLabelText('PDF or image files'),
       new File(['hello'], 'notes.png', { type: 'image/png' }),
     );
     expect(await screen.findByText('Could not open notes.png')).toBeTruthy();

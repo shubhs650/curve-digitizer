@@ -1,5 +1,6 @@
 import { Workspace } from '../session/workspace';
 import { MemoryRepository } from '../storage/memory';
+import { FakePdfBackend } from './fakePdf';
 
 /** Signature + IHDR of a 3 × 2 PNG; the workspace stores PNG bytes as they are, so this is enough. */
 export const TINY_PNG = new Uint8Array([
@@ -8,11 +9,12 @@ export const TINY_PNG = new Uint8Array([
 ]);
 
 /** A workspace over memory storage with deterministic ids. */
-export function testWorkspace(): Workspace {
+export function testWorkspace(pdf = new FakePdfBackend()): Workspace {
   let id = 0;
   return new Workspace({
     repo: new MemoryRepository(),
     encodePng: () => Promise.reject(new Error('not used in tests')),
+    pdf,
     newId: () => `id${String(++id)}`,
     now: () => new Date().toISOString(),
     appVersion: 'test',

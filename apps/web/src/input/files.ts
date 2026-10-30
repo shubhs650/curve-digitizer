@@ -1,7 +1,12 @@
 import type { InputFile } from '../session/workspace';
 
-/** What the file picker offers: the image types a Graph can come from (PRD §4.1). */
-export const IMAGE_ACCEPT = 'image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
+/** What the file picker offers: PDFs and the image types a Graph can come from (PRD §4.1). */
+export const OPEN_ACCEPT = 'application/pdf,.pdf,image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
+
+/** PDFs go to PDFium; everything else is tried as an image. By type or name: content sniffing would read the file. */
+export function isPdfFile(file: File): boolean {
+  return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+}
 
 export async function readInputFiles(files: Iterable<File>): Promise<InputFile[]> {
   return Promise.all(

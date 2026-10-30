@@ -1,5 +1,5 @@
 import { Body1, makeStyles, tokens } from '@fluentui/react-components';
-import { OpenImageButton } from '../input/OpenImageButton';
+import { OpenFileButton } from '../input/OpenFileButton';
 
 const useStyles = makeStyles({
   empty: {
@@ -19,8 +19,8 @@ export function ProjectEmpty({ onFiles }: { onFiles: (files: File[]) => void }) 
   const styles = useStyles();
   return (
     <div className={styles.empty}>
-      <Body1>Add an image of a graph: open it, drop it here, or paste it with Ctrl+V.</Body1>
-      <OpenImageButton appearance="primary" onFiles={onFiles} />
+      <Body1>Add a PDF or an image of a graph: open it, drop it here, or paste an image with Ctrl+V.</Body1>
+      <OpenFileButton appearance="primary" onFiles={onFiles} />
     </div>
   );
 }

@@ -43,6 +43,14 @@ export class MemoryRepository implements ProjectRepository {
     return Promise.resolve();
   }
 
+  async writeBlob(projectId: string, path: string, blob: Blob): Promise<void> {
+    await this.writeFile(projectId, path, new Uint8Array(await blob.arrayBuffer()));
+  }
+
+  async readBlob(projectId: string, path: string): Promise<Blob> {
+    return new Blob([(await this.readFile(projectId, path)) as Uint8Array<ArrayBuffer>]);
+  }
+
   readFile(projectId: string, path: string): Promise<Uint8Array> {
     const bytes = this.#projects.get(projectId)?.get(path);
     if (!bytes) return Promise.reject(new Error(`No file "${path}" in project "${projectId}"`));

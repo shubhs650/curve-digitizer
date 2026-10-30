@@ -25,4 +25,5 @@ export type {
   PdfOpenOutput,
   PdfThumbnailInput,
 } from './tasks/pdf.ts';
+export type { PageGeometry, PdfPermissions, RgbaImage } from '@cd/pdf';
 export type { ExportFileInput, ExportFileOutput, ExportFormat } from './tasks/export.ts';

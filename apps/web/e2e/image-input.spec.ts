@@ -48,7 +48,7 @@ test.describe('image input', () => {
   });
 
   test('file picker → new project with the graph, kept across a reload', async ({ page }) => {
-    await page.getByTestId('image-file-input').setInputFiles(SAMPLE.pathname);
+    await page.getByTestId('open-file-input').setInputFiles(SAMPLE.pathname);
     await expectGraphShown(page, 'source', '2400 × 1600 px');
 
     await page.reload();
@@ -60,7 +60,7 @@ test.describe('image input', () => {
   });
 
   test('the open project passes axe', async ({ page }) => {
-    await page.getByTestId('image-file-input').setInputFiles(SAMPLE.pathname);
+    await page.getByTestId('open-file-input').setInputFiles(SAMPLE.pathname);
     await expectGraphShown(page, 'source', '2400 × 1600 px');
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
@@ -74,7 +74,7 @@ test.describe('image input', () => {
   });
 
   test('pasting a JPEG converts it in the worker and adds a graph to the open project', async ({ page }) => {
-    await page.getByTestId('image-file-input').setInputFiles(SAMPLE.pathname);
+    await page.getByTestId('open-file-input').setInputFiles(SAMPLE.pathname);
     await expectGraphShown(page, 'source', '2400 × 1600 px');
 
     const jpeg = await page.evaluate(() => {

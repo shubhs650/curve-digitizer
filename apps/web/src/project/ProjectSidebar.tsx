@@ -1,7 +1,8 @@
 import { Button, Caption1, Caption1Strong, makeStyles, Text, tokens } from '@fluentui/react-components';
 import { ArrowLeftRegular, ImageRegular } from '@fluentui/react-icons';
 import { ExportMenu } from '../export/ExportMenu';
-import { OpenImageButton } from '../input/OpenImageButton';
+import { OpenFileButton } from '../input/OpenFileButton';
+import { PdfSources } from '../pdf/PdfSources';
 import { useActiveGraph, useProject, useWorkspace } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
 
@@ -33,7 +34,7 @@ export interface ProjectSidebarProps {
   readonly onFiles: (files: File[]) => void;
 }
 
-/** The open project's graphs; on the home screen it only says that no project is open. */
+/** The open project's graphs and source PDFs; on the home screen it only says that no project is open. */
 export function ProjectSidebar({ onFiles }: ProjectSidebarProps) {
   const styles = useStyles();
   const workspace = useWorkspace();
@@ -86,8 +87,9 @@ export function ProjectSidebar({ onFiles }: ProjectSidebarProps) {
           ))}
         </ul>
       )}
-      <OpenImageButton label="Add image…" onFiles={onFiles} />
+      <OpenFileButton label="Add PDF or image…" onFiles={onFiles} />
       <ExportMenu project={project} graph={active} />
+      <PdfSources sources={project.sources} />
     </div>
   );
 }
