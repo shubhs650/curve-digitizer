@@ -7,5 +7,8 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "fflate": "0.8.3"
   }
 }
