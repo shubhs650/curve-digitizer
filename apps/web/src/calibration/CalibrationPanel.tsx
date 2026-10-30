@@ -17,19 +17,15 @@ import {
 import { DismissRegular } from '@fluentui/react-icons';
 import { TextField } from '../inspector/fields';
 import { useUiStore } from '../ui/uiStore';
-import {
-  type CalibrationDraft,
-  type DraftEvaluation,
-  numberText,
-  PICKS,
-  type PickIndex,
-  type ValueField,
-} from './draft';
+import { type CalibrationDraft, type DraftEvaluation, PICKS, type PickIndex, type ValueField } from './draft';
+import { formatValue } from './format';
 import { PICK_COLOURS } from './overlay';
 import { useCalibrationEditor } from './useCalibrationEditor';
 
 const useStyles = makeStyles({
   panel: {
+    // Fluent fields size to their input's default width; let them shrink to the inspector's.
+    '& .fui-Field, & .fui-Input': { minWidth: 0 },
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
@@ -49,20 +45,27 @@ const useStyles = makeStyles({
   },
   row: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    // minmax(0, …): a grid track otherwise grows to its input's intrinsic width and overflows the inspector.
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
     gap: tokens.spacingHorizontalS,
   },
   pick: {
     display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
+    gridTemplateColumns: 'auto minmax(0, 1fr)',
     alignItems: 'end',
     gap: tokens.spacingHorizontalS,
   },
   place: {
-    minWidth: '76px',
+    minWidth: '84px',
+    whiteSpace: 'nowrap',
   },
+  /** The marker's colour on the canvas; the label says which pick, so this is decoration. */
   marker: {
-    fontWeight: tokens.fontWeightSemibold,
+    display: 'inline-block',
+    width: '10px',
+    height: '10px',
+    borderRadius: tokens.borderRadiusCircular,
+    border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralBackground1}`,
   },
   muted: {
     color: tokens.colorNeutralForeground3,
@@ -147,7 +150,9 @@ function AxisGroup({ editor, axis }: AxisGroupProps) {
   };
   const solved =
     evaluation.status === 'ok' && draft.values[crossingField].trim() === ''
-      ? numberText(axis === 'x' ? evaluation.crossings.xAxisAt : evaluation.crossings.yAxisAt)
+      ? axis === 'x'
+        ? formatValue(evaluation.crossings.xAxisAt, other.type, evaluation.calibration.resolution.yUnitsPerPx)
+        : formatValue(evaluation.crossings.yAxisAt, other.type, evaluation.calibration.resolution.xUnitsPerPx)
       : null;
 
   return (
@@ -190,15 +195,13 @@ function AxisGroup({ editor, axis }: AxisGroupProps) {
               size="small"
               className={styles.place}
               checked={active === i}
+              icon={<span className={styles.marker} style={{ backgroundColor: PICK_COLOURS[axis] }} />}
               onClick={() => {
                 editor.setActive(active === i ? null : i);
                 setTool('calibrate');
               }}
             >
-              {px === null ? 'Place' : 'Move'}{' '}
-              <span className={styles.marker} style={{ color: PICK_COLOURS[axis] }}>
-                {pick}
-              </span>
+              {px === null ? 'Place' : 'Move'} {pick}
             </ToggleButton>
             <TextField
               label={`${pick} value`}

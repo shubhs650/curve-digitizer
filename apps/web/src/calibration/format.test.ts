@@ -17,6 +17,10 @@ describe('formatValue', () => {
     expect(formatValue(3e-6, 'linear', 1e-7)).toBe('3.000e-6');
     expect(formatValue(Number.NaN, 'linear', 1)).toBe('—');
   });
+
+  it('shows a value within a pixel of zero as zero', () => {
+    expect(formatValue(-2.1e-6, 'linear', 0.047)).toBe('0.000');
+  });
 });
 
 describe('calibratedReadout', () => {
