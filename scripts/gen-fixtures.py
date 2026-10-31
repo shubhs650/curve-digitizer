@@ -327,6 +327,89 @@ def image_cases():
     return {"edt": edt, "otsu": {"values": values.tolist(), "threshold": reference_otsu(values)}}
 
 
+def reference_lab(rgb):
+    """sRGB (8-bit) to CIELAB D65 straight from the IEC 61966-2-1 and CIE 15 formulas, vectorised in NumPy."""
+    c = np.asarray(rgb, dtype=float) / 255.0
+    lin = np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+    m = np.array([[0.4124564, 0.3575761, 0.1804375],
+                  [0.2126729, 0.7151522, 0.0721750],
+                  [0.0193339, 0.1191920, 0.9503041]])
+    xyz = lin @ m.T / np.array([0.95047, 1.0, 1.08883])
+    d = 6 / 29
+    f = np.where(xyz > d ** 3, np.cbrt(xyz), xyz / (3 * d * d) + 4 / 29)
+    return np.stack([116 * f[:, 1] - 16, 500 * (f[:, 0] - f[:, 1]), 200 * (f[:, 1] - f[:, 2])], axis=1)
+
+
+def reference_median(img, r):
+    """Brute-force (2r+1)^2 median with the edge replicated."""
+    padded = np.pad(img, r, mode="edge")
+    out = np.zeros_like(img)
+    h, w = img.shape
+    for y in range(h):
+        for x in range(w):
+            out[y, x] = np.median(padded[y:y + 2 * r + 1, x:x + 2 * r + 1])
+    return out
+
+
+def reference_zhang_suen(mask):
+    """Zhang-Suen thinning as published (1984), written from the paper: two sub-iterations until stable."""
+    img = np.pad(mask.astype(np.uint8), 1)
+    changed = True
+    while changed:
+        changed = False
+        for step in (0, 1):
+            remove = []
+            for y in range(1, img.shape[0] - 1):
+                for x in range(1, img.shape[1] - 1):
+                    if not img[y, x]:
+                        continue
+                    p = [img[y - 1, x], img[y - 1, x + 1], img[y, x + 1], img[y + 1, x + 1],
+                         img[y + 1, x], img[y + 1, x - 1], img[y, x - 1], img[y - 1, x - 1]]
+                    b = sum(p)
+                    a = sum(1 for k in range(8) if p[k] == 0 and p[(k + 1) % 8] == 1)
+                    p2, p4, p6, p8 = p[0], p[2], p[4], p[6]
+                    if step == 0:
+                        cond = p2 * p4 * p6 == 0 and p4 * p6 * p8 == 0
+                    else:
+                        cond = p2 * p4 * p8 == 0 and p2 * p6 * p8 == 0
+                    if 2 <= b <= 6 and a == 1 and cond:
+                        remove.append((y, x))
+            for y, x in remove:
+                img[y, x] = 0
+            if remove:
+                changed = True
+    return img[1:-1, 1:-1]
+
+
+def filter_cases():
+    rng = np.random.default_rng(20261101)
+    colours = np.concatenate([
+        np.array([[0, 0, 0], [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255], [31, 119, 180],
+                  [255, 127, 14], [44, 160, 44], [38, 38, 38], [10, 10, 10], [5, 3, 1]]),
+        rng.integers(0, 256, (20, 3)),
+    ])
+    lab = reference_lab(colours)
+    grey = rng.integers(0, 256, (9, 11)).astype(float)
+    grey[4, 5] = 255
+    medians = [{"radius": r, "width": 11, "height": 9, "input": grey.flatten().astype(int).tolist(),
+                "output": reference_median(grey, r).flatten().astype(int).tolist()} for r in (1, 2)]
+    shapes = {}
+    bar = np.zeros((12, 24), dtype=np.uint8)
+    bar[4:9, 2:22] = 1
+    shapes["bar"] = bar
+    cross = np.zeros((21, 21), dtype=np.uint8)
+    cross[9:12, 2:19] = 1
+    cross[2:19, 9:12] = 1
+    shapes["cross"] = cross
+    yy, xx = np.mgrid[0:20, 0:20]
+    ring = (((yy - 9.5) ** 2 + (xx - 9.5) ** 2 <= 64) & ((yy - 9.5) ** 2 + (xx - 9.5) ** 2 >= 16)).astype(np.uint8)
+    shapes["ring"] = ring
+    shapes["random"] = (rng.random((14, 18)) < 0.55).astype(np.uint8)
+    thinning = [{"name": n, "width": m.shape[1], "height": m.shape[0], "mask": m.flatten().tolist(),
+                 "skeleton": reference_zhang_suen(m).flatten().astype(int).tolist()} for n, m in shapes.items()]
+    return {"lab": {"rgb": colours.tolist(), "lab": lab.tolist()}, "median": medians, "thinning": thinning}
+
+
 def write(name, data, out=OUT):
     out.mkdir(parents=True, exist_ok=True)
     meta = {"generator": "scripts/gen-fixtures.py", "numpy": np.__version__}
@@ -338,4 +421,5 @@ if __name__ == "__main__":
     write("linalg.json", linalg_cases())
     write("crossings.json", {"cases": crossing_cases()})
     write("thinness.json", image_cases(), IMAGE_OUT)
+    write("filters.json", filter_cases(), IMAGE_OUT)
     print(f"wrote fixtures to {OUT} and {IMAGE_OUT}")

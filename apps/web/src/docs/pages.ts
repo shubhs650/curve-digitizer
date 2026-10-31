@@ -22,6 +22,7 @@ const ORDER = [
   'pdf-and-images',
   'calibration',
   'digitizing',
+  'preprocessing',
   'data-table',
   'export',
   'projects',

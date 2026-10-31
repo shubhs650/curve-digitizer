@@ -18,12 +18,13 @@ describe('docsSlug', () => {
 });
 
 describe('docs pages', () => {
-  it('has every M1 page, in reading order, titled by its first heading', () => {
+  it('has every page, in reading order, titled by its first heading', () => {
     expect(DOC_PAGES.map((p) => [p.slug, p.title])).toEqual([
       ['getting-started', 'Getting started'],
       ['pdf-and-images', 'PDFs and images'],
       ['calibration', 'Calibration'],
       ['digitizing', 'Digitizing points'],
+      ['preprocessing', 'Pre-processing'],
       ['data-table', 'The data table'],
       ['export', 'Exporting'],
       ['projects', 'Projects, autosave and .cdz files'],

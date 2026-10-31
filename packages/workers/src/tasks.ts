@@ -2,9 +2,10 @@ import type { TaskSet } from './api.ts';
 import { cdzRead, cdzWrite } from './tasks/cdz.ts';
 import { exportFile } from './tasks/export.ts';
 import { imageToPng } from './tasks/image.ts';
+import { processImage } from './tasks/process.ts';
 import { pdfClose, pdfCrop, pdfCropPng, pdfOpen, pdfThumbnail } from './tasks/pdf.ts';
 
-// Task registries per worker type. Compute gets the filter stack, tracers and fits from M2 task 2.1 onwards.
+// Task registries per worker type. Compute runs the filter stack (task 2.1), the tracers and the fits.
 
 export const renderTasks = {
   imageToPng,
@@ -16,5 +17,5 @@ export const renderTasks = {
 } satisfies TaskSet;
 export type RenderTasks = typeof renderTasks;
 
-export const computeTasks = { exportFile, cdzWrite, cdzRead } satisfies TaskSet;
+export const computeTasks = { exportFile, cdzWrite, cdzRead, processImage } satisfies TaskSet;
 export type ComputeTasks = typeof computeTasks;

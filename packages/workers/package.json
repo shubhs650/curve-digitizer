@@ -11,6 +11,7 @@
   "dependencies": {
     "@cd/core": "workspace:*",
     "@cd/export": "workspace:*",
+    "@cd/image": "workspace:*",
     "@cd/pdf": "workspace:*",
     "comlink": "^4.4.2"
   }
