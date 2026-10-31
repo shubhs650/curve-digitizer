@@ -39,6 +39,7 @@ describe('traceGuided', () => {
     expect(Math.max(...xs)).toBeGreaterThan(535);
     for (const p of result.points) expect(p.lineWidthPx).toBeGreaterThan(2);
     for (const p of result.points) expect(p.lineWidthPx).toBeLessThan(4);
+    expect(result.widths).toHaveLength(result.path.length);
   });
 
   it('spaces output points by the density setting', async () => {

@@ -5,6 +5,7 @@ import { MaskPanel } from '../mask/MaskPanel';
 import { GraphSourcePanel } from '../pdf/GraphSourcePanel';
 import { PointsPanel } from '../points/PointsPanel';
 import { ProcessingPanel } from '../processing/ProcessingPanel';
+import { TracePanel } from '../trace/TracePanel';
 import { DatasetsPanel } from './DatasetsPanel';
 
 const useStyles = makeStyles({
@@ -25,6 +26,7 @@ export function Inspector({ graph }: { graph: Graph }) {
       <DatasetsPanel graph={graph} />
       <PointsPanel graph={graph} />
       <ProcessingPanel graph={graph} />
+      <TracePanel graph={graph} />
       <MaskPanel graph={graph} />
     </div>
   );

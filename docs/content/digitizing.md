@@ -10,6 +10,18 @@ Press **P** for the add points tool and click on the curve. With **Magnetic snap
 
 Without a mouse, focus the canvas and press **Enter** to show the keyboard crosshair. Move it with the arrow keys (Shift for 10 pixels) and press **Enter** again to click with the current tool. **Esc** hides it.
 
+## Guided trace
+
+The guided tracer follows one curve and places points along it. It goes straight through crossings, ignores grid lines and other colours, and bridges small gaps such as dashes.
+
+1. Press **T** for the guided trace tool (or **Guided trace (T)** in the inspector) and click on the curve where the trace should start. The colour under the click becomes the curve colour.
+2. Click where the trace should stop, or press **Trace to the curve ends** in the **Guided trace** panel to follow the curve both ways to its ends. A progress bar shows while it runs; **Cancel** stops it.
+3. Where the curve splits and the tracer cannot tell which way it goes, it stops and draws numbered branches on the canvas. Click a number (or **Follow branch 1**, **2** … in the panel) to go on, or **Stop here**.
+4. Set **Point spacing** for how densely points are placed; the count updates as you change it. **Use for** *dataset* sets the active dataset's colour to the curve colour.
+5. Press **Add points** to add the points to the active dataset (or to a new dataset in the curve colour). This is one step to undo. **Esc** or **Clear** discards the trace.
+
+The tracer reads the [pre-processed](preprocessing.md) image.
+
 ## Colour mask
 
 The colour mask finds every curve of one colour at once, which suits clean charts where each curve has its own colour.

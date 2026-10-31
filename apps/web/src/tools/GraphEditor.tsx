@@ -10,6 +10,7 @@ import { bitmapPixels } from '../points/pixels';
 import { useMaskTool } from '../mask/useMaskTool';
 import { paintMarquee, usePointTools } from '../points/usePointTools';
 import { useProcessedImage } from '../processing/processedImage';
+import { useTraceTool } from '../trace/useTraceTool';
 import { useUiStore } from '../ui/uiStore';
 
 /** The canvas with the rail's active tool plugged in. */
@@ -28,6 +29,7 @@ export function GraphEditor({ graph }: { graph: Graph }) {
   const editor = useCalibrationEditor(graph);
   const calibrate = useCalibrateTool(editor);
   const mask = useMaskTool(graph);
+  const trace = useTraceTool(graph);
   const { picks } = editor.draft;
   const { marquee } = points;
   const decorateCalibration = useCallback(
@@ -53,6 +55,8 @@ export function GraphEditor({ graph }: { graph: Graph }) {
       return <GraphCanvas {...common} tool={points.select} decorate={decorateMarquee} />;
     case 'pan':
       return <GraphCanvas {...common} />;
+    case 'trace':
+      return <GraphCanvas {...common} tool={trace.tool} decorate={trace.decorate} />;
     case 'mask':
       return <GraphCanvas {...common} tool={mask.tool} decorate={mask.decorate} />;
   }
