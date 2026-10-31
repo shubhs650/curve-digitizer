@@ -17,7 +17,7 @@ test.describe('datasets panel', () => {
     const panel = inspector(page);
     await panel.getByRole('button', { name: 'Add dataset' }).click();
     await panel.getByRole('textbox', { name: 'Name' }).fill('T = 300 °C');
-    await panel.getByLabel('Colour').fill('#882255');
+    await panel.getByLabel('Colour', { exact: true }).fill('#882255');
     await panel.getByRole('radio', { name: /Path/ }).check();
     await panel.getByRole('textbox', { name: 'X unit' }).fill('m³/h');
     await panel.getByRole('textbox', { name: 'Y unit' }).fill('m');
@@ -38,7 +38,7 @@ test.describe('datasets panel', () => {
       .getByRole('button', { name: /T = 300 °C/ })
       .click();
     const form = inspector(page).getByRole('group', { name: 'Dataset T = 300 °C' });
-    await expect(form.getByLabel('Colour')).toHaveValue('#882255');
+    await expect(form.getByLabel('Colour', { exact: true })).toHaveValue('#882255');
     await expect(form.getByRole('radio', { name: /Path/ })).toBeChecked();
     await expect(form.getByRole('textbox', { name: 'X unit' })).toHaveValue('m³/h');
     await expect(form.getByRole('textbox', { name: 'Parameter value' })).toHaveValue('300');
