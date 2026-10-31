@@ -9,6 +9,7 @@ import {
   TabList,
   tokens,
 } from '@fluentui/react-components';
+import { CalculatorPanel } from '../calc/CalculatorPanel';
 import { FitPanel } from '../fit/FitPanel';
 import { CopyRegular } from '@fluentui/react-icons';
 import { type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
@@ -126,6 +127,8 @@ const useStyles = makeStyles({
   },
 });
 
+const TAB_LABELS: Readonly<Record<DockTab, string>> = { table: 'Table', fit: 'Fit', calc: 'Calculator' };
+
 /** The bottom dock's live data table for the shown graph (task 1.6). */
 export function DataDock() {
   const styles = useStyles();
@@ -149,13 +152,14 @@ export function DataDock() {
       >
         <Tab value="table">Table</Tab>
         <Tab value="fit">Fit</Tab>
+        <Tab value="calc">Calculator</Tab>
       </TabList>
-      <div role="tabpanel" aria-label={tab === 'table' ? 'Table' : 'Fit'} className={styles.tabPanel}>
-        {tab === 'table' ? (
-          <DataTable key={graph.id} graph={graph} />
-        ) : (
+      <div role="tabpanel" aria-label={TAB_LABELS[tab]} className={styles.tabPanel}>
+        {tab === 'table' && <DataTable key={graph.id} graph={graph} />}
+        {tab === 'fit' && (
           <FitPanel key={`${graph.id}/${dataset?.id ?? ''}`} graph={graph} dataset={dataset} />
         )}
+        {tab === 'calc' && <CalculatorPanel graph={graph} />}
       </div>
     </div>
   );

@@ -27,6 +27,7 @@ describe('docs pages', () => {
       ['preprocessing', 'Pre-processing'],
       ['data-table', 'The data table'],
       ['fitting', 'Fitting curves'],
+      ['calculator', 'Calculator and comparing curves'],
       ['export', 'Exporting'],
       ['projects', 'Projects, autosave and .cdz files'],
       ['keyboard-shortcuts', 'Keyboard shortcuts'],
