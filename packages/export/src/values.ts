@@ -29,37 +29,54 @@ function axesOf(graph: Graph): { readonly matrix: Mat3; readonly axes: AxisTypes
   return { matrix: calibration.matrix, axes: { x: calibration.xAxis.type, y: calibration.yAxis.type } };
 }
 
-function exportPoint(point: Point, matrix: Mat3, axes: AxisTypes): ExportPoint {
+/** An exported row and its pick-resolution floor: σ of a 0.5 px pick on no stroke, in data units. */
+interface Row {
+  readonly point: ExportPoint;
+  readonly floorX: number;
+  readonly floorY: number;
+}
+
+function exportRow(point: Point, matrix: Mat3, axes: AxisTypes): Row {
   const [x, y] = pixelToValue(matrix, axes, point.px);
   const [sigmaX, sigmaY] = pointSigma(matrix, axes, point.px, point.lineWidthPx);
-  return { x, y, sigmaX, sigmaY, excludedFromFit: point.excludedFromFit, outOfRange: point.outOfRange };
+  const [floorX, floorY] = pointSigma(matrix, axes, point.px, 0);
+  return {
+    point: { x, y, sigmaX, sigmaY, excludedFromFit: point.excludedFromFit, outOfRange: point.outOfRange },
+    floorX,
+    floorY,
+  };
 }
 
 /**
  * Function mode (PRD §4.7): sorted by X; points with exactly the same X become one row with the mean Y, the
- * standard error of that mean as σy (`√Σσ²/n`), and a flag set when any merged point had it.
+ * standard error of that mean as σ (`√Σσ²/n`) but never below the pick resolution of one point (A9: no row is
+ * located better than 0.5 px), and a flag set when any merged point had it.
  */
-function asFunction(points: readonly ExportPoint[]): { points: ExportPoint[]; merged: number } {
-  const sorted = [...points].sort((a, b) => a.x - b.x);
+function asFunction(rows: readonly Row[]): { points: ExportPoint[]; merged: number } {
+  const sorted = [...rows].sort((a, b) => a.point.x - b.point.x);
   const out: ExportPoint[] = [];
   let merged = 0;
   for (let i = 0; i < sorted.length;) {
     let j = i + 1;
-    while (j < sorted.length && sorted[j]?.x === sorted[i]?.x) j++;
+    while (j < sorted.length && sorted[j]?.point.x === sorted[i]?.point.x) j++;
     const group = sorted.slice(i, j);
     const first = group[0];
-    if (first && group.length === 1) out.push(first);
+    if (first && group.length === 1) out.push(first.point);
     else if (first) {
       merged += group.length;
       const n = group.length;
-      const rss = (k: 'sigmaX' | 'sigmaY') => Math.sqrt(group.reduce((s, p) => s + p[k] ** 2, 0)) / n;
+      const sigma = (k: 'sigmaX' | 'sigmaY', floor: 'floorX' | 'floorY') =>
+        Math.max(
+          Math.sqrt(group.reduce((s, r) => s + r.point[k] ** 2, 0)) / n,
+          Math.min(...group.map((r) => r[floor])),
+        );
       out.push({
-        x: first.x,
-        y: group.reduce((s, p) => s + p.y, 0) / n,
-        sigmaX: rss('sigmaX'),
-        sigmaY: rss('sigmaY'),
-        excludedFromFit: group.some((p) => p.excludedFromFit),
-        outOfRange: group.some((p) => p.outOfRange),
+        x: first.point.x,
+        y: group.reduce((s, r) => s + r.point.y, 0) / n,
+        sigmaX: sigma('sigmaX', 'floorX'),
+        sigmaY: sigma('sigmaY', 'floorY'),
+        excludedFromFit: group.some((r) => r.point.excludedFromFit),
+        outOfRange: group.some((r) => r.point.outOfRange),
       });
     }
     i = j;
@@ -71,9 +88,9 @@ function asFunction(points: readonly ExportPoint[]): { points: ExportPoint[]; me
 export function exportDatasets(graph: Graph): ExportDataset[] {
   const { matrix, axes } = axesOf(graph);
   return graph.datasets.map((dataset) => {
-    const points = dataset.points.map((p) => exportPoint(p, matrix, axes));
-    if (dataset.mode === 'path') return { dataset, points, merged: 0 };
-    return { dataset, ...asFunction(points) };
+    const rows = dataset.points.map((p) => exportRow(p, matrix, axes));
+    if (dataset.mode === 'path') return { dataset, points: rows.map((r) => r.point), merged: 0 };
+    return { dataset, ...asFunction(rows) };
   });
 }
 

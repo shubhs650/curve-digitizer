@@ -14,6 +14,15 @@ const OVERSCAN = 8;
 /** Rows assumed visible before the scroll area is laid out (and in jsdom, which lays out nothing). */
 const FALLBACK_ROWS = 20;
 
+const SIGMA_TITLE =
+  'standard uncertainty in data units: √(0.5² + (line width / 2)²) px through the calibration; the line width is measured when the point was snapped or traced, else 2 px';
+/** Header tooltips that say more than the header. */
+const HEADER_TITLES: Partial<Record<Column['id'], string>> = {
+  sigmaX: `σx, the X ${SIGMA_TITLE}`,
+  sigmaY: `σy, the Y ${SIGMA_TITLE}`,
+  residual: 'Distance to the fit, once the dataset is fitted',
+};
+
 const useStyles = makeStyles({
   dock: {
     display: 'flex',
@@ -482,11 +491,7 @@ function PointsGrid({
                   scope="col"
                   className={mergeClasses(styles.th, column.id === 'origin' && styles.text)}
                   aria-colindex={col + 1}
-                  title={
-                    column.id === 'residual'
-                      ? 'Distance to the fit, once the dataset is fitted'
-                      : column.header
-                  }
+                  title={HEADER_TITLES[column.id] ?? column.header}
                 >
                   {column.header}
                 </th>

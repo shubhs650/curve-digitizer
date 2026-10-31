@@ -10,6 +10,12 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 - Guided trace tool (T): click the start of a curve and where to stop (or trace it to its ends); the trace follows the curve through crossings, grid lines and gaps off the main thread with progress and Cancel, asks which way to go where the curve splits, and adds points at an adjustable spacing in one step. The eyedropper colour can be applied to the dataset.
 - Colour mask tool (M): click a curve to find every curve of its colour, tune the colour tolerance, keep or drop the curves found, and add points along the kept ones in one step. Runs off the main thread with progress and Cancel.
 - X-step tool (X): enter a step (From, To, Step) or a list of X values, click a curve, and get one point at each X, read along the traced curve through the calibration. Outliers are drawn red and added excluded from fits; X values the curve does not reach are reported. Runs off the main thread with progress and Cancel.
+- Uncertainty: the σx/σy columns of the data table and the `sigma_x`/`sigma_y` export columns now use the line width measured by the guided trace, colour mask and X-step as well as by snap, and the column headers explain how σ is worked out. Docs: "Uncertainty" in the data table page.
+
+### Changed
+
+- Points of a function dataset averaged into one export row (same X) no longer get an uncertainty below the half-pixel resolution of one point.
+- A project file with a negative point line width is refused when opened, instead of failing at export.
 
 ## [0.1.0] - 2026-10-31
 

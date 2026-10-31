@@ -29,15 +29,21 @@ const SNAP_RADIUS_PX = 8;
 /** Task 1.4: each recorded click through magnetic snap, as the point tool places it. */
 const manualPick: Replayer<'manualPick'> = (op, sample) => {
   const image = sample.image();
+  const snaps = op.clicks.map((click) => (op.snap ? snapToCurve(image, click, SNAP_RADIUS_PX) : null));
   return {
-    points: op.clicks.map((click) => (op.snap ? (snapToCurve(image, click, SNAP_RADIUS_PX)?.px ?? click) : click)),
+    points: op.clicks.map((click, i) => snaps[i]?.px ?? click),
+    widths: snaps.flatMap((snap) => (snap ? [snap.lineWidthPx] : [])),
   };
 };
 
 /** Task 2.3: the guided tracer from the start pick to the end pick on the unprocessed image, default settings. */
 const trace: Replayer<'trace'> = async (op, sample) => {
   const result = await traceGuided(sample.image(), { start: op.start, end: op.end });
-  return { points: result.points.map((p) => p.px), prompted: result.status === 'ambiguous' };
+  return {
+    points: result.points.map((p) => p.px),
+    prompted: result.status === 'ambiguous',
+    widths: result.points.map((p) => p.lineWidthPx),
+  };
 };
 
 /**
@@ -49,7 +55,7 @@ const colourMask: Replayer<'colourMask'> = async (op, sample) => {
   const color = sampleStrokeColor(image, op.pick[0], op.pick[1]);
   const { components } = await traceColourMask(image, { color });
   const kept = components[nearestComponent(components, op.pick)];
-  return { paths: kept ? [kept.path] : [] };
+  return { paths: kept ? [kept.path] : [], widths: kept ? kept.points.map((p) => p.lineWidthPx) : [] };
 };
 
 /**
@@ -68,6 +74,7 @@ const xStep: Replayer<'xStep'> = async (op, sample) => {
   return {
     points: result.points.flatMap((p) => (p.px ? [p.px] : [])),
     outliers: result.points.filter((p) => p.outlier).length,
+    widths: result.points.flatMap((p) => (p.px ? [p.lineWidthPx] : [])),
   };
 };
 

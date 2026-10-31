@@ -74,6 +74,9 @@ describe('DataTable', () => {
         .getAllByRole('columnheader')
         .map((h) => h.textContent),
     ).toEqual(['#', 'X', 'Y', 'σx', 'σy', 'x px', 'y px', 'Origin', 'Excluded', 'Residual']);
+    expect(grid.getByRole('columnheader', { name: 'σy' }).title).toMatch(
+      /^σy, the Y standard uncertainty in data units: √\(0\.5² \+ \(line width \/ 2\)²\) px/,
+    );
     expect(
       within(rows[2] as HTMLElement)
         .getAllByRole('gridcell')
