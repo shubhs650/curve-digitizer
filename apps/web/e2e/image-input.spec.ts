@@ -93,7 +93,7 @@ test.describe('image input', () => {
     });
     await sendFile(page, 'paste', 'image.jpg', jpeg, 'image/jpeg');
     await expectGraphShown(page, 'image', '64 × 48 px');
-    await expect(sidebar(page).getByRole('listitem')).toHaveCount(2);
+    await expect(sidebar(page).getByRole('list', { name: 'Graphs' }).getByRole('listitem')).toHaveCount(2);
   });
 
   test('a file that is not an image is reported and nothing is created', async ({ page }) => {

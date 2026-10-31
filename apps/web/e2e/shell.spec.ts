@@ -47,6 +47,7 @@ test.describe('app shell', () => {
     const expected = [
       'Project sidebar',
       'Open Engineering Tools home',
+      'Shortcuts',
       'Docs',
       'Report issue',
       'GitHub repository',

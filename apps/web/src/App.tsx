@@ -1,6 +1,7 @@
 import { FluentProvider, makeStyles, tokens } from '@fluentui/react-components';
 import { useEffect, useState } from 'react';
 import { useUndoShortcuts } from './history/useUndoShortcuts';
+import { ShortcutSheet, useShortcutSheetKey } from './help/ShortcutSheet';
 import { HomeScreen } from './home/HomeScreen';
 import { Inspector } from './inspector/Inspector';
 import { useImageInput } from './input/useImageInput';
@@ -82,6 +83,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
   useProjectList();
   useToolShortcuts();
   useUndoShortcuts();
+  useShortcutSheetKey();
 
   return (
     <div className={styles.shell}>
@@ -119,6 +121,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
         }
       />
       <PasswordDialog />
+      <ShortcutSheet />
       {dragging && <div className={styles.dropHint} aria-hidden="true" />}
     </div>
   );
