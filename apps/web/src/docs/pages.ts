@@ -25,6 +25,7 @@ const ORDER = [
   'preprocessing',
   'data-table',
   'fitting',
+  'calculator',
   'export',
   'projects',
   'keyboard-shortcuts',

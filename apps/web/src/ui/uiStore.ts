@@ -49,7 +49,7 @@ export interface UiState {
   readonly setDockTab: (tab: DockTab) => void;
 }
 
-export type DockTab = 'table' | 'fit';
+export type DockTab = 'table' | 'fit' | 'calc';
 
 export const useUiStore = create<UiState>()((set) => ({
   activeGraphId: null,
