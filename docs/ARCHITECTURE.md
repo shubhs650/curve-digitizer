@@ -27,7 +27,7 @@ Doc version 1.0 (2026-10-30). Read `docs/PRD.md` first. This document is the con
 | Math | Own `@cd/math` (linear algebra, least squares, splines, AICc) | Small; tested against SciPy/NumPy fixtures |
 | Tests | Vitest (unit), Playwright (e2e + visual), fixtures from `samples/` | CI gates in §9 |
 | PWA | vite-plugin-pwa (Workbox), file handlers in manifest | Core-first precache; PDFium runtime-cached |
-| Hosting | Cloudflare Pages, static | No functions |
+| Hosting | Cloudflare Workers static assets (ADR 46) | No Worker script |
 
 ## 3. Repository layout
 

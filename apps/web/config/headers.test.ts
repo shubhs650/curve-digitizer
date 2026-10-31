@@ -10,7 +10,7 @@ describe('response headers', () => {
     });
   });
 
-  it('renders a Cloudflare Pages _headers file applying isolation and the CSP to every path', () => {
+  it('renders a Cloudflare _headers file applying isolation and the CSP to every path', () => {
     const lines = hostHeadersFile().trimEnd().split('\n');
     expect(lines[0]).toBe('/*');
     expect(lines.slice(1, 5)).toEqual([
