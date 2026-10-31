@@ -1,7 +1,6 @@
 import {
   Button,
   Caption1,
-  Caption1Strong,
   Field,
   makeStyles,
   MessageBar,
@@ -25,13 +24,14 @@ import { useNotify } from '../ui/notices';
 import { decodeReference } from '../reference/ReferencePanel';
 import { useReferenceStore } from '../reference/referenceStore';
 import { cropRotation, DPI_CHOICES, turn, useCropDraft, wholePage } from './cropDraft';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     overflowY: 'auto',
     // Children keep their height and the panel scrolls; shrinking squashed Fluent buttons, which clip.
     '& > *': { flexShrink: 0 },
@@ -122,7 +122,7 @@ export function CropPanel({ page }: { readonly page: CropPage }) {
 
   return (
     <section aria-labelledby="crop-heading" className={styles.panel}>
-      <Caption1Strong id="crop-heading">Crop</Caption1Strong>
+      <PanelTitle id="crop-heading">Crop</PanelTitle>
       <Caption1>
         Page {page.pageIndex + 1} of {fileName}
       </Caption1>

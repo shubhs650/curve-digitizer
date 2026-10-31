@@ -18,7 +18,7 @@ function setup() {
   const dialogClosed = () =>
     waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull();
-      expect(screen.queryByRole('complementary', { name: 'Project and pages' })).not.toBeNull();
+      expect(screen.queryByRole('main', { name: 'Canvas' })).not.toBeNull();
     });
   return { workspace, pdf, user, input, sidebar, dialogClosed };
 }
@@ -33,7 +33,7 @@ describe('opening PDFs', () => {
       'Page 2 of pump.pdf',
     ]);
     expect(sidebar().getByText('2 pages')).toBeTruthy();
-    expect(sidebar().getByText('pump', { selector: 'span' })).toBeTruthy();
+    expect(sidebar().getByRole('heading', { name: 'pump' })).toBeTruthy();
   });
 
   it('takes PDFs and images from one pick', async () => {
@@ -81,7 +81,8 @@ describe('opening PDFs', () => {
     pdf.unavailable = true;
     await user.upload(input(), pdfFile(PLAIN_PDF));
     expect((await screen.findAllByText('PDF support could not be loaded')).length).toBeGreaterThan(0);
-    expect(screen.getByText('No project open.')).toBeTruthy();
+    // Still on the home screen.
+    expect(screen.getByRole('heading', { name: 'Projects' })).toBeTruthy();
     await user.upload(input(), new File([TINY_PNG], 'curve.png', { type: 'image/png' }));
     await sidebar().findByRole('button', { name: 'curve' });
   });

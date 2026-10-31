@@ -38,13 +38,14 @@ import {
   stepProblem,
   updateStep,
 } from './steps';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   muted: { color: tokens.colorNeutralForeground3 },
@@ -96,7 +97,7 @@ export function ProcessingPanel({ graph }: { graph: Graph }) {
 
   return (
     <section aria-labelledby="processing-heading" className={styles.panel}>
-      <Caption1Strong id="processing-heading">Pre-processing</Caption1Strong>
+      <PanelTitle id="processing-heading">Pre-processing</PanelTitle>
       <Caption1 className={styles.muted}>
         Filters clean the image for the tracers. Points are always shown on the original image.
       </Caption1>

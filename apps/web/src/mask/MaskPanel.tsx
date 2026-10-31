@@ -3,7 +3,6 @@ import { toHexColor } from '@cd/image';
 import {
   Button,
   Caption1,
-  Caption1Strong,
   Checkbox,
   Field,
   makeStyles,
@@ -19,6 +18,7 @@ import { useUiStore } from '../ui/uiStore';
 import { maskPoints } from './maskPoints';
 import { type MaskSession, toggleKept, useMaskSession } from './maskStore';
 import { cancelMask, clearMask, runMask } from './runMask';
+import { PanelTitle } from '../ui/PanelTitle';
 
 /** Slider edits closer together than this start one re-run. */
 const DEBOUNCE_MS = 200;
@@ -30,7 +30,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   muted: { color: tokens.colorNeutralForeground3 },
@@ -57,7 +57,7 @@ export function MaskPanel({ graph }: { graph: Graph }) {
 
   return (
     <section aria-labelledby="mask-heading" className={styles.panel}>
-      <Caption1Strong id="mask-heading">Colour mask</Caption1Strong>
+      <PanelTitle id="mask-heading">Colour mask</PanelTitle>
       {session === null ? (
         <>
           <Caption1 className={styles.muted}>

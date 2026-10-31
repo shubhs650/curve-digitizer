@@ -1,0 +1,10 @@
+/* Screenshot tests only: one font present on every Linux runner (fonts-liberation, installed with Playwright's
+   browser dependencies), so baselines match between machines; no caret blink, no offline badge (it appears
+   whenever the service worker finishes). */
+* {
+  font-family: 'Liberation Sans', Arial, sans-serif !important;
+  caret-color: transparent !important;
+}
+[data-testid='offline-status'] {
+  visibility: hidden !important;
+}

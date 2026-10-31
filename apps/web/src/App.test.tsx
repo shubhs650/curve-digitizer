@@ -79,8 +79,9 @@ describe('App shell', () => {
   });
 
   it('collapses and expands the project sidebar', async () => {
-    const { user } = renderApp();
-    const toggle = screen.getByRole('button', { name: 'Project sidebar' });
+    const user = userEvent.setup();
+    render(<App workspace={await workspaceWithGraph()} />);
+    const toggle = await screen.findByRole('button', { name: 'Project sidebar' });
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
 
     await user.click(toggle);

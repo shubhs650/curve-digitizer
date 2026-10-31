@@ -3,7 +3,6 @@ import { sniffImageType } from '@cd/image';
 import {
   Button,
   Caption1,
-  Caption1Strong,
   Field,
   makeStyles,
   Slider,
@@ -15,13 +14,14 @@ import { DismissRegular, ImageAddRegular } from '@fluentui/react-icons';
 import { useRef } from 'react';
 import { useNotify } from '../ui/notices';
 import { useReference, useReferenceStore } from './referenceStore';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderBottom: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   row: {
@@ -73,7 +73,7 @@ export function ReferencePanel({ graph }: { readonly graph: Graph }) {
 
   return (
     <section aria-labelledby="reference-heading" className={styles.panel}>
-      <Caption1Strong id="reference-heading">Reference overlay</Caption1Strong>
+      <PanelTitle id="reference-heading">Reference overlay</PanelTitle>
       {reference === null ? (
         <Caption1 className={styles.muted}>
           Lay a second image over this graph to compare them: an image file, or a crop of a PDF page (Use as

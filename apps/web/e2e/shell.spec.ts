@@ -43,8 +43,8 @@ test.describe('app shell', () => {
   });
 
   test('header controls are reachable by keyboard in order', async ({ page }) => {
+    // The sidebar toggle joins them once a project is open.
     const expected = [
-      'Project sidebar',
       'Open Engineering Tools home',
       'Shortcuts',
       'Docs',

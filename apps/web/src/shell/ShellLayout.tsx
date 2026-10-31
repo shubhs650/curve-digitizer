@@ -30,7 +30,7 @@ const useStyles = makeStyles({
   sidebar: {
     display: 'flex',
     flexDirection: 'column',
-    width: '248px',
+    width: '260px',
     flexShrink: 0,
     minHeight: 0,
     backgroundColor: tokens.colorNeutralBackground2,

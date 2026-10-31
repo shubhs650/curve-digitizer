@@ -11,6 +11,7 @@ import {
   CircleRegular,
   DismissRegular,
   LightbulbRegular,
+  RecordRegular,
 } from '@fluentui/react-icons';
 import { useState } from 'react';
 import { useActiveGraph, useProject } from '../session/context';
@@ -21,38 +22,51 @@ const useStyles = makeStyles({
   guide: {
     display: 'flex',
     flexDirection: 'column',
-    gap: tokens.spacingVerticalXS,
-    padding: tokens.spacingHorizontalS,
-    borderRadius: tokens.borderRadiusMedium,
-    backgroundColor: tokens.colorNeutralBackground1,
-    border: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
+    gap: tokens.spacingVerticalS,
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: tokens.spacingHorizontalS,
+  },
+  title: {
+    flexGrow: 1,
+  },
+  count: {
+    color: tokens.colorNeutralForeground3,
+    fontVariantNumeric: 'tabular-nums',
   },
   steps: {
     listStyleType: 'none',
     margin: 0,
     padding: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: tokens.spacingVerticalXXS,
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+    gap: `${tokens.spacingVerticalXXS} ${tokens.spacingHorizontalS}`,
   },
   step: {
     display: 'flex',
     alignItems: 'center',
     gap: tokens.spacingHorizontalXS,
+    minWidth: 0,
+    color: tokens.colorNeutralForeground3,
   },
   done: {
     color: tokens.colorPaletteGreenForeground1,
   },
   current: {
     fontWeight: tokens.fontWeightSemibold,
+    color: tokens.colorBrandForeground1,
   },
   hint: {
-    paddingLeft: tokens.spacingHorizontalL,
+    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalS}`,
+    borderRadius: tokens.borderRadiusMedium,
+    color: tokens.colorNeutralForeground2,
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderLeft: `${tokens.strokeWidthThicker} solid ${tokens.colorBrandStroke1}`,
+  },
+  action: {
+    alignSelf: 'flex-start',
   },
   // Read by screen readers only: the icons carry the same state visually.
   visuallyHidden: {
@@ -101,10 +115,17 @@ export function GuideChecklist() {
   const steps = guideSteps(project, graph, exported);
   const current = currentStep(steps);
   const action = current ? STEP_TOOLS[current.id] : undefined;
+  const done = steps.filter((step) => step.done).length;
   return (
     <section aria-labelledby="guide-heading" className={styles.guide}>
       <div className={styles.header}>
-        <Caption1Strong id="guide-heading">Getting started</Caption1Strong>
+        <LightbulbRegular aria-hidden="true" />
+        <Caption1Strong id="guide-heading" className={styles.title}>
+          Getting started
+        </Caption1Strong>
+        <Caption1 className={styles.count} data-testid="guide-progress">
+          {done} of {steps.length}
+        </Caption1>
         <Button
           appearance="subtle"
           size="small"
@@ -118,28 +139,41 @@ export function GuideChecklist() {
       </div>
       <ol className={styles.steps}>
         {steps.map((step, i) => (
-          <li key={step.id} aria-current={step === current ? 'step' : undefined}>
-            <div className={mergeClasses(styles.step, step === current && styles.current)}>
-              {step.done ? (
-                <CheckmarkCircleFilled className={styles.done} aria-hidden="true" />
-              ) : (
-                <CircleRegular aria-hidden="true" />
-              )}
-              <Caption1 className={step === current ? styles.current : undefined}>
-                {i + 1}. {step.title}
-                <span className={styles.visuallyHidden}>
-                  {step.done ? ', done' : step === current ? ', next' : ''}
-                </span>
-              </Caption1>
-            </div>
-            {step === current && <Caption1 className={styles.hint}>{step.hint}</Caption1>}
+          <li
+            key={step.id}
+            aria-current={step === current ? 'step' : undefined}
+            className={mergeClasses(
+              styles.step,
+              step.done && styles.done,
+              step === current && styles.current,
+            )}
+          >
+            {step.done ? (
+              <CheckmarkCircleFilled aria-hidden="true" />
+            ) : step === current ? (
+              <RecordRegular aria-hidden="true" />
+            ) : (
+              <CircleRegular aria-hidden="true" />
+            )}
+            <Caption1 className={step === current ? styles.current : undefined}>
+              {i + 1}. {step.title}
+              <span className={styles.visuallyHidden}>
+                {step.done ? ', done' : step === current ? ', next' : ''}
+              </span>
+            </Caption1>
           </li>
         ))}
       </ol>
-      {current === null && <Caption1>All done. The checklist can be hidden now.</Caption1>}
+      {current !== null ? (
+        <Caption1 className={styles.hint}>{current.hint}</Caption1>
+      ) : (
+        <Caption1 className={styles.hint}>All done. The checklist can be hidden now.</Caption1>
+      )}
       {action && (
         <Button
           size="small"
+          appearance="primary"
+          className={styles.action}
           onClick={() => {
             setTool(action.tool);
           }}

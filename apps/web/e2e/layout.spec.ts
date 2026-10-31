@@ -86,6 +86,8 @@ async function canvasShare(page: Page): Promise<{ width: number; height: number 
 async function openCropView(page: Page) {
   await page.getByTestId('open-file-input').first().setInputFiles(CHART_PDF);
   const thumbnail = page.getByRole('button', { name: 'Page 1 of chart.pdf' });
+  // The sidebar and its toggle exist only once the project is open.
+  await expect(page.getByTestId('header-project')).toBeAttached();
   // Narrow windows start with the sidebar hidden.
   if (!(await page.getByRole('complementary', { name: 'Project and pages' }).isVisible()))
     await page.getByRole('button', { name: 'Project sidebar' }).click();

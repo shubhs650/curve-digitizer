@@ -30,7 +30,10 @@ async function selectedPx(page: Page): Promise<[number, number]> {
 test.describe('help', () => {
   test('the checklist starts at Crop and moves on to Calibrate for an open graph', async ({ page }) => {
     await page.goto('/');
+    // The guide lives in the project sidebar, so it shows once a project is open.
+    await page.getByRole('button', { name: 'New project' }).click();
     await expect(guide(page).getByRole('listitem').first()).toContainText('Crop, next');
+    await page.getByRole('button', { name: 'All projects' }).click();
     await seedProject(page, graphProject('vector-clean', { width: 2400, height: 1600 }, [DATASET]), {
       'graphs/g1/original.png': sampleImage('vector-clean'),
     });

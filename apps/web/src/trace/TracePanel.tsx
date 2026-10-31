@@ -3,7 +3,6 @@ import { toHexColor } from '@cd/image';
 import {
   Button,
   Caption1,
-  Caption1Strong,
   Field,
   Link,
   makeStyles,
@@ -20,6 +19,7 @@ import { useUiStore } from '../ui/uiStore';
 import { cancelTrace, clearTrace, runTrace } from './runTrace';
 import { tracePoints } from './tracePoints';
 import { type TraceSession, useTraceSession, useTraceStore } from './traceStore';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const MIN_SPACING = 1;
 const MAX_SPACING = 100;
@@ -29,7 +29,7 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   muted: { color: tokens.colorNeutralForeground3 },
@@ -55,7 +55,7 @@ export function TracePanel({ graph }: { graph: Graph }) {
 
   return (
     <section aria-labelledby="trace-heading" className={styles.panel}>
-      <Caption1Strong id="trace-heading">Guided trace</Caption1Strong>
+      <PanelTitle id="trace-heading">Guided trace</PanelTitle>
       {session === null ? (
         <>
           <Caption1 className={styles.muted}>

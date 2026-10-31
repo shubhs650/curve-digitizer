@@ -20,7 +20,20 @@ describe('home screen and image input', () => {
   it('starts on the empty project list', async () => {
     setup();
     expect(await screen.findByText('No saved projects yet.')).toBeTruthy();
-    expect(screen.getByText('No project open.')).toBeTruthy();
+    // The home screen has the whole width: no project sidebar until a project is open.
+    expect(screen.queryByRole('complementary', { name: 'Project and pages' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Project sidebar' })).toBeNull();
+  });
+
+  it('introduces the four steps of the guide', async () => {
+    setup();
+    const steps = within(await screen.findByRole('list', { name: 'How it works' }));
+    expect(steps.getAllByRole('heading').map((h) => h.textContent)).toEqual([
+      '1. Crop',
+      '2. Calibrate',
+      '3. Digitize',
+      '4. Export',
+    ]);
   });
 
   it('says which browsers it works best in', async () => {
@@ -65,7 +78,7 @@ describe('home screen and image input', () => {
       new File(['hello'], 'notes.png', { type: 'image/png' }),
     );
     expect(await screen.findByText('Could not open notes.png')).toBeTruthy();
-    expect(screen.getByText('No project open.')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Projects' })).toBeTruthy();
   });
 
   it('opens a sample in one click as a calibrated project with its datasets', async () => {

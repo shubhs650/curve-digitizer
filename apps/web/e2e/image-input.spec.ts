@@ -105,6 +105,6 @@ test.describe('image input', () => {
     await sendFile(page, 'drop', 'notes.txt', Buffer.from('hello').toString('base64'), 'text/plain');
     // The toast text is also mirrored into an aria-live region.
     await expect(page.getByText('Could not open notes.txt').first()).toBeVisible();
-    await expect(page.getByText('No project open.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
   });
 });

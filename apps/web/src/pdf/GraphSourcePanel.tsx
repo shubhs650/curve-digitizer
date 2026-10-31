@@ -1,27 +1,19 @@
 import type { Graph, PdfCropSource } from '@cd/core';
 import { capDpi } from '@cd/pdf/geometry';
-import {
-  Button,
-  Caption1,
-  Caption1Strong,
-  Field,
-  makeStyles,
-  Select,
-  Spinner,
-  tokens,
-} from '@fluentui/react-components';
+import { Button, Caption1, Field, makeStyles, Select, Spinner, tokens } from '@fluentui/react-components';
 import { ArrowSyncRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
 import { useProject, useWorkspace, useWorkspaceState } from '../session/context';
 import { useNotify } from '../ui/notices';
 import { DPI_CHOICES } from './cropDraft';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderBottom: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   muted: {
@@ -75,7 +67,7 @@ function PdfCropSourcePanel({ graph, source }: { readonly graph: Graph; readonly
 
   return (
     <section aria-labelledby="source-heading" className={styles.panel}>
-      <Caption1Strong id="source-heading">Source</Caption1Strong>
+      <PanelTitle id="source-heading">Source</PanelTitle>
       <Caption1 data-testid="graph-source">
         Page {source.pageIndex + 1} of {file?.fileName ?? 'a PDF'}, {source.dpi} DPI, {graph.image.width} ×{' '}
         {graph.image.height} px
