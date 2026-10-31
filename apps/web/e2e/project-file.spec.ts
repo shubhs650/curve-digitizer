@@ -53,9 +53,13 @@ async function storedFile(page: Page, projectId: string, path: string): Promise<
 
 const storedJson = async (page: Page, projectId: string) => {
   const base64 = await storedFile(page, projectId, 'project.json');
-  return base64 === null
-    ? null
-    : (JSON.parse(Buffer.from(base64, 'base64').toString('utf8')) as Record<string, unknown>);
+  if (base64 === null) return null;
+  try {
+    return JSON.parse(Buffer.from(base64, 'base64').toString('utf8')) as Record<string, unknown>;
+  } catch {
+    // WebKit can show a file mid-write (zero-filled) to a concurrent reader; the poll reads it again.
+    return null;
+  }
 };
 
 const withoutModified = (project: Record<string, unknown>) =>
