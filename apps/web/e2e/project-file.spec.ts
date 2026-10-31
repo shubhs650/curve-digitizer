@@ -107,7 +107,8 @@ test.describe('project files', () => {
     await page.close({ runBeforeUnload: false });
     const reopened = await context.newPage();
     await reopened.goto('/');
-    await expect(canvas(reopened)).toHaveAttribute('data-state', 'ready');
+    // R3 is about the edit surviving, not load speed; CI's WebKit can take over 5 s to reopen.
+    await expect(canvas(reopened)).toHaveAttribute('data-state', 'ready', { timeout: 15_000 });
     await expect(rows(reopened)).toHaveCount(3);
   });
 
