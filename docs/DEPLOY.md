@@ -1,13 +1,13 @@
 # Deploying
 
-Curve Digitizer is a static site served by Cloudflare Workers static assets at https://curve-digitizer.openengtools.com (ADR 46, which replaces Pages from ADR 32). There is no Worker script: `pnpm build` writes everything to `apps/web/dist`, including the `_headers` file that sets cross-origin isolation, the CSP and asset caching, and `wrangler.toml` at the repository root tells `wrangler deploy` to upload that folder.
+Curve Digitizer is a static site served by Cloudflare Workers static assets at https://curve-digitizer.openengtools.com (ADR 46, which replaces Pages from ADR 32). There is no Worker script: `pnpm build` writes everything to `apps/web/dist`, including the `_headers` file that sets cross-origin isolation, the CSP and asset caching, and `wrangler.toml` at the repository root makes `wrangler deploy` run `pnpm build` and then upload that folder.
 
 ## One-time setup (repository owner)
 
 1. Cloudflare dashboard → Workers & Pages → Create → Import a repository → `shubhs650/curve-digitizer` (Workers Builds).
 2. Build settings:
    - Root directory: `/` (the repository root, where `wrangler.toml` is)
-   - Build command: `pnpm build`
+   - Build command: leave empty. `wrangler.toml` runs `pnpm build` itself before every deploy and preview upload; setting `pnpm build` here as well only builds twice.
    - Deploy command: `npx wrangler deploy` (the default)
    - Non-production branch deploy command: `npx wrangler versions upload` (the default), for pull request previews
    - Environment variable: `NODE_VERSION` = the version in `.nvmrc`

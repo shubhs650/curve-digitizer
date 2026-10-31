@@ -9,3 +9,8 @@ send_metrics = false
 directory = "./apps/web/dist"
 # Unknown paths (the /docs/<page> deep links on a first visit) get index.html.
 not_found_handling = "single-page-application"
+
+# Wrangler runs this before every deploy or version upload, so the deploy builds the app itself whatever the
+# dashboard's build command is (an empty one left no apps/web/dist and failed the deploy).
+[build]
+command = "pnpm build"
