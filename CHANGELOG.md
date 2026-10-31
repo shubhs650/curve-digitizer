@@ -5,6 +5,7 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 ## Unreleased
 
 ### Added
+- The home screen says the app works best with Chromium browsers (Chrome, Edge).
 - Getting started: a "1 Crop · 2 Calibrate · 3 Digitize · 4 Export" checklist in the sidebar ticks each step as you do it and says what to do next, with buttons for the calibrate and add points tools. Hide it with its close button; "Show the getting-started guide" brings it back.
 - Keyboard shortcuts: press ? (or Shortcuts in the header) for a cheat sheet of every shortcut. Every canvas tool works without a mouse: with the canvas focused, Enter shows a crosshair, the arrow keys move it 1 px (Shift: 10 px), Enter clicks with the current tool and Esc hides it.
 - Docs at /docs: getting started, PDFs and images, calibration, digitizing, the data table, export, projects and .cdz files, and keyboard shortcuts. They load only when opened and work offline.

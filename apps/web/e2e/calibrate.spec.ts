@@ -1,6 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { graphProject, pageXY, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { graphProject, pageXY, sampleImage, seedProject, expect, test, axe } from './fixtures';
 
 // Task 1.3: calibrate vector-clean by clicking its ticks, as a user would. A1's accuracy is checked on the exact
 // clicks by test:samples; here clicks land on whole screen pixels of the fitted view.
@@ -24,7 +23,18 @@ async function clickImage(page: Page, px: readonly [number, number]): Promise<vo
 async function calibrate(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Calibrate', exact: true }).click();
   await expect(panel(page).getByRole('button', { name: 'Place X1' })).toHaveAttribute('aria-pressed', 'true');
-  for (const px of CLICKS) await clickImage(page, px);
+  const picks = ['X1', 'X2', 'Y1', 'Y2'];
+  for (const [i, px] of CLICKS.entries()) {
+    await clickImage(page, px);
+    // Each click places the active pick and moves on; waiting for that keeps a quick next click off this pick.
+    const next = picks[i + 1];
+    if (next !== undefined) {
+      await expect(panel(page).getByRole('button', { name: `Place ${next}` })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    }
+  }
   for (const [name, value] of [
     ['X1', '10'],
     ['X2', '90'],
@@ -83,7 +93,7 @@ test.describe('calibration', () => {
   test('passes axe with the calibration filled in', async ({ page }) => {
     await calibrate(page);
     await expect(panel(page).getByTestId('calibration-status')).toHaveText('Calibrated');
-    const results = await new AxeBuilder({ page })
+    const results = await axe(page)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(results.violations).toEqual([]);

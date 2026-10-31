@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
-import { expect, type Page, test } from '@playwright/test';
-import { graphProject, pageXY, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { downloadName, expect, graphProject, pageXY, sampleImage, seedProject, test } from './fixtures';
 
 // Task 1.10: projects autosave within 5 s and reopen after the tab is killed (R3); a saved .cdz opens on another
 // device with the same project.json and byte-identical images (R2).
@@ -109,18 +109,16 @@ test.describe('project files', () => {
 
   test('saves a .cdz that opens elsewhere with the same project and byte-identical images (R2)', async ({
     page,
-    browser,
+    otherContext,
   }) => {
     const downloading = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Save .cdz' }).click();
     const download = await downloading;
-    expect(download.suggestedFilename()).toBe('E2E vector-clean.cdz');
+    expect(downloadName(download)).toBe('E2E vector-clean.cdz');
     const path = await download.path();
     const original = await storedJson(page, PROJECT.id);
 
-    // A fresh browser context has its own, empty OPFS: another device as far as the app can tell.
-    const elsewhere = await browser.newContext();
-    const other = await elsewhere.newPage();
+    const other = await otherContext.newPage();
     await other.goto('/');
     await expect(other.getByText('No saved projects yet.')).toBeVisible();
     await other
@@ -139,6 +137,5 @@ test.describe('project files', () => {
     expect(await storedFile(other, PROJECT.id, 'graphs/g1/original.png')).toBe(
       sampleImage('vector-clean').toString('base64'),
     );
-    await elsewhere.close();
   });
 });

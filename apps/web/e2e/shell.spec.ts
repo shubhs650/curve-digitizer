@@ -1,5 +1,4 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, axe } from './fixtures';
 
 // WCAG 2.x A and AA, which covers U4 (contrast on primary surfaces) for both themes.
 const WCAG_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
@@ -32,14 +31,14 @@ test.describe('app shell', () => {
 
   test('passes axe in the light theme', async ({ page }) => {
     await expect(page.locator('[data-theme="light"]')).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
+    const results = await axe(page).withTags(WCAG_AA).analyze();
     expect(results.violations).toEqual([]);
   });
 
   test('passes axe in the dark theme', async ({ page }) => {
     await page.getByRole('button', { name: 'Dark theme' }).click();
     await expect(page.locator('[data-theme="dark"]')).toBeVisible();
-    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
+    const results = await axe(page).withTags(WCAG_AA).analyze();
     expect(results.violations).toEqual([]);
   });
 

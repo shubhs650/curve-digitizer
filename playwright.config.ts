@@ -12,8 +12,12 @@ export default defineConfig({
     baseURL: `http://localhost:${String(port)}`,
     trace: 'retain-on-failure',
   },
-  // Chromium only during M0; Firefox and WebKit join the matrix for R4 in M1.
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  // R4: current Chrome/Edge (Chromium), Firefox and Safari (WebKit).
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+  ],
   webServer: {
     // e2e runs against the production bundle so offline/PWA behaviour matches what ships.
     command: 'pnpm --filter @cd/web build && pnpm --filter @cd/web preview',

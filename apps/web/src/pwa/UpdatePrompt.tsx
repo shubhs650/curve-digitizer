@@ -27,24 +27,27 @@ export function UpdatePrompt({ open, onReload, onDismiss }: UpdatePromptProps) {
   const styles = useStyles();
   if (!open) return null;
 
+  // A labelled region, so the bar between the header and the workspace still sits in a landmark.
   return (
-    <MessageBar intent="info" politeness="polite" className={styles.bar}>
-      <MessageBarBody>
-        <MessageBarTitle>New version available</MessageBarTitle>
-        Reload to update.
-      </MessageBarBody>
-      <MessageBarActions
-        containerAction={
-          <Button
-            appearance="transparent"
-            icon={<DismissRegular />}
-            aria-label="Dismiss"
-            onClick={onDismiss}
-          />
-        }
-      >
-        <Button onClick={onReload}>Reload</Button>
-      </MessageBarActions>
-    </MessageBar>
+    <section aria-label="App update">
+      <MessageBar intent="info" politeness="polite" className={styles.bar}>
+        <MessageBarBody>
+          <MessageBarTitle>New version available</MessageBarTitle>
+          Reload to update.
+        </MessageBarBody>
+        <MessageBarActions
+          containerAction={
+            <Button
+              appearance="transparent"
+              icon={<DismissRegular />}
+              aria-label="Dismiss"
+              onClick={onDismiss}
+            />
+          }
+        >
+          <Button onClick={onReload}>Reload</Button>
+        </MessageBarActions>
+      </MessageBar>
+    </section>
   );
 }

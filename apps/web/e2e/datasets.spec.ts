@@ -1,6 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { graphProject, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { graphProject, sampleImage, seedProject, expect, test, axe } from './fixtures';
 
 // Task 1.5: datasets panel — add, rename, colour, mode, family parameter, units, source reference, notes.
 
@@ -68,7 +67,7 @@ test.describe('datasets panel', () => {
   test('passes axe with the dataset form open', async ({ page }) => {
     await inspector(page).getByRole('button', { name: 'Add dataset' }).click();
     await inspector(page).getByRole('switch', { name: 'Family parameter' }).check();
-    const results = await new AxeBuilder({ page })
+    const results = await axe(page)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(results.violations).toEqual([]);

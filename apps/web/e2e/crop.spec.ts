@@ -1,6 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { animationsSettled } from './fixtures';
+import { type Page } from '@playwright/test';
+import { animationsSettled, expect, test, axe } from './fixtures';
 
 // Task 1.8: crop a PDF page into a graph at a chosen DPI, capped by the pixel budget (R7) within the render time
 // target (P3), and re-render it at a higher DPI with its points rescaled.
@@ -127,6 +126,6 @@ test.describe('PDF crop', () => {
     await openPage(page, 'chart.pdf', 2);
     await dragOnPage(page, [0.1, 0.1], [0.5, 0.5]);
     await animationsSettled(page);
-    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    expect((await axe(page).analyze()).violations).toEqual([]);
   });
 });

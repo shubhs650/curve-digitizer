@@ -43,8 +43,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Chromium only during M0; firefox and webkit are added for R4 in M1.
-        browser: [chromium]
+        # R4: Chrome/Edge, Firefox and Safari.
+        browser: [chromium, firefox, webkit]
     steps:
       - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4

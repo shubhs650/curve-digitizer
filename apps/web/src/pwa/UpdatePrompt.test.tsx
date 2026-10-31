@@ -38,6 +38,7 @@ describe('UpdatePrompt', () => {
   it('announces the new version with labelled Reload and Dismiss buttons', () => {
     renderPrompt(true);
     expect(screen.getByText(/New version available/)).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'App update' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Reload' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Dismiss' })).toBeTruthy();
   });
