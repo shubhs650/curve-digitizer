@@ -5,10 +5,10 @@ import { describe, expect, it } from 'vitest';
 import { applyMat3, pointAt, polyline, project } from './geometry.ts';
 import { hexToRgb, strokeOffsets } from './ink.ts';
 import { hasReplayer, limitFor, replay } from './replay.ts';
-import { REPLAYER_TASKS } from './replayers.ts';
+import { REPLAYER_TASKS, replayers, type Replayer } from './replayers.ts';
 import { loadSample, missingFiles, sampleNames } from './sample.ts';
-import { TARGETS } from './score.ts';
-import { TARGET_IDS, type AxisType } from './truth.ts';
+import { score, TARGETS } from './score.ts';
+import { TARGET_IDS, type AxisType, type OpKind, type TargetId } from './truth.ts';
 
 const names = sampleNames();
 
@@ -22,6 +22,15 @@ const INK_P95_OFFSET_PX = 0.35;
 const INK_PROBE_SPACING_PX = 3;
 /** Probes this close to another curve, or to a line end, see more than one stroke. */
 const INK_CLEARANCE_PX = 12;
+
+/**
+ * Ops recorded without an acceptance target (the calibrations of `dark-bg` and `scan-tilted`, the `dark-bg` traces) are still
+ * replayed as regression checks, scored like the target for their kind at that target's clean-image limit.
+ */
+const UNTARGETED: Partial<Record<OpKind, { readonly target: TargetId; readonly limit: number }>> = {
+  calibrate: { target: 'A1', limit: 0.3 },
+  trace: { target: 'A3', limit: 1.0 },
+};
 
 function quantile(values: readonly number[], q: number): number {
   const sorted = [...values].sort((a, b) => a - b);
@@ -137,6 +146,15 @@ for (const name of names) {
     });
 
     for (const op of sample.ops.ops) {
+      const check = UNTARGETED[op.kind];
+      if (op.targets.length === 0 && check && hasReplayer(op.kind)) {
+        it(`${op.id} (regression check, scored as ${check.target} at ${String(check.limit)})`, async () => {
+          const replayer = replayers[op.kind] as Replayer<OpKind>;
+          const result = score(check.target, check.limit, op, await replayer(op, sample), truth);
+          console.log(`${name} ${op.id}: ${result.measured}`);
+          expect(result.failures).toEqual([]);
+        });
+      }
       for (const target of op.targets) {
         const title = `${target} ${op.id}`;
         it(`${title}: target applies to this sample`, () => {
