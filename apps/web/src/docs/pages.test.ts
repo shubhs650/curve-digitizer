@@ -31,7 +31,6 @@ describe('docs pages', () => {
       ['export', 'Exporting'],
       ['projects', 'Projects, autosave and .cdz files'],
       ['keyboard-shortcuts', 'Keyboard shortcuts'],
-      ['roadmap', 'Roadmap'],
     ]);
   });
 

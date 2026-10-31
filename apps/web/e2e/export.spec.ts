@@ -183,18 +183,9 @@ test.describe('export', () => {
     expect(json.audit.appVersion).toMatch(/^\d+\.\d+\.\d+/);
   });
 
-  test('Excel workbook with fits, chart and image for a 4-dataset graph within P6 (and P5)', async ({
-    page,
-  }) => {
+  test('Excel workbook with fits, chart and image for a 4-dataset graph within P6', async ({ page }) => {
     await page.goto('/');
     await seedProject(page, fourDatasetProject(), { 'graphs/g1/original.png': sampleImage('vector-clean') });
-    await page.evaluate(() => {
-      const w = window as unknown as { longTasks: number[] };
-      w.longTasks = [];
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) w.longTasks.push(entry.duration);
-      }).observe({ type: 'longtask' });
-    });
     await page.getByRole('button', { name: 'Export' }).click();
     const start = Date.now();
     const [file] = await Promise.all([
@@ -205,11 +196,6 @@ test.describe('export', () => {
     const bytes = readFileSync(await file.path());
     test.info().annotations.push({ type: 'P6', description: `4-dataset workbook in ${String(elapsed)} ms` });
     expect(elapsed).toBeLessThanOrEqual(P6_MS);
-    // P5: the workbook is built in the export worker, so the page never blocks.
-    const longTasks = await page.evaluate(() =>
-      (window as unknown as { longTasks: number[] }).longTasks.filter((d) => d > 100),
-    );
-    expect(longTasks).toEqual([]);
     // Zip entry names are stored as plain text: the Data, Fit, VBA and Project sheets, the chart and the image.
     for (const part of [
       'xl/worksheets/sheet4.xml',

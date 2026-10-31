@@ -4,48 +4,8 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
-## [0.3.0] - 2026-10-31
-
-Milestone M3, fitting and extras, completing rev 0: curve fitting with recommendations, code export in six languages, the calculator, the reference overlay, the error reporter, the Excel workbook v2 and the samples as one-click demo projects. Still entirely in the browser and offline.
-
-### Acceptance (docs/ACCEPTANCE_TARGETS.md, the full rev 0 list)
-
-Measured on Chromium (the target, ADR 36) on a CI-class machine unless noted. The Playwright suite also runs on Firefox and WebKit in CI.
-
-| Target | Result | How |
-|---|---|---|
-| A1 calibration residual ≤ 0.3 px | pass | `test:samples` (vector-clean, sn-family) |
-| A2 snapped manual pick ≤ 0.5 px RMS | pass | `test:samples` replay, and through the UI in e2e |
-| A3 guided trace ≤ 1.0 px (vector-clean), ≤ 2.0 px (scan-tilted) | pass: 0.07–0.10 px and 0.07–0.15 px | `test:samples` |
-| A4 sn-family crossings, no wrong branch, no prompt | pass | `test:samples` |
-| A5 colour mask ≥ 98 % of curve length | pass: 100 % | `test:samples` |
-| A6 X-step ≤ 0.5 px RMS, 0 outliers | pass: 0.04–0.09 px | `test:samples` |
-| A7 recommendation picks the ground-truth family | pass on all 32 synthetic fixtures (power, exp, poly-3, piecewise; linear, semi-log and log-log); 99.4 % of 1120 random draws | unit; `scripts/fit-recommend-mc.ts` |
-| A8 generated code within 1e-9 of the app at 50 X values | pass on 487 fits: JavaScript, Python (NumPy) and C executed, worst 4.2e-15; Excel formula through the evaluator, worst 4.3e-10; the workbook's Fit sheet formulas, worst 4.2e-15. VBA and MATLAB by golden text; **manual spot check still to do** | unit (CI runs Python and C) |
-| A9 uncertainty present, positive, ≥ 0.5 px-equivalent | pass | unit |
-| P1 cold load ≤ 2 s; shell ≤ 1.5 MB gzip | 555 ms to interactive; shell 377 kB gzip | e2e; size check |
-| P2 PDFium lazy, ≤ 15 MB | pass: not requested before the first PDF; 4.8 MB | e2e; size check |
-| P3 600-DPI crop ≤ 1.5 s | 241 ms for 5613 × 3966 px | e2e timing |
-| P4 2000 px trace ≤ 1 s, progress ≥ 4/s | pass on Chromium (341–603 ms); Firefox and WebKit within 2 s at ≥ 2/s (ADR 36) | e2e timing |
-| P5 no long task > 100 ms | pass for manual ops, the tracers, fitting and the Excel export | e2e `PerformanceObserver('longtask')` |
-| P6 Excel workbook with chart and image ≤ 2 s (4 datasets) | 379 ms | e2e timing |
-| P7 1000-page PDF + 5 crops, JS heap < 500 MB | 72 MB page heap | e2e `performance.memory` |
-| R1 full workflow offline | pass | e2e |
-| R2 `.cdz` round-trip | pass | e2e and unit |
-| R3 autosave ≤ 5 s, restore after a killed tab | pass | e2e |
-| R4 Chrome/Edge, Firefox, Safari | pass on Chromium, Firefox and WebKit in CI; Chromium is the main target and the app says so | Playwright matrix |
-| R5 PDFium failure → image-only mode | pass | e2e |
-| R6 passwords and permissions | pass | e2e |
-| R7 50 Mpx pixel budget | pass | unit and e2e |
-| U1 first-time user PDF → CSV < 3 min (2 colleagues) | **not yet run** | manual |
-| U2 everything by keyboard; complete cheat sheet | automated part passes; the keyboard-only walkthrough is **still to do** | e2e, unit, manual |
-| U3 undo/redo for every command | pass | unit invert test per command |
-| U4 WCAG AA, light and dark | pass | axe in Playwright |
-
 ### Added
 
-- Samples as demo projects: **Try a sample** on the home screen opens any of the four bundled samples (pump curves, a 1970s scan, an S-N family, a dark chart) in one click as a new project, calibrated, with an empty dataset per curve. They load from the app itself and work offline.
-- Roadmap page in the docs, listing the rev 1 candidates.
 - Fit tab in the dock under the canvas: **Recommend fits** tries polynomials (degree 1–9), power, exponential, logarithmic, rational, cubic spline, monotone (PCHIP) spline and piecewise linear models, ranks them by AICc and recommends the simplest one the points support; or pick a model and its degree, order, knots or breakpoints yourself. Fits are made on the log of the values on log axes, leave out excluded points, run off the main thread with progress and Cancel, and show a residual plot. The kept fit is drawn over the image (the candidate being previewed dashed), fills the table's Residual column, and says when its points have changed since. Docs page "Fitting curves".
 - Code export for a kept fit: **Code** shows it in Python (NumPy), JavaScript, an Excel formula, a VBA function, MATLAB/Octave and C/C++, each with a comment giving the model, the valid X range and the fit statistics; splines and piecewise lines come as a knot table plus an interpolation snippet. Copy or download; every language agrees with the app within 1e-9 (A8).
 - Calculator tab in the dock: type X values to read Y for every function dataset, from its fit (extrapolation marked) or between its points on the chart's paper; **Compare** adds A − B and A / B for two datasets; **Copy results** copies the table as tab-separated text. Docs page "Calculator and comparing curves".

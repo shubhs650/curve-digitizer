@@ -4,8 +4,6 @@
 
 ## Rev 1 candidates (contributions welcome after rev 0 ships)
 
-The app shows these at /docs/roadmap (`docs/content/roadmap.md`); keep the two lists in step.
-
 Ordered by expected value for engineers:
 
 1. **Vector-path extraction** — when a PDF figure is vector, snap points to the actual path objects via PDFium; near-exact data. The project schema already records page + PDF-space rect.
