@@ -1,5 +1,6 @@
 import { levenbergMarquardt } from '@cd/math';
 import { fromSpace, toSpace, toSpaceDerivative } from '../space.ts';
+import type { CodeForm } from '../codegen/form.ts';
 import type { FitData, FitParams, FitSpaces, ModelFit, ModelId, ModelSpec } from '../types.ts';
 
 /** One entry of the model registry. */
@@ -13,6 +14,8 @@ export interface FitModel {
   readonly fit: (data: FitData, spec: ModelSpec, tick: () => void) => ModelFit | null;
   /** Human-readable name of a fitted instance, e.g. "Polynomial, degree 3". */
   readonly describe: (params: FitParams) => string;
+  /** The fitted instance in the form the code generators write (codegen/form.ts). */
+  readonly form: (params: FitParams) => CodeForm;
 }
 
 /**

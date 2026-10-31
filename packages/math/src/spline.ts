@@ -84,6 +84,24 @@ export function evalCubicSpline(
   );
 }
 
+/**
+ * Knot slopes S′(tᵢ) of the natural cubic spline through (t, v), so it can be written as the cubic Hermite
+ * interpolant {@link evalHermite} (one form for every exported spline): with δᵢ = (vᵢ₊₁ − vᵢ)/hᵢ,
+ * S′(tᵢ) = δᵢ − hᵢ(2Mᵢ + Mᵢ₊₁)/6 for i < K−1 and S′(t_{K−1}) = δ_{K−2} + h_{K−2}(M_{K−2} + 2M_{K−1})/6.
+ */
+export function naturalSplineSlopes(t: readonly number[], v: readonly number[]): number[] {
+  const m = naturalSplineSecondDerivatives(t, v);
+  const k = t.length;
+  return t.map((_, i) => {
+    const j = Math.min(i, k - 2);
+    const h = at(t, j + 1) - at(t, j);
+    const delta = (at(v, j + 1) - at(v, j)) / h;
+    return i < k - 1
+      ? delta - (h * (2 * at(m, j) + at(m, j + 1))) / 6
+      : delta + (h * (at(m, j) + 2 * at(m, j + 1))) / 6;
+  });
+}
+
 /** The natural cubic spline through (t, v) at u: {@link evalCubicSpline} with {@link naturalSplineSecondDerivatives}. */
 export function naturalSpline(t: readonly number[], v: readonly number[], u: number): number {
   return evalCubicSpline(t, v, naturalSplineSecondDerivatives(t, v), u);

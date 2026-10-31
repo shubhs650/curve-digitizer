@@ -1,0 +1,168 @@
+{
+  "meta": "Hand-written fits for the code generator golden files and the A8 cross-language check (task 3.3). One per model and fit space; parameters are in fit space (docs/DECISIONS.md ADR 39).",
+  "fits": [
+    {
+      "name": "poly3",
+      "datasetName": "Pump A head",
+      "fit": {
+        "model": "poly",
+        "space": { "x": "lin", "y": "lin" },
+        "params": { "c": [52.3, 0.0841, -0.00312, -1.27e-5] },
+        "domain": [0, 120],
+        "stats": { "n": 42, "r2": 0.999312, "rmse": 0.0832, "aicc": -198.4 }
+      }
+    },
+    {
+      "name": "poly2-loglog",
+      "datasetName": "Friction factor",
+      "fit": {
+        "model": "poly",
+        "space": { "x": "log", "y": "log" },
+        "params": { "c": [1.2, -0.8, 0.05] },
+        "domain": [1, 1000],
+        "stats": { "n": 30, "r2": 0.99871, "rmse": 0.0041, "aicc": -320.2 }
+      }
+    },
+    {
+      "name": "power",
+      "datasetName": "Drag",
+      "fit": {
+        "model": "power",
+        "space": { "x": "lin", "y": "lin" },
+        "params": { "a": 7.25, "b": -1.3 },
+        "domain": [1, 20],
+        "stats": { "n": 25, "r2": 0.9991, "rmse": 0.012, "aicc": -210.5 }
+      }
+    },
+    {
+      "name": "power-loglog",
+      "datasetName": "NPSHr (m)",
+      "fit": {
+        "model": "power",
+        "space": { "x": "log", "y": "log" },
+        "params": { "a": 0.0123, "b": 1.85 },
+        "domain": [10, 5000],
+        "stats": { "n": 18, "r2": 0.99952, "rmse": 0.0063, "aicc": -170.9 }
+      }
+    },
+    {
+      "name": "exp-decay",
+      "datasetName": "Cooling",
+      "fit": {
+        "model": "exp",
+        "space": { "x": "lin", "y": "lin" },
+        "params": { "a": -3, "b": -0.2 },
+        "domain": [0, 25],
+        "stats": { "n": 40, "r2": 0.9987, "rmse": 0.0201, "aicc": -301.7 }
+      }
+    },
+    {
+      "name": "exp-semilog",
+      "datasetName": "Leakage current",
+      "fit": {
+        "model": "exp",
+        "space": { "x": "lin", "y": "log" },
+        "params": { "a": 0.0025, "b": 0.0715 },
+        "domain": [-40, 125],
+        "stats": { "n": 34, "r2": 0.99934, "rmse": 0.0122, "aicc": -284.3 }
+      }
+    },
+    {
+      "name": "log",
+      "datasetName": "Settlement",
+      "fit": {
+        "model": "log",
+        "space": { "x": "lin", "y": "lin" },
+        "params": { "a": 1.5, "b": -2 },
+        "domain": [0.5, 60],
+        "stats": { "n": 22, "r2": 0.9978, "rmse": 0.051, "aicc": -121.6 }
+      }
+    },
+    {
+      "name": "rational21",
+      "datasetName": "Efficiency",
+      "fit": {
+        "model": "rational",
+        "space": { "x": "lin", "y": "lin" },
+        "params": { "p": [3, 2, 0.1], "q": [0.25] },
+        "domain": [0, 40],
+        "stats": { "n": 36, "r2": 0.99963, "rmse": 0.073, "aicc": -175.2 }
+      }
+    },
+    {
+      "name": "rational11-logx",
+      "datasetName": "Gain",
+      "fit": {
+        "model": "rational",
+        "space": { "x": "log", "y": "lin" },
+        "params": { "p": [-0.4, 1.7], "q": [-0.12] },
+        "domain": [0.1, 100],
+        "stats": { "n": 28, "r2": 0.9969, "rmse": 0.034, "aicc": -180.1 }
+      }
+    },
+    {
+      "name": "spline",
+      "datasetName": "Torque",
+      "fit": {
+        "model": "spline",
+        "space": { "x": "lin", "y": "lin" },
+        "params": {
+          "knots": [0, 1.25, 2.5, 4, 5.5, 8, 10],
+          "values": [1, 2.1, 1.6, 0.2, -1.05, 0.5, 0.92]
+        },
+        "domain": [0, 10],
+        "stats": { "n": 80, "r2": 0.99841, "rmse": 0.0287, "aicc": -540.3 }
+      }
+    },
+    {
+      "name": "spline-loglog",
+      "datasetName": "Response spectrum",
+      "fit": {
+        "model": "spline",
+        "space": { "x": "log", "y": "log" },
+        "params": {
+          "knots": [-2, -1.3, -0.6, 0, 0.5, 1],
+          "values": [-1.1, -0.35, 0.21, 0.18, -0.42, -1.3]
+        },
+        "domain": [0.01, 10],
+        "stats": { "n": 64, "r2": 0.99902, "rmse": 0.0097, "aicc": -560.8 }
+      }
+    },
+    {
+      "name": "pchip",
+      "datasetName": "Valve Cv",
+      "fit": {
+        "model": "pchip",
+        "space": { "x": "lin", "y": "lin" },
+        "params": {
+          "knots": [0, 10, 20, 35, 50, 70, 90, 100],
+          "values": [0, 0.8, 3.1, 9.5, 21, 44, 71, 80]
+        },
+        "domain": [0, 100],
+        "stats": { "n": 21, "r2": 0.99977, "rmse": 0.38, "aicc": 12.4 }
+      }
+    },
+    {
+      "name": "piecewise",
+      "datasetName": "Derating",
+      "fit": {
+        "model": "piecewise",
+        "space": { "x": "lin", "y": "lin" },
+        "params": { "knots": [-20, 40, 85, 125], "values": [100, 100.2, 60, 0] },
+        "domain": [-20, 125],
+        "stats": { "n": 50, "r2": 0.99993, "rmse": 0.19, "aicc": -151.1 }
+      }
+    },
+    {
+      "name": "piecewise-logx",
+      "datasetName": "Fatigue",
+      "fit": {
+        "model": "piecewise",
+        "space": { "x": "log", "y": "lin" },
+        "params": { "knots": [3, 6, 8], "values": [450, 210, 205] },
+        "domain": [1000, 100000000],
+        "stats": { "n": 33, "r2": 0.9958, "rmse": 4.1, "aicc": 101.7 }
+      }
+    }
+  ]
+}

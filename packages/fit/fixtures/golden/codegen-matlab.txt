@@ -1,0 +1,227 @@
+==== poly3 ====
+function y = pump_a_head(x)
+%PUMP_A_HEAD Curve Digitizer fit: Polynomial, degree 3
+%   Dataset: Pump A head
+%   Valid for 0 <= x <= 120, the range of the 42 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.999312, RMSE = 0.0832, AICc = -198.4
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    u = x;
+    v = 52.3 + u .* (0.0841 + u .* (-0.00312 + u .* (-0.0000127)));
+    y = v;
+end
+
+==== poly2-loglog ====
+function y = friction_factor(x)
+%FRICTION_FACTOR Curve Digitizer fit: Polynomial, degree 2
+%   Dataset: Friction factor
+%   Fitted on log paper: u = log10(x), y = 10^v
+%   Valid for 1 <= x <= 1000, the range of the 30 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99871, RMSE = 0.0041 (in log10 y), AICc = -320.2
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    x(x <= 0) = NaN;
+    u = log10(x);
+    v = 1.2 + u .* (-0.8 + u .* 0.05);
+    y = 10 .^ v;
+end
+
+==== power ====
+function y = drag(x)
+%DRAG Curve Digitizer fit: Power law, y = a * x^b
+%   Dataset: Drag
+%   Valid for 1 <= x <= 20, the range of the 25 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.9991, RMSE = 0.012, AICc = -210.5
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    x(x <= 0) = NaN;
+    y = 7.25 .* x .^ (-1.3);
+end
+
+==== power-loglog ====
+function y = npshr_m(x)
+%NPSHR_M Curve Digitizer fit: Power law, y = a * x^b
+%   Dataset: NPSHr (m)
+%   Valid for 10 <= x <= 5000, the range of the 18 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99952, RMSE = 0.0063 (in log10 y), AICc = -170.9
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    x(x <= 0) = NaN;
+    y = 0.0123 .* x .^ 1.85;
+end
+
+==== exp-decay ====
+function y = cooling(x)
+%COOLING Curve Digitizer fit: Exponential, y = a * exp(b * x)
+%   Dataset: Cooling
+%   Valid for 0 <= x <= 25, the range of the 40 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.9987, RMSE = 0.0201, AICc = -301.7
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    y = -3 .* exp(-0.2 .* x);
+end
+
+==== exp-semilog ====
+function y = leakage_current(x)
+%LEAKAGE_CURRENT Curve Digitizer fit: Exponential, y = a * exp(b * x)
+%   Dataset: Leakage current
+%   Valid for -40 <= x <= 125, the range of the 34 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99934, RMSE = 0.0122 (in log10 y), AICc = -284.3
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    y = 0.0025 .* exp(0.0715 .* x);
+end
+
+==== log ====
+function y = settlement(x)
+%SETTLEMENT Curve Digitizer fit: Logarithmic, y = a + b * ln(x)
+%   Dataset: Settlement
+%   Valid for 0.5 <= x <= 60, the range of the 22 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.9978, RMSE = 0.051, AICc = -121.6
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    x(x <= 0) = NaN;
+    y = 1.5 - 2 .* log(x);
+end
+
+==== rational21 ====
+function y = efficiency(x)
+%EFFICIENCY Curve Digitizer fit: Rational, degree 2/1
+%   Dataset: Efficiency
+%   Valid for 0 <= x <= 40, the range of the 36 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99963, RMSE = 0.073, AICc = -175.2
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    u = x;
+    v = (3 + u .* (2 + u .* 0.1)) ./ (1 + u .* 0.25);
+    y = v;
+end
+
+==== rational11-logx ====
+function y = gain(x)
+%GAIN Curve Digitizer fit: Rational, degree 1/1
+%   Dataset: Gain
+%   Fitted on log paper: u = log10(x), y = v
+%   Valid for 0.1 <= x <= 100, the range of the 28 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.9969, RMSE = 0.034, AICc = -180.1
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    x(x <= 0) = NaN;
+    u = log10(x);
+    v = (-0.4 + u .* 1.7) ./ (1 + u .* (-0.12));
+    y = v;
+end
+
+==== spline ====
+function y = torque(x)
+%TORQUE Curve Digitizer fit: Cubic spline, 7 knots
+%   Dataset: Torque
+%   Valid for 0 <= x <= 10, the range of the 80 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99841, RMSE = 0.0287, AICc = -540.3
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    sz = size(x);
+    x = x(:);
+    u = x;
+    knots = [0, 1.25, 2.5, 4, 5.5, 8, 10].';
+    values = [1, 2.1, 1.6, 0.2, -1.05, 0.5, 0.92].';
+    slopes = [ ...
+        1.189899854508072, 0.26020029098385655, -0.7907010184434978, -1.073155868029238, ...
+        -0.21667550943955094, 0.6375291637263358, -0.0037645818631678873 ...
+    ].';
+    % Interval i holds u (the end intervals continue outside the knots)
+    i = sum(u >= knots(2:end-1).', 2) + 1;
+    h = knots(i + 1) - knots(i);
+    s = (u - knots(i)) ./ h;
+    s2 = s .* s;
+    s3 = s2 .* s;
+    v = (2 .* s3 - 3 .* s2 + 1) .* values(i) + (s3 - 2 .* s2 + s) .* h .* slopes(i) ...
+        + (-2 .* s3 + 3 .* s2) .* values(i + 1) + (s3 - s2) .* h .* slopes(i + 1);
+    y = reshape(v, sz);
+end
+
+==== spline-loglog ====
+function y = response_spectrum(x)
+%RESPONSE_SPECTRUM Curve Digitizer fit: Cubic spline, 6 knots
+%   Dataset: Response spectrum
+%   Fitted on log paper: u = log10(x), y = 10^v
+%   Valid for 0.01 <= x <= 10, the range of the 64 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99902, RMSE = 0.0097 (in log10 y), AICc = -560.8
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    sz = size(x);
+    x = x(:);
+    x(x <= 0) = NaN;
+    u = log10(x);
+    knots = [-2, -1.3, -0.6, 0, 0.5, 1].';
+    values = [-1.1, -0.35, 0.21, 0.18, -0.42, -1.3].';
+    slopes = [ ...
+        1.1011927376970858, 1.0119002388915432, 0.46549202102245574, -0.6891705685618729, ...
+        -1.5859512661251793, -1.8470243669374107 ...
+    ].';
+    % Interval i holds u (the end intervals continue outside the knots)
+    i = sum(u >= knots(2:end-1).', 2) + 1;
+    h = knots(i + 1) - knots(i);
+    s = (u - knots(i)) ./ h;
+    s2 = s .* s;
+    s3 = s2 .* s;
+    v = (2 .* s3 - 3 .* s2 + 1) .* values(i) + (s3 - 2 .* s2 + s) .* h .* slopes(i) ...
+        + (-2 .* s3 + 3 .* s2) .* values(i + 1) + (s3 - s2) .* h .* slopes(i + 1);
+    y = reshape(10 .^ v, sz);
+end
+
+==== pchip ====
+function y = valve_cv(x)
+%VALVE_CV Curve Digitizer fit: Monotone spline (PCHIP), 8 knots
+%   Dataset: Valve Cv
+%   Valid for 0 <= x <= 100, the range of the 21 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99977, RMSE = 0.38, AICc = 12.4
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    sz = size(x);
+    x = x(:);
+    u = x;
+    knots = [0, 10, 20, 35, 50, 70, 90, 100].';
+    values = [0, 0.8, 3.1, 9.5, 21, 44, 71, 80].';
+    slopes = [ ...
+        0.0050000000000000044, 0.11870967741935484, 0.2930325149303251, 0.5482309124767226, ...
+        0.9113207547169812, 1.242, 1.0565217391304347, 0.75 ...
+    ].';
+    % Interval i holds u (the end intervals continue outside the knots)
+    i = sum(u >= knots(2:end-1).', 2) + 1;
+    h = knots(i + 1) - knots(i);
+    s = (u - knots(i)) ./ h;
+    s2 = s .* s;
+    s3 = s2 .* s;
+    v = (2 .* s3 - 3 .* s2 + 1) .* values(i) + (s3 - 2 .* s2 + s) .* h .* slopes(i) ...
+        + (-2 .* s3 + 3 .* s2) .* values(i + 1) + (s3 - s2) .* h .* slopes(i + 1);
+    y = reshape(v, sz);
+end
+
+==== piecewise ====
+function y = derating(x)
+%DERATING Curve Digitizer fit: Piecewise linear, 3 segments
+%   Dataset: Derating
+%   Valid for -20 <= x <= 125, the range of the 50 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.99993, RMSE = 0.19, AICc = -151.1
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    sz = size(x);
+    x = x(:);
+    u = x;
+    knots = [-20, 40, 85, 125].';
+    values = [100, 100.2, 60, 0].';
+    % Interval i holds u (the end intervals continue outside the knots)
+    i = sum(u >= knots(2:end-1).', 2) + 1;
+    s = (u - knots(i)) ./ (knots(i + 1) - knots(i));
+    v = values(i) + s .* (values(i + 1) - values(i));
+    y = reshape(v, sz);
+end
+
+==== piecewise-logx ====
+function y = fatigue(x)
+%FATIGUE Curve Digitizer fit: Piecewise linear, 2 segments
+%   Dataset: Fatigue
+%   Fitted on log paper: u = log10(x), y = v
+%   Valid for 1000 <= x <= 100000000, the range of the 33 fitted points; outside it the curve is extrapolated
+%   R^2 = 0.9958, RMSE = 4.1, AICc = 101.7
+%   x may be an array of any shape; y has the same shape (NaN where the fit is undefined).
+    sz = size(x);
+    x = x(:);
+    x(x <= 0) = NaN;
+    u = log10(x);
+    knots = [3, 6, 8].';
+    values = [450, 210, 205].';
+    % Interval i holds u (the end intervals continue outside the knots)
+    i = sum(u >= knots(2:end-1).', 2) + 1;
+    s = (u - knots(i)) ./ (knots(i + 1) - knots(i));
+    v = values(i) + s .* (values(i + 1) - values(i));
+    y = reshape(v, sz);
+end

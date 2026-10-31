@@ -7,6 +7,7 @@ import {
   lsqSplineValues,
   lstsqScaled,
   naturalSplineSecondDerivatives,
+  naturalSplineSlopes,
   pchipSlopes,
   polyfit,
   polyval,
@@ -39,6 +40,7 @@ export const polynomial: FitModel = {
     const c = tryFit(() => polyfit(data.u, data.v, spec.degree));
     return c && { params: { c }, k: c.length };
   },
+  form: (p) => ({ kind: 'poly', c: vector(p, 'c') }),
   describe: (p) => `Polynomial, degree ${String(vector(p, 'c').length - 1)}`,
 };
 
@@ -98,6 +100,7 @@ export const rational: FitModel = {
     if (hasPole(q, u[0] ?? 0, u[u.length - 1] ?? 0)) return null;
     return { params: { p, q }, k: m + n };
   },
+  form: (p) => ({ kind: 'rational', p: vector(p, 'p'), q: vector(p, 'q') }),
   describe: (p) => `Rational, degree ${String(vector(p, 'p').length - 1)}/${String(vector(p, 'q').length)}`,
 };
 
@@ -196,6 +199,12 @@ export const spline: FitModel = {
       (knots, d) => tryFit(() => lsqSplineValues(knots, d.u, d.v, 'natural')),
       tick,
     ),
+  form: (p) => ({
+    kind: 'hermite',
+    knots: vector(p, 'knots'),
+    values: vector(p, 'values'),
+    slopes: naturalSplineSlopes(vector(p, 'knots'), vector(p, 'values')),
+  }),
   describe: (p) => `Cubic spline, ${String(vector(p, 'knots').length)} knots`,
 };
 
@@ -247,6 +256,12 @@ export const pchipModel: FitModel = {
         return result?.params ?? [...start];
       },
     ),
+  form: (p) => ({
+    kind: 'hermite',
+    knots: vector(p, 'knots'),
+    values: vector(p, 'values'),
+    slopes: pchipSlopes(vector(p, 'knots'), vector(p, 'values')),
+  }),
   describe: (p) => `Monotone spline (PCHIP), ${String(vector(p, 'knots').length)} knots`,
 };
 
@@ -288,6 +303,7 @@ export const piecewise: FitModel = {
     }
     return autoPiecewise(data, tick);
   },
+  form: (p) => ({ kind: 'linear', knots: vector(p, 'knots'), values: vector(p, 'values') }),
   describe: (p) => `Piecewise linear, ${String(Math.max(0, vector(p, 'knots').length - 1))} segments`,
 };
 

@@ -120,6 +120,8 @@ As built (task 3.1, ADR 39): closed-form laws in data units fitted by Levenbergâ
 
 Linear least squares via QR for polynomial/log-linearised models; Levenberg-Marquardt for nonlinear (rational); natural cubic spline and PCHIP from standard formulas; piecewise linear with breakpoints from user input or from a change-point heuristic. AICc = `n ln(RSS/n) + 2k + 2k(k+1)/(n-k-1)`. Fits are computed in axis space (log for log axes). Extrapolation warning when a query X is outside `domain`.
 
+Code generators (task 3.3, ADR 40): `packages/fit/src/codegen/`. Each model's `form` turns its parameters into one of a few code forms (closed form, Horner polynomial or rational, Hermite or linear knot table); one emitter per language writes them, with a header giving the model, X range and statistics. A8 runs the JavaScript, Python and C and evaluates the Excel formula (`scripts/codegen/`).
+
 ## 9. Quality gates (CI)
 
 1. `pnpm lint && pnpm typecheck`

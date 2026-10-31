@@ -39,6 +39,7 @@ export const power: FitModel = {
     );
     return fitClosedForm(powerForm, data, l && [sg.s * Math.exp(l[0]), l[1]]);
   },
+  form: (p) => ({ kind: 'power', a: scalar(p, 'a'), b: scalar(p, 'b') }),
   describe: (p) => `Power law y = ${format(scalar(p, 'a'))}·x^${format(scalar(p, 'b'))}`,
 };
 
@@ -62,6 +63,7 @@ export const exponential: FitModel = {
     );
     return fitClosedForm(expForm, data, l && [sg.s * Math.exp(l[0]), l[1]]);
   },
+  form: (p) => ({ kind: 'exp', a: scalar(p, 'a'), b: scalar(p, 'b') }),
   describe: (p) => `Exponential y = ${format(scalar(p, 'a'))}·e^(${format(scalar(p, 'b'))}·x)`,
 };
 
@@ -87,5 +89,6 @@ export const logarithmic: FitModel = {
       ),
     );
   },
+  form: (p) => ({ kind: 'log', a: scalar(p, 'a'), b: scalar(p, 'b') }),
   describe: (p) => `Logarithmic y = ${format(scalar(p, 'a'))} + ${format(scalar(p, 'b'))}·ln x`,
 };

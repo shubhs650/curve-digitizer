@@ -41,3 +41,16 @@ If points are added, removed or excluded after a fit was kept, the panel says so
 ## Range
 
 Every fit records the X range of the points it was made from. The curve is drawn over that range only; outside it a fit is an extrapolation.
+
+## Code for your fit
+
+**Code** next to the kept fit shows the fit as ready-to-paste code in Python (NumPy), JavaScript, an Excel formula, a VBA function, MATLAB (or GNU Octave) and C/C++. **Copy** puts it on the clipboard and **Download** saves it as a file named after the dataset (for example `pump_b.py`). The code is made on your device, like everything else.
+
+Every snippet starts with a comment giving the model, the dataset, the X range the fit is valid for, and R², RMSE and AICc. It computes exactly what the app draws: tested to agree within 1e-9 of the app's value at 50 X values for every model.
+
+- **Polynomials, rationals, power, exponential and logarithmic** fits are one formula with the coefficients written out in full precision.
+- **Splines** (cubic and PCHIP) are written as a knot table (knot, value, slope) and a few lines of cubic Hermite interpolation; **piecewise linear** fits as a knot table and straight-line interpolation. Outside the knots they continue their end pieces, as the app does.
+- **Log axes**: the code takes x and returns y in data units; the log10 steps are inside it.
+- **Excel**: paste the formula into the cell next to your first X value (set the cell in the dialog, A2 by default) and fill down. Excel keeps 15 significant digits of typed numbers, which is still within 1e-9 of the app. Knot tables use `LET`, which needs Excel 2021 or Microsoft 365; on older Excel use the VBA function, which works from a worksheet as `=pump_b(A2)`.
+- Where a fit is undefined (x ≤ 0 for a power law or a log axis) the code returns NaN, or #NUM! in Excel.
+

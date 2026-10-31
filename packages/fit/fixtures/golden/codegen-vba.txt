@@ -1,0 +1,260 @@
+==== poly3 ====
+' Curve Digitizer fit: Polynomial, degree 3
+' Dataset: Pump A head
+' Valid for 0 <= x <= 120, the range of the 42 fitted points; outside it the curve is extrapolated
+' R^2 = 0.999312, RMSE = 0.0832, AICc = -198.4
+Public Function pump_a_head(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    u = x
+    v = 52.3 + u * (0.0841 + u * (-0.00312 + u * (-0.0000127)))
+    pump_a_head = v
+End Function
+
+==== poly2-loglog ====
+' Curve Digitizer fit: Polynomial, degree 2
+' Dataset: Friction factor
+' Fitted on log paper: u = log10(x), y = 10^v
+' Valid for 1 <= x <= 1000, the range of the 30 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99871, RMSE = 0.0041 (in log10 y), AICc = -320.2
+Public Function friction_factor(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    If x <= 0 Then
+        friction_factor = CVErr(xlErrNum)
+        Exit Function
+    End If
+    u = Log(x) / Log(10#)
+    v = 1.2 + u * (-0.8 + u * 0.05)
+    friction_factor = 10# ^ v
+End Function
+
+==== power ====
+' Curve Digitizer fit: Power law, y = a * x^b
+' Dataset: Drag
+' Valid for 1 <= x <= 20, the range of the 25 fitted points; outside it the curve is extrapolated
+' R^2 = 0.9991, RMSE = 0.012, AICc = -210.5
+Public Function drag(ByVal x As Double) As Variant
+    If x <= 0 Then
+        drag = CVErr(xlErrNum)
+        Exit Function
+    End If
+    drag = 7.25 * x ^ (-1.3)
+End Function
+
+==== power-loglog ====
+' Curve Digitizer fit: Power law, y = a * x^b
+' Dataset: NPSHr (m)
+' Valid for 10 <= x <= 5000, the range of the 18 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99952, RMSE = 0.0063 (in log10 y), AICc = -170.9
+Public Function npshr_m(ByVal x As Double) As Variant
+    If x <= 0 Then
+        npshr_m = CVErr(xlErrNum)
+        Exit Function
+    End If
+    npshr_m = 0.0123 * x ^ 1.85
+End Function
+
+==== exp-decay ====
+' Curve Digitizer fit: Exponential, y = a * exp(b * x)
+' Dataset: Cooling
+' Valid for 0 <= x <= 25, the range of the 40 fitted points; outside it the curve is extrapolated
+' R^2 = 0.9987, RMSE = 0.0201, AICc = -301.7
+Public Function cooling(ByVal x As Double) As Variant
+    cooling = -3# * Exp(-0.2 * x)
+End Function
+
+==== exp-semilog ====
+' Curve Digitizer fit: Exponential, y = a * exp(b * x)
+' Dataset: Leakage current
+' Valid for -40 <= x <= 125, the range of the 34 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99934, RMSE = 0.0122 (in log10 y), AICc = -284.3
+Public Function leakage_current(ByVal x As Double) As Variant
+    leakage_current = 0.0025 * Exp(0.0715 * x)
+End Function
+
+==== log ====
+' Curve Digitizer fit: Logarithmic, y = a + b * ln(x)
+' Dataset: Settlement
+' Valid for 0.5 <= x <= 60, the range of the 22 fitted points; outside it the curve is extrapolated
+' R^2 = 0.9978, RMSE = 0.051, AICc = -121.6
+Public Function settlement(ByVal x As Double) As Variant
+    If x <= 0 Then
+        settlement = CVErr(xlErrNum)
+        Exit Function
+    End If
+    settlement = 1.5 - 2# * Log(x)
+End Function
+
+==== rational21 ====
+' Curve Digitizer fit: Rational, degree 2/1
+' Dataset: Efficiency
+' Valid for 0 <= x <= 40, the range of the 36 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99963, RMSE = 0.073, AICc = -175.2
+Public Function efficiency(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    u = x
+    v = (3# + u * (2# + u * 0.1)) / (1# + u * 0.25)
+    efficiency = v
+End Function
+
+==== rational11-logx ====
+' Curve Digitizer fit: Rational, degree 1/1
+' Dataset: Gain
+' Fitted on log paper: u = log10(x), y = v
+' Valid for 0.1 <= x <= 100, the range of the 28 fitted points; outside it the curve is extrapolated
+' R^2 = 0.9969, RMSE = 0.034, AICc = -180.1
+Public Function gain(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    If x <= 0 Then
+        gain = CVErr(xlErrNum)
+        Exit Function
+    End If
+    u = Log(x) / Log(10#)
+    v = (-0.4 + u * 1.7) / (1# + u * (-0.12))
+    gain = v
+End Function
+
+==== spline ====
+' Curve Digitizer fit: Cubic spline, 7 knots
+' Dataset: Torque
+' Valid for 0 <= x <= 10, the range of the 80 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99841, RMSE = 0.0287, AICc = -540.3
+Public Function torque(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    Dim knots As Variant, values As Variant, slopes As Variant
+    Dim i As Long, h As Double, s As Double, s2 As Double, s3 As Double
+    u = x
+    knots = Array(0#, 1.25, 2.5, 4#, 5.5, 8#, 10#)
+    values = Array(1#, 2.1, 1.6, 0.2, -1.05, 0.5, 0.92)
+    slopes = Array( _
+        1.189899854508072, 0.26020029098385655, -0.7907010184434978, -1.073155868029238, _
+        -0.21667550943955094, 0.6375291637263358, -0.0037645818631678873)
+    ' Interval i holds u (the end intervals continue outside the knots)
+    i = LBound(knots)
+    Do While i < UBound(knots) - 1
+        If u < knots(i + 1) Then Exit Do
+        i = i + 1
+    Loop
+    h = knots(i + 1) - knots(i)
+    s = (u - knots(i)) / h
+    s2 = s * s
+    s3 = s2 * s
+    v = (2 * s3 - 3 * s2 + 1) * values(i) + (s3 - 2 * s2 + s) * h * slopes(i) _
+        + (-2 * s3 + 3 * s2) * values(i + 1) + (s3 - s2) * h * slopes(i + 1)
+    torque = v
+End Function
+
+==== spline-loglog ====
+' Curve Digitizer fit: Cubic spline, 6 knots
+' Dataset: Response spectrum
+' Fitted on log paper: u = log10(x), y = 10^v
+' Valid for 0.01 <= x <= 10, the range of the 64 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99902, RMSE = 0.0097 (in log10 y), AICc = -560.8
+Public Function response_spectrum(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    Dim knots As Variant, values As Variant, slopes As Variant
+    Dim i As Long, h As Double, s As Double, s2 As Double, s3 As Double
+    If x <= 0 Then
+        response_spectrum = CVErr(xlErrNum)
+        Exit Function
+    End If
+    u = Log(x) / Log(10#)
+    knots = Array(-2#, -1.3, -0.6, 0#, 0.5, 1#)
+    values = Array(-1.1, -0.35, 0.21, 0.18, -0.42, -1.3)
+    slopes = Array( _
+        1.1011927376970858, 1.0119002388915432, 0.46549202102245574, -0.6891705685618729, _
+        -1.5859512661251793, -1.8470243669374107)
+    ' Interval i holds u (the end intervals continue outside the knots)
+    i = LBound(knots)
+    Do While i < UBound(knots) - 1
+        If u < knots(i + 1) Then Exit Do
+        i = i + 1
+    Loop
+    h = knots(i + 1) - knots(i)
+    s = (u - knots(i)) / h
+    s2 = s * s
+    s3 = s2 * s
+    v = (2 * s3 - 3 * s2 + 1) * values(i) + (s3 - 2 * s2 + s) * h * slopes(i) _
+        + (-2 * s3 + 3 * s2) * values(i + 1) + (s3 - s2) * h * slopes(i + 1)
+    response_spectrum = 10# ^ v
+End Function
+
+==== pchip ====
+' Curve Digitizer fit: Monotone spline (PCHIP), 8 knots
+' Dataset: Valve Cv
+' Valid for 0 <= x <= 100, the range of the 21 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99977, RMSE = 0.38, AICc = 12.4
+Public Function valve_cv(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    Dim knots As Variant, values As Variant, slopes As Variant
+    Dim i As Long, h As Double, s As Double, s2 As Double, s3 As Double
+    u = x
+    knots = Array(0#, 10#, 20#, 35#, 50#, 70#, 90#, 100#)
+    values = Array(0#, 0.8, 3.1, 9.5, 21#, 44#, 71#, 80#)
+    slopes = Array( _
+        0.0050000000000000044, 0.11870967741935484, 0.2930325149303251, _
+        0.5482309124767226, 0.9113207547169812, 1.242, 1.0565217391304347, 0.75)
+    ' Interval i holds u (the end intervals continue outside the knots)
+    i = LBound(knots)
+    Do While i < UBound(knots) - 1
+        If u < knots(i + 1) Then Exit Do
+        i = i + 1
+    Loop
+    h = knots(i + 1) - knots(i)
+    s = (u - knots(i)) / h
+    s2 = s * s
+    s3 = s2 * s
+    v = (2 * s3 - 3 * s2 + 1) * values(i) + (s3 - 2 * s2 + s) * h * slopes(i) _
+        + (-2 * s3 + 3 * s2) * values(i + 1) + (s3 - s2) * h * slopes(i + 1)
+    valve_cv = v
+End Function
+
+==== piecewise ====
+' Curve Digitizer fit: Piecewise linear, 3 segments
+' Dataset: Derating
+' Valid for -20 <= x <= 125, the range of the 50 fitted points; outside it the curve is extrapolated
+' R^2 = 0.99993, RMSE = 0.19, AICc = -151.1
+Public Function derating(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    Dim knots As Variant, values As Variant
+    Dim i As Long, h As Double, s As Double
+    u = x
+    knots = Array(-20#, 40#, 85#, 125#)
+    values = Array(100#, 100.2, 60#, 0#)
+    ' Interval i holds u (the end intervals continue outside the knots)
+    i = LBound(knots)
+    Do While i < UBound(knots) - 1
+        If u < knots(i + 1) Then Exit Do
+        i = i + 1
+    Loop
+    s = (u - knots(i)) / (knots(i + 1) - knots(i))
+    v = values(i) + s * (values(i + 1) - values(i))
+    derating = v
+End Function
+
+==== piecewise-logx ====
+' Curve Digitizer fit: Piecewise linear, 2 segments
+' Dataset: Fatigue
+' Fitted on log paper: u = log10(x), y = v
+' Valid for 1000 <= x <= 100000000, the range of the 33 fitted points; outside it the curve is extrapolated
+' R^2 = 0.9958, RMSE = 4.1, AICc = 101.7
+Public Function fatigue(ByVal x As Double) As Variant
+    Dim u As Double, v As Double
+    Dim knots As Variant, values As Variant
+    Dim i As Long, h As Double, s As Double
+    If x <= 0 Then
+        fatigue = CVErr(xlErrNum)
+        Exit Function
+    End If
+    u = Log(x) / Log(10#)
+    knots = Array(3#, 6#, 8#)
+    values = Array(450#, 210#, 205#)
+    ' Interval i holds u (the end intervals continue outside the knots)
+    i = LBound(knots)
+    Do While i < UBound(knots) - 1
+        If u < knots(i + 1) Then Exit Do
+        i = i + 1
+    Loop
+    s = (u - knots(i)) / (knots(i + 1) - knots(i))
+    v = values(i) + s * (values(i + 1) - values(i))
+    fatigue = v
+End Function

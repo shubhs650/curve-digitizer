@@ -11,3 +11,5 @@ packages/math/fixtures/
 samples/
 # Export golden files (Vitest file snapshots); reformatting them would break the byte-exact comparison.
 packages/export/fixtures/golden/
+# Code generator golden files (Vitest file snapshots), compared byte for byte.
+packages/fit/fixtures/golden/

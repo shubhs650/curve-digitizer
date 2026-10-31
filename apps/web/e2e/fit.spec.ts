@@ -140,4 +140,53 @@ test.describe('Fit panel', () => {
     const residuals = dock(page).locator('[aria-colindex="10"][role="gridcell"]');
     await expect(residuals.first()).toHaveText(/^-?\d/);
   });
+
+  test('exports the kept fit as code to copy or download (task 3.3)', async ({
+    page,
+    context,
+    browserName,
+  }) => {
+    await dock(page).getByRole('tab', { name: 'Fit' }).click();
+    await dock(page).getByRole('button', { name: 'Recommend fits' }).click();
+    await expect(
+      dock(page).getByRole('radiogroup', { name: 'Recommended fits' }).getByRole('radio'),
+    ).toHaveCount(3, { timeout: 15_000 });
+    await dock(page).getByRole('button', { name: 'Use this fit' }).click();
+    await dock(page).getByRole('button', { name: 'Code' }).click();
+    const dialog = page.getByRole('dialog', { name: 'Code for Pump B' });
+    await expect(dialog.getByRole('region', { name: 'Python code' })).toContainText('def pump_b(x):');
+    expect((await axe(page).include('[role="dialog"]').analyze()).violations).toEqual([]);
+
+    const download = page.waitForEvent('download');
+    await dialog.getByRole('button', { name: 'Download' }).click();
+    expect((await download).suggestedFilename()).toBe('pump_b.py');
+
+    // Only Chromium lets Playwright grant clipboard reads; elsewhere, record what the app writes.
+    if (browserName === 'chromium') {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    } else {
+      await page.evaluate(() => {
+        Object.defineProperty(navigator.clipboard, 'writeText', {
+          configurable: true,
+          value: (text: string) => {
+            document.body.dataset.copied = text;
+            return Promise.resolve();
+          },
+        });
+      });
+    }
+    await dialog.getByRole('tab', { name: 'JavaScript' }).click();
+    await dialog.getByRole('button', { name: 'Copy' }).click();
+    await expect(page.getByText('Copied the JavaScript code').first()).toBeVisible();
+    const code = await page.evaluate(() => document.body.dataset.copied ?? navigator.clipboard.readText());
+    // The copied function computes Pump B's curve, H = 38·e^(−0.012·Q), as drawn.
+    const head = await page.evaluate((source) => {
+      // eslint-disable-next-line @typescript-eslint/no-implied-eval -- running the copied code is the test
+      const make = new Function(`${source}\nreturn pump_b;`) as () => (q: number) => number;
+      return make()(100);
+    }, code);
+    expect(head).toBeCloseTo(38 * Math.exp(-1.2), 1);
+    await dialog.getByRole('button', { name: 'Close' }).click();
+    await expect(dialog).toHaveCount(0);
+  });
 });
