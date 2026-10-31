@@ -42,4 +42,14 @@ describe('Excel formula evaluator', () => {
     expect(evaluateFormula('=10^400')).toEqual({ error: '#NUM!' });
     expect(evaluateFormula('=EXP(1)+N("a ""note""")')).toBe(Math.E);
   });
+
+  it('reads workbook names, and LET as a worksheet file stores it', () => {
+    const cells = { A2: 4, k_c: [1, 2, 3], k_a: 5 };
+    expect(evaluateFormula('INDEX(k_c,1)+A2*(INDEX(k_c,2)+A2*INDEX(k_c,3))', cells)).toBe(
+      1 + 4 * (2 + 4 * 3),
+    );
+    expect(evaluateFormula('INDEX(k_a,1)', cells)).toBe(5);
+    expect(evaluateFormula('INDEX(k_a,2)', cells)).toEqual({ error: '#REF!' });
+    expect(evaluateFormula('_xlfn.LET(_xlpm.u,A2*2,_xlpm.u+1)', cells)).toBe(9);
+  });
 });

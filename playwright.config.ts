@@ -12,11 +12,13 @@ export default defineConfig({
     baseURL: `http://localhost:${String(port)}`,
     trace: 'retain-on-failure',
   },
-  // R4: current Chrome/Edge (Chromium), Firefox and Safari (WebKit).
+  // R4: current Chrome/Edge (Chromium), Firefox and Safari (WebKit). Chromium is the target (ADR 36): it keeps
+  // the 5 s default for UI assertions, while Firefox and WebKit, which decode and render the 2400 px samples
+  // more slowly on shared CI runners, get twice that. Timing targets are asserted separately in each test.
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, expect: { timeout: 10_000 } },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] }, expect: { timeout: 10_000 } },
   ],
   webServer: {
     // e2e runs against the production bundle so offline/PWA behaviour matches what ships.

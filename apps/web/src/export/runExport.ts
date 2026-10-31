@@ -27,8 +27,8 @@ export function exportFileName(format: ExportFormat, project: Project, graph: Gr
 }
 
 /**
- * Builds an export in the compute pool (task 1.9). The audit JSON needs every graph image to hash, which is
- * read from project storage here and transferred to the worker.
+ * Builds an export in the compute pool (task 1.9). The audit JSON hashes every graph image and the workbook
+ * embeds them (task 3.4), so for those they are read from project storage here and transferred to the worker.
  */
 export async function runExport(
   format: ExportFormat,
@@ -37,7 +37,7 @@ export async function runExport(
   readFile: (path: string) => Promise<Uint8Array>,
 ): Promise<ExportedFile> {
   const images: Record<string, ArrayBuffer> = {};
-  if (format === 'audit') {
+  if (format === 'audit' || format === 'xlsx') {
     for (const g of project.graphs) {
       const bytes = await readFile(g.image.path);
       images[g.image.path] = bytes.buffer.slice(

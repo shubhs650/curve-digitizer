@@ -1,5 +1,6 @@
 // The project behind the export golden files: one linear and one log-x graph with awkward names, flags,
-// a duplicate X, a path dataset and an uncalibrated graph. Not exported from the package.
+// a duplicate X, a path dataset, a polynomial and a log-x spline fit, and an uncalibrated graph. Not exported
+// from the package.
 import { type Calibration, type Graph, type Point, type Project } from '@cd/core';
 import { type AxisTypes, type Correspondence, residuals, solveAffine } from '@cd/math';
 
@@ -105,6 +106,18 @@ export const EXPORT_PROJECT: Project = {
           points: [point('q2', [900, 900]), point('q1', [800, 800])],
         },
       ],
+      fits: [
+        {
+          id: 'f1',
+          datasetId: 'd1',
+          model: 'poly',
+          space: { x: 'lin', y: 'lin' },
+          params: { c: [52, -0.1, -0.003] },
+          domain: [10, 40],
+          stats: { n: 3, r2: 0.998, rmse: 0.12, aicc: -4.5 },
+          recommended: true,
+        },
+      ],
     }),
     graph('g2', 'Log x', {
       calibration: calibration(LOG_X, { x: 'log10', y: 'linear' }, ['', '']),
@@ -119,6 +132,18 @@ export const EXPORT_PROJECT: Project = {
           sourceRef: '',
           notes: '',
           points: [point('r1', [600, 300]), point('r2', [1000, 500])],
+        },
+      ],
+      fits: [
+        {
+          id: 'f2',
+          datasetId: 'e1',
+          model: 'spline',
+          space: { x: 'log', y: 'lin' },
+          params: { knots: [2, 2.5, 3], values: [60, 52, 40] },
+          domain: [100, 1000],
+          stats: { n: 2, r2: 1, rmse: 0, aicc: 0 },
+          recommended: false,
         },
       ],
     }),

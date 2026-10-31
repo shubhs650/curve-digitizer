@@ -165,7 +165,7 @@ function evaluate(node: Node, scope: Scope): ExcelValue {
     case 'array':
       return node.items;
     case 'name': {
-      const value = scope.get(node.name.replace(/\$/g, '').toUpperCase());
+      const value = scope.get(bare(node.name.replace(/\$/g, '')));
       if (value === undefined) throw new ReferenceError(`Unknown name ${node.name}`);
       return value;
     }
@@ -185,7 +185,16 @@ function evaluate(node: Node, scope: Scope): ExcelValue {
   }
 }
 
-function call(fn: string, args: readonly Node[], scope: Scope): ExcelValue {
+/**
+ * A name as Excel compares it: case-insensitive, and without the `_xlpm.` prefix a worksheet file gives LET's
+ * names (functions newer than the file format are stored `_xlfn.NAME`).
+ */
+function bare(name: string): string {
+  return name.toUpperCase().replace(/^_XLPM\./, '');
+}
+
+function call(stored: string, args: readonly Node[], scope: Scope): ExcelValue {
+  const fn = stored.toUpperCase().replace(/^_XLFN\./, '');
   const arg = (k: number): ExcelValue => {
     const a = args[k];
     if (a === undefined) throw new SyntaxError(`${fn} needs argument ${String(k + 1)}`);
@@ -202,9 +211,9 @@ function call(fn: string, args: readonly Node[], scope: Scope): ExcelValue {
       for (let k = 0; k < args.length - 1; k += 2) {
         const name = args[k];
         if (name?.t !== 'name') throw new SyntaxError('LET names must be names');
-        if (/^[RC]$/i.test(name.name) || /^\$?[A-Z]{1,3}\$?\d+$/i.test(name.name))
+        if (/^[RC]$/i.test(bare(name.name)) || /^\$?[A-Z]{1,3}\$?\d+$/i.test(bare(name.name)))
           throw new SyntaxError(`${name.name} cannot be a LET name in Excel`);
-        inner.set(name.name.toUpperCase(), evaluate(args[k + 1] as Node, inner));
+        inner.set(bare(name.name), evaluate(args[k + 1] as Node, inner));
       }
       return evaluate(args[args.length - 1] as Node, inner);
     }
@@ -246,6 +255,8 @@ function call(fn: string, args: readonly Node[], scope: Scope): ExcelValue {
       const array = arg(0);
       const k = num(arg(1));
       if (isError(k)) return k;
+      // A one-cell range is a number here; INDEX(cell, 1) is that cell.
+      if (typeof array === 'number') return Math.trunc(k) === 1 ? array : err('#REF!');
       if (!Array.isArray(array)) throw new SyntaxError('Only INDEX(array, n) is supported');
       const value = (array as readonly number[])[Math.trunc(k) - 1];
       return value === undefined ? err('#REF!') : value;
@@ -255,8 +266,11 @@ function call(fn: string, args: readonly Node[], scope: Scope): ExcelValue {
   }
 }
 
-/** The value of a worksheet formula, with cell references taken from `cells` (e.g. `{ A2: 3 }`). */
-export function evaluateFormula(formula: string, cells: Readonly<Record<string, number>> = {}): ExcelValue {
+/** Cell and workbook-name values a formula reads: a number, or a column of numbers for a range. */
+export type Cells = Readonly<Record<string, number | readonly number[]>>;
+
+/** The value of a worksheet formula, with cell references and names taken from `cells` (e.g. `{ A2: 3 }`). */
+export function evaluateFormula(formula: string, cells: Cells = {}): ExcelValue {
   const scope = new Map<string, ExcelValue>(
     Object.entries(cells).map(([ref, value]) => [ref.replace(/\$/g, '').toUpperCase(), value]),
   );
@@ -264,7 +278,7 @@ export function evaluateFormula(formula: string, cells: Readonly<Record<string, 
 }
 
 /** The formula's number, or NaN for an Excel error (the app's NaN where a fit is undefined). */
-export function formulaNumber(formula: string, cells: Readonly<Record<string, number>>): number {
+export function formulaNumber(formula: string, cells: Cells): number {
   const value = evaluateFormula(formula, cells);
   return typeof value === 'number' ? value : Number.NaN;
 }

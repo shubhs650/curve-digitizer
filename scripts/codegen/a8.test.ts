@@ -1,4 +1,4 @@
-// A8 (docs/ACCEPTANCE_TARGETS.md): the generated Python, JavaScript, C and Excel code computes the in-app fit
+// A8 (docs/ACCEPTANCE_TARGETS.md): the generated Python, JavaScript, C and Excel code (and the workbook's Fit sheet formulas) computes the in-app fit
 // within 1e-9 relative at 50 X values. Python, JavaScript and C are run (on CI they must run: the runner has
 // python3 and a C compiler, and NumPy is installed into a throwaway venv when the system Python lacks it;
 // elsewhere a missing tool skips its language); Excel goes through the formula evaluator. VBA and
@@ -8,11 +8,13 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { type CodeFit, evaluateFit, generateCode, identifier, recommendFits } from '@cd/fit';
+import { type CodeFit, evaluateFit, generateCode, identifier, recommendFits, sheetFit } from '@cd/fit';
 import { formulaNumber } from './excelFormula.ts';
 
 const RELATIVE = 1e-9;
 const COUNT = 50;
+/** Python and C run as child processes over every case (the C file is compiled twice); a loaded CI runner needs well over vitest's 5 s default. */
+const EXTERNAL_MS = 60_000;
 
 interface Case {
   readonly label: string;
@@ -165,75 +167,85 @@ describe('A8: generated code agrees with the app', () => {
     expectAgreement('JavaScript', results);
   });
 
-  it.runIf(python !== null)('Python (NumPy), arrays in and out', () => {
-    const script = [
-      'import math',
-      ...CASES.map((c) => generateCode(c.fit, 'python', { datasetName: c.datasetName })),
-      'CASES = [',
-      ...CASES.map((c) => `    (${identifier(c.datasetName)}, [${c.xs.map((x) => String(x)).join(', ')}]),`),
-      ']',
-      'for f, xs in CASES:',
-      '    print(" ".join("nan" if math.isnan(y) else repr(float(y)) for y in f(np.array(xs))))',
-    ].join('\n');
-    const file = join(dir, 'a8.py');
-    writeFileSync(file, script);
-    const out = execFileSync(python ?? 'python3', ['-I', file], { encoding: 'utf8', maxBuffer: 64 << 20 });
-    expectAgreement(
-      'Python',
-      out
-        .trimEnd()
-        .split('\n')
-        .map((line) => line.split(' ').map(Number)),
-    );
-  });
-
-  it.runIf(available('cc', ['--version']))('C, compiled with -std=c99 -Wall -Werror (and as C++)', () => {
-    const functions = CASES.map((c) => generateCode(c.fit, 'c', { datasetName: c.datasetName }));
-    const main = [
-      '#include <stdio.h>',
-      ...functions,
-      'int main(void)',
-      '{',
-      ...CASES.flatMap((c) => [
-        `    { static const double xs[] = {${c.xs.map((x) => (Number.isInteger(x) ? `${String(x)}.0` : String(x))).join(', ')}};`,
-        `      for (int i = 0; i < ${String(c.xs.length)}; i++) printf("%.17g ", ${identifier(c.datasetName)}(xs[i]));`,
-        '      printf("\\n"); }',
-      ]),
-      '    return 0;',
-      '}',
-      '',
-    ].join('\n');
-    const source = join(dir, 'a8.c');
-    const binary = join(dir, 'a8');
-    writeFileSync(source, main);
-    execFileSync('cc', [
-      '-std=c99',
-      '-pedantic',
-      '-Wall',
-      '-Wextra',
-      '-Werror',
-      '-O1',
-      source,
-      '-o',
-      binary,
-      '-lm',
-    ]);
-    if (has('c++', ['--version']))
-      execFileSync('c++', ['-x', 'c++', '-fsyntax-only', '-Wall', '-Werror', source]);
-    const out = execFileSync(binary, { encoding: 'utf8', maxBuffer: 64 << 20 });
-    expectAgreement(
-      'C',
-      out
-        .trimEnd()
-        .split('\n')
-        .map((line) =>
-          line
-            .trim()
-            .split(' ')
-            .map((t) => (/nan/i.test(t) ? Number.NaN : Number(t))),
+  it.runIf(python !== null)(
+    'Python (NumPy), arrays in and out',
+    () => {
+      const script = [
+        'import math',
+        ...CASES.map((c) => generateCode(c.fit, 'python', { datasetName: c.datasetName })),
+        'CASES = [',
+        ...CASES.map(
+          (c) => `    (${identifier(c.datasetName)}, [${c.xs.map((x) => String(x)).join(', ')}]),`,
         ),
-    );
-  });
+        ']',
+        'for f, xs in CASES:',
+        '    print(" ".join("nan" if math.isnan(y) else repr(float(y)) for y in f(np.array(xs))))',
+      ].join('\n');
+      const file = join(dir, 'a8.py');
+      writeFileSync(file, script);
+      const out = execFileSync(python ?? 'python3', ['-I', file], { encoding: 'utf8', maxBuffer: 64 << 20 });
+      expectAgreement(
+        'Python',
+        out
+          .trimEnd()
+          .split('\n')
+          .map((line) => line.split(' ').map(Number)),
+      );
+    },
+    EXTERNAL_MS,
+  );
+
+  it.runIf(available('cc', ['--version']))(
+    'C, compiled with -std=c99 -Wall -Werror (and as C++)',
+    () => {
+      const functions = CASES.map((c) => generateCode(c.fit, 'c', { datasetName: c.datasetName }));
+      const main = [
+        '#include <stdio.h>',
+        ...functions,
+        'int main(void)',
+        '{',
+        ...CASES.flatMap((c) => [
+          `    { static const double xs[] = {${c.xs.map((x) => (Number.isInteger(x) ? `${String(x)}.0` : String(x))).join(', ')}};`,
+          `      for (int i = 0; i < ${String(c.xs.length)}; i++) printf("%.17g ", ${identifier(c.datasetName)}(xs[i]));`,
+          '      printf("\\n"); }',
+        ]),
+        '    return 0;',
+        '}',
+        '',
+      ].join('\n');
+      const source = join(dir, 'a8.c');
+      const binary = join(dir, 'a8');
+      writeFileSync(source, main);
+      execFileSync('cc', [
+        '-std=c99',
+        '-pedantic',
+        '-Wall',
+        '-Wextra',
+        '-Werror',
+        '-O1',
+        source,
+        '-o',
+        binary,
+        '-lm',
+      ]);
+      if (has('c++', ['--version']))
+        execFileSync('c++', ['-x', 'c++', '-fsyntax-only', '-Wall', '-Werror', source]);
+      const out = execFileSync(binary, { encoding: 'utf8', maxBuffer: 64 << 20 });
+      expectAgreement(
+        'C',
+        out
+          .trimEnd()
+          .split('\n')
+          .map((line) =>
+            line
+              .trim()
+              .split(' ')
+              .map((t) => (/nan/i.test(t) ? Number.NaN : Number(t))),
+          ),
+      );
+    },
+    EXTERNAL_MS,
+  );
 
   it('Excel formula, through the evaluator (15-digit numbers, Excel precedence)', () => {
     const results = CASES.map((c) => {
@@ -241,5 +253,18 @@ describe('A8: generated code agrees with the app', () => {
       return c.xs.map((x) => formulaNumber(formula, { B2: Number(x.toPrecision(15)) }));
     });
     expectAgreement('Excel', results);
+  });
+
+  it('Excel workbook Fit sheet: named parameter ranges read by a live formula (task 3.4)', () => {
+    const results = CASES.map((c) => {
+      const sheet = sheetFit(c.fit, identifier(c.datasetName), c.datasetName);
+      const formula = sheet.formula('A20');
+      // Cells hold full doubles; a single-cell name is a number, a column an array.
+      const names = Object.fromEntries(
+        sheet.tables.map((t) => [t.name, t.values.length === 1 ? (t.values[0] ?? NaN) : t.values]),
+      );
+      return c.xs.map((x) => formulaNumber(formula, { ...names, A20: x }));
+    });
+    expectAgreement('Excel Fit sheet', results);
   });
 });

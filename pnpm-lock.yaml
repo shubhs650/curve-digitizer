@@ -144,6 +144,9 @@ importers:
       '@cd/core':
         specifier: workspace:*
         version: link:../core
+      '@cd/fit':
+        specifier: workspace:*
+        version: link:../fit
       '@cd/math':
         specifier: workspace:*
         version: link:../math
