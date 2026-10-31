@@ -59,10 +59,22 @@ test.describe('M1 acceptance', () => {
     await expect(graphCanvas(page)).toHaveAttribute('data-state', 'ready');
 
     await page.getByRole('button', { name: 'Calibrate', exact: true }).click();
-    await clickCanvas(page, 0.2, 0.8);
-    await clickCanvas(page, 0.8, 0.8);
-    await clickCanvas(page, 0.2, 0.75);
-    await clickCanvas(page, 0.2, 0.2);
+    const picks: readonly (readonly [string, number, number])[] = [
+      ['X2', 0.2, 0.8],
+      ['Y1', 0.8, 0.8],
+      ['Y2', 0.2, 0.75],
+      ['', 0.2, 0.2],
+    ];
+    for (const [next, fx, fy] of picks) {
+      await clickCanvas(page, fx, fy);
+      // Wait for the pick to move on, so the next click does not land on the same pick.
+      if (next !== '') {
+        await expect(calibration(page).getByRole('button', { name: `Place ${next}` })).toHaveAttribute(
+          'aria-pressed',
+          'true',
+        );
+      }
+    }
     for (const [name, value] of [
       ['X1', '0'],
       ['X2', '10'],

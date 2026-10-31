@@ -23,7 +23,18 @@ async function clickImage(page: Page, px: readonly [number, number]): Promise<vo
 async function calibrate(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Calibrate', exact: true }).click();
   await expect(panel(page).getByRole('button', { name: 'Place X1' })).toHaveAttribute('aria-pressed', 'true');
-  for (const px of CLICKS) await clickImage(page, px);
+  const picks = ['X1', 'X2', 'Y1', 'Y2'];
+  for (const [i, px] of CLICKS.entries()) {
+    await clickImage(page, px);
+    // Each click places the active pick and moves on; waiting for that keeps a quick next click off this pick.
+    const next = picks[i + 1];
+    if (next !== undefined) {
+      await expect(panel(page).getByRole('button', { name: `Place ${next}` })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    }
+  }
   for (const [name, value] of [
     ['X1', '10'],
     ['X2', '90'],
