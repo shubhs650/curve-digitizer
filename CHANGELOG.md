@@ -10,6 +10,13 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 - Ctrl+wheel, trackpad pinch and Ctrl + / Ctrl − / Ctrl 0 over the canvas now zoom the PDF page or the graph instead of the whole app.
 - The canvas gets most of the window: the tool rail, inspector and Data dock appear only when there is something in them, and the dock sits under the canvas instead of under the inspector.
 
+### Changed
+
+- New look: a header with the app mark and the open project's name, section headings in every panel, and labels in the header that fold into icons on narrow windows.
+- The home screen has a large drop zone, a four-step "How it works" strip, project cards and sample previews; the sidebar appears only once a project is open.
+- The project sidebar groups its actions (Add PDF or image, Save .cdz, Export) at the top, lists graphs and PDF pages with the current one highlighted, and keeps a compact Getting started guide at its foot.
+- An open project with no graph says what to do next, with an "Open page 1" button when it has a PDF.
+
 ### Added
 
 - The PDF page view zooms (zoom bar, Ctrl+wheel, + and −), pans (Space+drag, middle button, arrow keys) and renders sharper as you zoom in.

@@ -50,3 +50,9 @@ From PDF viewers (Acrobat, Edge/Chrome, PDF.js), graph digitizers (WebPlotDigiti
 ## Fixes
 
 F1–F10 in the layout PR (ADR 47); F11–F14 in the visual redesign PR. Both ship in v0.4.0.
+
+## Tests that keep it fixed
+
+- `apps/web/e2e/layout.spec.ts` opens the home screen, a crop and a graph at 1280×720, 1366×768, 1440×900, 1536×864, 1920×1080, 1024×768 and 768×1024 and fails on any control narrower or shorter than its content, any clipped label, page scroll, overlapping regions, or a canvas below half the width (or 60 % of the height at 1280 px and wider).
+- `apps/web/e2e/visual.spec.ts` compares screenshots of the home screen (1366 light and dark, 768), the crop view (1366) and a graph (1366 with the dock collapsed, 1920 with it open) against baselines, Chromium on Linux, with Liberation Sans forced so CI and local runs render alike. Update baselines with `npx playwright test apps/web/e2e/visual.spec.ts --project=chromium --update-snapshots` after an intended change, and look at the new images before committing.
+- Unit tests cover the zoom capture registry, the dock and sidebar defaults, and the crop handle geometry.
