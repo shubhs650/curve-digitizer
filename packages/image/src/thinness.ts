@@ -36,10 +36,9 @@ export function otsuThreshold(image: FloatImage, bins = 256): number {
 
 /** 1 where `image` is above `threshold`. */
 export function thresholdMask(image: FloatImage, threshold: number): Mask {
-  const data = new Uint8Array(image.data.length);
-  image.data.forEach((v, i) => {
-    data[i] = v > threshold ? 1 : 0;
-  });
+  const src = image.data;
+  const data = new Uint8Array(src.length);
+  for (let i = 0; i < src.length; i++) data[i] = (src[i] ?? 0) > threshold ? 1 : 0;
   return { width: image.width, height: image.height, data };
 }
 

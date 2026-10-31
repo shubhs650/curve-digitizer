@@ -16,6 +16,7 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:samples": "vitest run --config vitest.samples.config.ts",
+    "bench": "node scripts/bench-image.ts",
     "test:e2e": "playwright test",
     "build": "pnpm --filter @cd/web build && pnpm size",
     "size": "node scripts/size-check.ts apps/web/dist",

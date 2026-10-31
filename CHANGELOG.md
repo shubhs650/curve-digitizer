@@ -4,6 +4,10 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
+### Added
+
+- Pre-processing filters for the tracers (brightness, contrast with auto stretch, grayscale, invert, threshold, despeckle, grid-line suppression that copes with tilted scans, isolate colour), run off the main thread and cached; docs page "Pre-processing".
+
 ## [0.1.0] - 2026-10-31
 
 First release (milestone M1, manual core): open a PDF or image, crop, calibrate, digitize by hand with magnetic snap, edit in the data table, export CSV/Excel/audit JSON, and keep projects on this device or in `.cdz` files. Runs entirely in the browser and works offline.

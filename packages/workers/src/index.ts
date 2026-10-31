@@ -29,3 +29,5 @@ export type {
 export type { PageGeometry, PdfPermissions, RgbaImage } from '@cd/pdf';
 export type { ExportFileInput, ExportFileOutput, ExportFormat } from './tasks/export.ts';
 export type { CdzFiles, FileBuffers } from './tasks/cdz.ts';
+export type { ProcessImageInput, ProcessImageOutput } from './tasks/process.ts';
+export type { ImageSource } from './tasks/source.ts';
