@@ -1,6 +1,7 @@
 // A8 (docs/ACCEPTANCE_TARGETS.md): the generated Python, JavaScript, C and Excel code computes the in-app fit
-// within 1e-9 relative at 50 X values. Python, JavaScript and C are run (CI runners have python3 with NumPy and
-// a C compiler; elsewhere a missing tool skips its language); Excel goes through the formula evaluator. VBA and
+// within 1e-9 relative at 50 X values. Python, JavaScript and C are run (on CI they must run: the runner has
+// python3 and a C compiler, and NumPy is installed into a throwaway venv when the system Python lacks it;
+// elsewhere a missing tool skips its language); Excel goes through the formula evaluator. VBA and
 // MATLAB are compared as text with golden files in packages/fit (codegen.test.ts) and spot-checked by hand.
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -116,6 +117,25 @@ afterAll(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+/**
+ * A Python that can import NumPy: python3 itself, or on CI (whose system Python has no NumPy and refuses pip
+ * installs, PEP 668) a venv in the temporary directory with NumPy from PyPI. Null elsewhere without NumPy.
+ */
+function pythonWithNumpy(): string | null {
+  if (has('python3', ['-c', 'import numpy'])) return 'python3';
+  if (!process.env.CI) return null;
+  const venv = join(dir, 'venv');
+  execFileSync('python3', ['-m', 'venv', venv]);
+  const python = join(venv, 'bin', 'python');
+  execFileSync(python, ['-m', 'pip', 'install', '--quiet', '--only-binary=:all:', 'numpy>=2,<3'], {
+    stdio: 'inherit',
+  });
+  available(python, ['-c', 'import numpy']);
+  return python;
+}
+
+const python = pythonWithNumpy();
+
 describe('A8: generated code agrees with the app', () => {
   it(`has the hand-written examples and ${String(recommended.length)} fitted candidates`, () => {
     expect(CASES.length).toBeGreaterThan(300);
@@ -145,7 +165,7 @@ describe('A8: generated code agrees with the app', () => {
     expectAgreement('JavaScript', results);
   });
 
-  it.runIf(available('python3', ['-c', 'import numpy']))('Python (NumPy), arrays in and out', () => {
+  it.runIf(python !== null)('Python (NumPy), arrays in and out', () => {
     const script = [
       'import math',
       ...CASES.map((c) => generateCode(c.fit, 'python', { datasetName: c.datasetName })),
@@ -157,7 +177,7 @@ describe('A8: generated code agrees with the app', () => {
     ].join('\n');
     const file = join(dir, 'a8.py');
     writeFileSync(file, script);
-    const out = execFileSync('python3', ['-I', file], { encoding: 'utf8', maxBuffer: 64 << 20 });
+    const out = execFileSync(python ?? 'python3', ['-I', file], { encoding: 'utf8', maxBuffer: 64 << 20 });
     expectAgreement(
       'Python',
       out
