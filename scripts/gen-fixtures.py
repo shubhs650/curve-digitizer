@@ -2,8 +2,8 @@
 """Generate NumPy reference fixtures for packages/math and packages/image.
 
 Run from the repository root:  python3 scripts/gen-fixtures.py
-Needs NumPy only. Output is deterministic (seeded) and written to packages/math/fixtures/ and
-packages/image/fixtures/.
+Needs NumPy and SciPy. Output is deterministic (seeded) and written to packages/math/fixtures/,
+packages/image/fixtures/ and packages/fit/fixtures/.
 
 The reference implementations below are deliberately written independently of the TypeScript code:
 affine uses np.linalg.lstsq on raw pixel coordinates, the DLT uses np.linalg.svd, the Jacobian is the
@@ -18,6 +18,7 @@ import numpy as np
 
 OUT = Path(__file__).resolve().parent.parent / "packages" / "math" / "fixtures"
 IMAGE_OUT = Path(__file__).resolve().parent.parent / "packages" / "image" / "fixtures"
+FIT_OUT = Path(__file__).resolve().parent.parent / "packages" / "fit" / "fixtures"
 RNG = np.random.default_rng(20261030)
 PICK_SIGMA_PX = 0.5
 DEFAULT_LINE_WIDTH_PX = 2.0
@@ -415,9 +416,145 @@ def filter_cases():
     return {"lab": {"rgb": colours.tolist(), "lab": lab.tolist()}, "median": medians, "thinning": thinning}
 
 
+# ---------------------------------------------------------------------------------------------------------
+# Fitting (task 3.1). SciPy is the reference for splines and nonlinear least squares; its own generator keeps
+# the fixtures above unchanged.
+
+def fit_rng():
+    return np.random.default_rng(20261031)
+
+
+def poly_cases(rng):
+    cases = []
+    for name, x, degree in [
+        ("cubic", np.linspace(-2.0, 3.0, 25), 3),
+        ("line-offset", np.linspace(100.0, 600.0, 18), 1),
+        ("quintic-uneven", np.sort(rng.uniform(0.0, 10.0, 40)), 5),
+        ("nonic", np.linspace(-1.0, 1.0, 30), 9),
+    ]:
+        y = np.sin(x / (x.max() - x.min()) * 4.0) * 10.0 + 0.1 * x + rng.normal(0.0, 0.05, len(x))
+        coef = np.polyfit(x, y, degree)[::-1]
+        queries = np.linspace(x.min(), x.max(), 7)
+        cases.append({"name": name, "x": x.tolist(), "y": y.tolist(), "degree": degree,
+                      "coefficients": coef.tolist(), "queries": queries.tolist(),
+                      "values": np.polynomial.polynomial.polyval(queries, coef).tolist()})
+    return cases
+
+
+def spline_cases(rng):
+    from scipy.interpolate import CubicSpline, PchipInterpolator
+    cases = []
+    knots_sets = {
+        "smooth": (np.array([0.0, 1.0, 2.5, 3.0, 4.5, 6.0]), np.array([1.0, 2.0, 1.5, 0.2, -1.0, 0.5])),
+        "monotone-flat": (np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+                          np.array([0.0, 0.0, 1.0, 3.0, 3.0, 3.5, 8.0])),
+        "two-knots": (np.array([2.0, 5.0]), np.array([1.0, -2.0])),
+        "three-knots": (np.array([-1.0, 0.5, 4.0]), np.array([3.0, 0.0, 2.0])),
+        "sign-change-ends": (np.array([0.0, 0.2, 1.5, 1.6, 4.0]), np.array([5.0, 0.0, 4.0, 4.1, -3.0])),
+    }
+    for name, (t, v) in knots_sets.items():
+        queries = np.concatenate([np.linspace(t[0] - 0.5, t[-1] + 0.5, 23), t])
+        natural = CubicSpline(t, v, bc_type="natural")
+        pchip = PchipInterpolator(t, v, extrapolate=True)
+        cases.append({"name": name, "knots": t.tolist(), "values": v.tolist(), "queries": queries.tolist(),
+                      "natural": natural(queries).tolist(), "naturalSecond": natural(t, 2).tolist(),
+                      "pchip": pchip(queries).tolist(), "pchipSlopes": pchip(t, 1).tolist()})
+    return cases
+
+
+def lsq_spline_case(rng):
+    """Least-squares natural cubic spline on fixed knots: the spline is linear in its knot values, so the
+    design matrix column j is the natural spline through the j-th unit vector."""
+    from scipy.interpolate import CubicSpline
+    x = np.sort(rng.uniform(0.0, 10.0, 60))
+    y = np.exp(-0.3 * x) * np.cos(x) + rng.normal(0.0, 0.02, len(x))
+    knots = np.quantile(x, np.linspace(0.0, 1.0, 7))
+    design = np.column_stack([CubicSpline(knots, np.eye(len(knots))[j], bc_type="natural")(x)
+                              for j in range(len(knots))])
+    values, *_ = np.linalg.lstsq(design, y, rcond=None)
+    lin_design = np.column_stack([np.interp(x, knots, np.eye(len(knots))[j]) for j in range(len(knots))])
+    lin_values, *_ = np.linalg.lstsq(lin_design, y, rcond=None)
+    return {"x": x.tolist(), "y": y.tolist(), "knots": knots.tolist(), "naturalValues": values.tolist(),
+            "linearValues": lin_values.tolist()}
+
+
+def curve_fit_cases(rng):
+    from scipy.optimize import curve_fit
+    cases = []
+    x = np.linspace(1.0, 50.0, 30)
+    y = 120.0 * x ** -0.62 + rng.normal(0.0, 0.4, len(x))
+    p, _ = curve_fit(lambda x, a, b: a * x ** b, x, y, p0=[100.0, -0.5], xtol=1e-15, ftol=1e-15, gtol=1e-15)
+    cases.append({"model": "power", "x": x.tolist(), "y": y.tolist(), "p0": [100.0, -0.5], "params": p.tolist()})
+    x = np.linspace(0.0, 4.0, 35)
+    y = 2.5 * np.exp(0.8 * x) + rng.normal(0.0, 0.3, len(x))
+    p, _ = curve_fit(lambda x, a, b: a * np.exp(b * x), x, y, p0=[2.0, 0.7], xtol=1e-15, ftol=1e-15, gtol=1e-15)
+    cases.append({"model": "exp", "x": x.tolist(), "y": y.tolist(), "p0": [2.0, 0.7], "params": p.tolist()})
+    x = np.linspace(0.0, 8.0, 40)
+    y = (1.0 + 2.0 * x) / (1.0 + 0.5 * x) + rng.normal(0.0, 0.02, len(x))
+    p, _ = curve_fit(lambda x, p0, p1, q1: (p0 + p1 * x) / (1.0 + q1 * x), x, y, p0=[1.2, 1.5, 0.3],
+                     xtol=1e-15, ftol=1e-15, gtol=1e-15)
+    cases.append({"model": "rational11", "x": x.tolist(), "y": y.tolist(), "p0": [1.2, 1.5, 0.3],
+                  "params": p.tolist()})
+    return cases
+
+
+def aicc(rss, n, k):
+    return n * math.log(rss / n) + 2 * k + 2 * k * (k + 1) / (n - k - 1)
+
+
+def fit_math_cases():
+    rng = fit_rng()
+    return {"poly": poly_cases(rng), "splines": spline_cases(rng), "lsqSpline": lsq_spline_case(rng),
+            "curveFit": curve_fit_cases(rng),
+            "aicc": [{"rss": r, "n": n, "k": k, "aicc": aicc(r, n, k)}
+                     for r, n, k in [(1.5, 20, 3), (2.0e-6, 45, 7), (310.0, 12, 2)]]}
+
+
+def recommend_cases():
+    """Synthetic datasets for A7: the recommendation must pick the family each was drawn from.
+
+    Noise is Gaussian with sigma a fraction of the y range (in fit space), at the 0.3 % a careful digitization
+    reaches and at a rougher 1 %."""
+    rng = np.random.default_rng(20261101)
+    families = {
+        "power": ("power", "linear", "linear", lambda n: np.linspace(1.0, 60.0, n), lambda x: 85.0 * x ** -0.55),
+        "exp": ("exp", "linear", "linear", lambda n: np.linspace(0.0, 5.0, n), lambda x: 1.8 * np.exp(0.72 * x)),
+        "exp-decay": ("exp", "linear", "linear", lambda n: np.linspace(0.0, 400.0, n),
+                      lambda x: 950.0 * np.exp(-0.009 * x)),
+        "poly3": ("poly", "linear", "linear", lambda n: np.linspace(-3.0, 4.0, n),
+                  lambda x: 0.5 * x ** 3 - 2.0 * x ** 2 - 1.5 * x + 4.0),
+        "piecewise": ("piecewise", "linear", "linear", lambda n: np.linspace(0.0, 10.0, n),
+                      lambda x: np.where(x < 4.0, 2.0 + 1.5 * x, 8.0 - 0.4 * (x - 4.0))),
+        "piecewise-3": ("piecewise", "linear", "linear", lambda n: np.linspace(0.0, 30.0, n),
+                        lambda x: np.interp(x, [0.0, 8.0, 19.0, 30.0], [10.0, 40.0, 45.0, 12.0])),
+        "power-loglog": ("power", "log10", "log10", lambda n: np.logspace(1.0, 6.0, n),
+                         lambda x: 4000.0 * x ** -0.25),
+        "exp-semilog": ("exp", "linear", "log10", lambda n: np.linspace(0.0, 600.0, n),
+                        lambda x: 2.0e5 * np.exp(-0.011 * x)),
+    }
+    cases = []
+    for name, (family, xaxis, yaxis, xs, f) in families.items():
+        for n in (30, 60):
+            for rel in (0.003, 0.01):
+                x = xs(n)
+                y = f(x)
+                if yaxis == "log10":
+                    v = np.log10(y)
+                    y = 10.0 ** (v + rng.normal(0.0, rel * (v.max() - v.min()), n))
+                else:
+                    y = y + rng.normal(0.0, rel * (y.max() - y.min()), n)
+                cases.append({"name": f"{name} n={n} noise={rel * 100:g}%", "family": family,
+                              "degree": 3 if family == "poly" else None,
+                              "axes": {"x": xaxis, "y": yaxis}, "x": x.tolist(), "y": y.tolist()})
+    return cases
+
+
 def write(name, data, out=OUT):
     out.mkdir(parents=True, exist_ok=True)
     meta = {"generator": "scripts/gen-fixtures.py", "numpy": np.__version__}
+    if out == FIT_OUT or name == "fits.json":
+        import scipy
+        meta["scipy"] = scipy.__version__
     (out / name).write_text(json.dumps({"meta": meta, **data}, indent=2) + "\n")
 
 
@@ -427,4 +564,6 @@ if __name__ == "__main__":
     write("crossings.json", {"cases": crossing_cases()})
     write("thinness.json", image_cases(), IMAGE_OUT)
     write("filters.json", filter_cases(), IMAGE_OUT)
-    print(f"wrote fixtures to {OUT} and {IMAGE_OUT}")
+    write("fits.json", fit_math_cases())
+    write("recommend.json", {"cases": recommend_cases()}, FIT_OUT)
+    print(f"wrote fixtures to {OUT}, {IMAGE_OUT} and {FIT_OUT}")

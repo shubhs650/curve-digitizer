@@ -2,6 +2,7 @@ import { expect } from 'vitest';
 import linalgJson from '../../fixtures/linalg.json';
 import crossingsJson from '../../fixtures/crossings.json';
 import transformsJson from '../../fixtures/transforms.json';
+import fitsJson from '../../fixtures/fits.json';
 import type { AxisType, AxisTypes } from '../axis.ts';
 import type { TransformModel } from '../transform.ts';
 import type { Mat2, Mat3, Vec2 } from '../types.ts';
@@ -126,3 +127,5 @@ export const crossingCases: readonly CrossingCase[] = crossingsJson.cases.map((c
   xAxisAt: c.xAxisAt,
   yAxisAt: c.yAxisAt,
 }));
+
+export const fitsFixture = fitsJson;

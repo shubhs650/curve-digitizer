@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@cd/fit": "workspace:*",
     "@cd/image": "workspace:*",
     "@cd/math": "workspace:*",
     "@cd/trace": "workspace:*",

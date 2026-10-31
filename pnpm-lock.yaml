@@ -11,6 +11,9 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.14.0
         version: 4.14.0(playwright-core@1.63.0)
+      '@cd/fit':
+        specifier: workspace:*
+        version: link:packages/fit
       '@cd/image':
         specifier: workspace:*
         version: link:packages/image
@@ -145,7 +148,14 @@ importers:
         specifier: 0.8.3
         version: 0.8.3
 
-  packages/fit: {}
+  packages/fit:
+    dependencies:
+      '@cd/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cd/math':
+        specifier: workspace:*
+        version: link:../math
 
   packages/image: {}
 
