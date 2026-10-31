@@ -85,10 +85,11 @@ test.describe('guided trace', () => {
       description: `${run.ms.toFixed(0)} ms, ${String(run.events)} progress events`,
     });
     expect(END[0] - START[0]).toBeGreaterThan(1800);
-    // P4's 1 s budget applies to Chromium, the target browser (ADR 36);
-    // elsewhere the trace must still finish within twice that.
-    expect(run.ms).toBeLessThanOrEqual(browserName === 'chromium' ? 1000 : 2000);
-    expect((run.events * 1000) / run.ms).toBeGreaterThanOrEqual(4);
+    // P4's 1 s budget and 4 events/s apply to Chromium, the target browser (ADR 36);
+    // elsewhere the trace must still finish within twice that, at half the rate.
+    const chromium = browserName === 'chromium';
+    expect(run.ms).toBeLessThanOrEqual(chromium ? 1000 : 2000);
+    expect((run.events * 1000) / run.ms).toBeGreaterThanOrEqual(chromium ? 4 : 2);
     const longTasks = await page.evaluate(() =>
       (window as unknown as { longTasks: number[] }).longTasks.filter((d) => d > 100),
     );

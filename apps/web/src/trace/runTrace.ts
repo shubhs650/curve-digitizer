@@ -88,7 +88,14 @@ export async function runTrace(
   } catch (error) {
     if (stale()) return;
     setSession((s) =>
-      s ? { ...s, phase: 'error', error: error instanceof Error ? error.message : String(error) } : s,
+      s
+        ? {
+            ...s,
+            phase: 'error',
+            error: error instanceof Error ? error.message : String(error),
+            cause: error,
+          }
+        : s,
     );
   } finally {
     if (current === abort) current = null;
