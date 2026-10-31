@@ -22,6 +22,7 @@ import {
   zoomAt,
 } from './viewTransform';
 import { ZoomBar } from './ZoomBar';
+import { useZoomTarget, type ZoomTarget } from './zoomTarget';
 
 const useStyles = makeStyles({
   view: {
@@ -146,9 +147,19 @@ export function GraphCanvas({
       observer.disconnect();
     };
   }, []);
+  // A fitted view stays fitted when the canvas changes size (dock or sidebar toggled, window resized); a view
+  // the user zoomed or panned is left alone.
+  const lastViewport = useRef<Size | null>(null);
   useEffect(() => {
-    if (viewport && view === null) setView(fitView(imageSize, viewport));
-  }, [viewport, view, imageSize]);
+    if (!viewport) return;
+    const previous = lastViewport.current;
+    lastViewport.current = viewport;
+    setView((v) =>
+      v === null || (previous !== null && sameView(v, fitView(imageSize, previous)))
+        ? fitView(imageSize, viewport)
+        : v,
+    );
+  }, [viewport, imageSize]);
 
   useLayerPaint(imageLayer, viewport, [bitmap, view, reference], (ctx) => {
     if (!bitmap || !view) return;
@@ -261,6 +272,28 @@ export function GraphCanvas({
   const zoomBy = (factor: number) => {
     if (viewport) setView((v) => (v ? zoomAt(v, factor, [viewport.width / 2, viewport.height / 2]) : v));
   };
+
+  // Ctrl+wheel, pinch and Ctrl + / − / 0 zoom the graph, not the app (ADR 47).
+  const zoomTarget = useMemo<ZoomTarget | null>(
+    () =>
+      viewport
+        ? {
+            zoomBy: (factor, anchor) => {
+              const rect = overlayLayer.current?.getBoundingClientRect();
+              const at: Vec2 =
+                anchor && rect
+                  ? [anchor.clientX - rect.left, anchor.clientY - rect.top]
+                  : [viewport.width / 2, viewport.height / 2];
+              setView((v) => (v ? zoomAt(v, factor, at) : v));
+            },
+            fit: () => {
+              setView(fitView(imageSize, viewport));
+            },
+          }
+        : null,
+    [viewport, imageSize],
+  );
+  useZoomTarget(zoomTarget);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLCanvasElement>) => {
     if (event.key === ' ') {
@@ -436,6 +469,11 @@ export function GraphCanvas({
       )}
     </div>
   );
+}
+
+function sameView(a: ViewTransform, b: ViewTransform): boolean {
+  const close = (x: number, y: number) => Math.abs(x - y) < 1e-6;
+  return close(a.scale, b.scale) && close(a.offset[0], b.offset[0]) && close(a.offset[1], b.offset[1]);
 }
 
 /**

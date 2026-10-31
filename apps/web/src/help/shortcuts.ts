@@ -24,6 +24,8 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { keys: ['Ctrl+S'], action: 'Save the project as a .cdz file' },
       { keys: ['Ctrl+V'], action: 'Paste an image as a new graph' },
       { keys: ['Tab', 'Shift+Tab'], action: 'Move between controls' },
+      { keys: ['Ctrl++', 'Ctrl+−'], action: 'Zoom the page or graph in or out (also Ctrl+wheel and pinch)' },
+      { keys: ['Ctrl+0'], action: 'Fit the page or graph to the window' },
     ],
   },
   {
@@ -53,6 +55,17 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { keys: ['Enter'], action: 'Show the keyboard crosshair, then click with the current tool' },
       { keys: ['Arrow keys'], action: 'Move the crosshair 1 px (Shift: 10 px) while it is shown' },
       { keys: ['Esc'], action: 'Hide the crosshair, or clear the selection' },
+    ],
+  },
+  {
+    title: 'PDF page',
+    where: 'with the page focused, while cropping',
+    shortcuts: [
+      { keys: ['+', '−'], action: 'Zoom in or out (also Ctrl+wheel)' },
+      { keys: ['0'], action: 'Fit the page to the window' },
+      { keys: ['Arrow keys'], action: 'Scroll the page' },
+      { keys: ['Space+drag'], action: 'Pan with the mouse (also the middle button)' },
+      { keys: ['Esc'], action: 'Clear the crop rectangle' },
     ],
   },
   {

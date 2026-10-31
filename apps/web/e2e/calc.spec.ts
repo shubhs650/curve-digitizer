@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { axe, expect, graphProject, sampleImage, SAMPLES, seedProject, test } from './fixtures';
+import { axe, expect, graphProject, sampleImage, SAMPLES, seedProject, test, withDockOpen } from './fixtures';
 
 // Task 3.5: the interpolation calculator and compare readout on vector-clean's Pump A
 // (H = 52 + 0.05 Q − 0.0035 Q² − 0.000012 Q³) and Pump B (H = 38·e^(−0.012 Q)), from their ground-truth points.
@@ -69,6 +69,7 @@ async function rows(page: Page): Promise<string[][]> {
 
 test.describe('Calculator', () => {
   test.beforeEach(async ({ page }) => {
+    await withDockOpen(page);
     await page.goto('/');
     await seedProject(page, calibrated, { 'graphs/g1/original.png': sampleImage('vector-clean') });
     await expect(canvas(page)).toHaveAttribute('data-state', 'ready');

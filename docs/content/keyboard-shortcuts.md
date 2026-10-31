@@ -12,6 +12,8 @@ Press **?** anywhere in the app to show this list. Every action can be done from
 | <kbd>Ctrl+S</kbd> | Save the project as a .cdz file |
 | <kbd>Ctrl+V</kbd> | Paste an image as a new graph |
 | <kbd>Tab</kbd>, <kbd>Shift+Tab</kbd> | Move between controls |
+| <kbd>Ctrl++</kbd>, <kbd>Ctrl+−</kbd> | Zoom the page or graph in or out (also Ctrl+wheel and pinch) |
+| <kbd>Ctrl+0</kbd> | Fit the page or graph to the window |
 
 ## Tools
 
@@ -43,6 +45,18 @@ With the canvas focused.
 | <kbd>Enter</kbd> | Show the keyboard crosshair, then click with the current tool |
 | <kbd>Arrow keys</kbd> | Move the crosshair 1 px (Shift: 10 px) while it is shown |
 | <kbd>Esc</kbd> | Hide the crosshair, or clear the selection |
+
+## PDF page
+
+With the page focused, while cropping.
+
+| Keys | Action |
+|---|---|
+| <kbd>+</kbd>, <kbd>−</kbd> | Zoom in or out (also Ctrl+wheel) |
+| <kbd>0</kbd> | Fit the page to the window |
+| <kbd>Arrow keys</kbd> | Scroll the page |
+| <kbd>Space+drag</kbd> | Pan with the mouse (also the middle button) |
+| <kbd>Esc</kbd> | Clear the crop rectangle |
 
 ## Points
 

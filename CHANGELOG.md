@@ -4,6 +4,18 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
+### Fixed
+
+- Buttons in the sidebar and the Crop panel (Add PDF or image, Save .cdz, Export, All projects, Whole page) no longer shrink to a few pixels on laptop screens; the panels scroll instead.
+- Ctrl+wheel, trackpad pinch and Ctrl + / Ctrl − / Ctrl 0 over the canvas now zoom the PDF page or the graph instead of the whole app.
+- The canvas gets most of the window: the tool rail, inspector and Data dock appear only when there is something in them, and the dock sits under the canvas instead of under the inspector.
+
+### Added
+
+- The PDF page view zooms (zoom bar, Ctrl+wheel, + and −), pans (Space+drag, middle button, arrow keys) and renders sharper as you zoom in.
+- The crop rectangle has handles to resize it, moves when dragged from inside, shows its size in pixels and clears with Esc.
+- The Data dock can be resized by dragging its top edge (or with the arrow keys) and remembers its size; it starts collapsed on short windows. The project sidebar starts hidden on windows narrower than 1200 px.
+
 ## [0.3.0] - 2026-10-31
 
 Milestone M3, fitting and extras, completing rev 0: curve fitting with recommendations, code export in six languages, the calculator, the reference overlay, the error reporter, the Excel workbook v2 and the samples as one-click demo projects. Still entirely in the browser and offline.

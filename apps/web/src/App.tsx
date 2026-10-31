@@ -20,6 +20,7 @@ import { createWorkspace } from './session/createWorkspace';
 import { useImportFiles } from './session/useImportFiles';
 import type { Workspace } from './session/workspace';
 import { AppHeader } from './shell/AppHeader';
+import { initialSidebarOpen } from './shell/layoutPrefs';
 import { ShellLayout } from './shell/ShellLayout';
 import { GraphEditor } from './tools/GraphEditor';
 import { ToolRail } from './tools/ToolRail';
@@ -86,7 +87,7 @@ function GlobalErrors() {
 
 function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () => void }) {
   const styles = useStyles();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => initialSidebarOpen(window.innerWidth));
   const update = usePwaUpdate();
   const onFiles = useImportFiles();
   const dragging = useImageInput(onFiles);
@@ -112,7 +113,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
       <ShellLayout
         sidebarOpen={sidebarOpen}
         sidebar={<ProjectSidebar onFiles={onFiles} />}
-        rail={project !== null && cropPage === null && <ToolRail />}
+        rail={graph !== null && cropPage === null && <ToolRail />}
         inspector={
           cropPage !== null ? (
             <CropPanel page={cropPage} />
@@ -120,7 +121,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
             graph !== null && <Inspector key={graph.id} graph={graph} />
           )
         }
-        dock={project !== null && <DataDock />}
+        dock={graph !== null && cropPage === null && <DataDock />}
         canvas={
           project === null ? (
             <HomeScreen onFiles={onFiles} />

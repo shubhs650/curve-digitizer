@@ -23,6 +23,11 @@ const useStyles = makeStyles({
     height: '100%',
     boxSizing: 'border-box',
     paddingBlock: tokens.spacingVerticalS,
+    // A short canvas (dock dragged up, small window) scrolls the rail instead of squashing its buttons.
+    overflowX: 'hidden',
+    overflowY: 'auto',
+    scrollbarWidth: 'thin',
+    '& > *': { flexShrink: 0 },
   },
   spacer: {
     flexGrow: 1,

@@ -8,17 +8,17 @@ test.describe('app shell', () => {
     await page.goto('/');
   });
 
-  test('renders the header and every layout region', async ({ page }) => {
+  test('renders the header, and the home screen at full width', async ({ page }) => {
     const header = page.getByRole('banner');
     await expect(header.getByText('Curve Digitizer')).toBeVisible();
     for (const name of ['Open Engineering Tools home', 'Docs', 'Report issue', 'GitHub repository']) {
       await expect(header.getByRole('link', { name })).toBeVisible();
     }
-    await expect(page.getByRole('complementary', { name: 'Project and pages' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Tools' })).toBeVisible();
     await expect(page.getByRole('main', { name: 'Canvas' })).toBeVisible();
-    await expect(page.getByRole('complementary', { name: 'Inspector' })).toBeVisible();
-    await expect(page.getByRole('region', { name: 'Data dock' })).toBeVisible();
+    // The tool rail, inspector and dock come with a graph (ADR 47; laid out in layout.spec.ts).
+    await expect(page.getByRole('region', { name: 'Tools' })).toHaveCount(0);
+    await expect(page.getByRole('complementary', { name: 'Inspector' })).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'Data dock' })).toHaveCount(0);
   });
 
   test('fills the viewport without page scroll', async ({ page }) => {

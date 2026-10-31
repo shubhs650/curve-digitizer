@@ -261,3 +261,14 @@ export async function waitForServiceWorker(page: Page): Promise<void> {
   });
   await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 }
+
+/**
+ * Starts the app with the Data dock open, as a user who opened it once finds it (it is remembered). Windows under
+ * 800 px tall, Playwright's default 1280 × 720 among them, otherwise start with it collapsed (ADR 47).
+ */
+export async function withDockOpen(target: Page | BrowserContext): Promise<void> {
+  await target.addInitScript(() => {
+    if (localStorage.getItem('curve-digitizer:dock') === null)
+      localStorage.setItem('curve-digitizer:dock', JSON.stringify({ open: true, height: 220 }));
+  });
+}
