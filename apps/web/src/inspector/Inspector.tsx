@@ -1,6 +1,7 @@
 import type { Graph } from '@cd/core';
 import { makeStyles } from '@fluentui/react-components';
 import { CalibrationPanel } from '../calibration/CalibrationPanel';
+import { MaskPanel } from '../mask/MaskPanel';
 import { GraphSourcePanel } from '../pdf/GraphSourcePanel';
 import { PointsPanel } from '../points/PointsPanel';
 import { ProcessingPanel } from '../processing/ProcessingPanel';
@@ -24,6 +25,7 @@ export function Inspector({ graph }: { graph: Graph }) {
       <DatasetsPanel graph={graph} />
       <PointsPanel graph={graph} />
       <ProcessingPanel graph={graph} />
+      <MaskPanel graph={graph} />
     </div>
   );
 }

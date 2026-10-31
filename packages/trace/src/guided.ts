@@ -31,8 +31,8 @@ const BRANCH_MIN_INK = 0.6;
 const BRANCH_EPSILON = 0.1;
 /** After the user picks a branch, the tracer commits to it for this far before it may ask again, px. */
 const COMMIT_PX = 2 * RAY_PX;
-/** A start colour closer than this (ΔE*ab) to the paper is no curve at all. */
-const MIN_CURVE_CONTRAST = 10;
+/** A curve colour closer than this (ΔE*ab) to the paper is no curve at all. */
+export const MIN_CURVE_CONTRAST = 10;
 /** Arc length over which the heading is re-estimated from the accepted centres, px. */
 const TANGENT_PX = 6;
 const DEG = Math.PI / 180;
@@ -90,7 +90,8 @@ export interface TraceHooks {
   readonly checkpoint?: () => Promise<void>;
 }
 
-interface Node {
+/** A path vertex with the stroke width measured there. */
+export interface PathNode {
   readonly px: Vec2;
   readonly width: number;
 }
@@ -289,7 +290,7 @@ function centreOn(
 }
 
 interface Walk {
-  readonly nodes: Node[];
+  readonly nodes: PathNode[];
   readonly reachedEnd: boolean;
   readonly branches: readonly TraceBranch[];
 }
@@ -305,9 +306,9 @@ interface WalkContext {
 }
 
 /** Follows the curve from `start` (already centred) along `heading` until an end, a long gap or a branch. */
-async function walk(ctx: WalkContext, start: Node, heading: Vec2, commitPx = 0): Promise<Walk> {
+async function walk(ctx: WalkContext, start: PathNode, heading: Vec2, commitPx = 0): Promise<Walk> {
   const { map, end, maxGapPx, turnPenalty } = ctx;
-  const nodes: Node[] = [start];
+  const nodes: PathNode[] = [start];
   // Indices into `nodes` of re-centred (not crossing, not gap) nodes, for the heading estimate.
   const clean: number[] = [0];
   let d = unit(heading);
@@ -329,7 +330,7 @@ async function walk(ctx: WalkContext, start: Node, heading: Vec2, commitPx = 0):
     const q = add(p, dir, STEP_PX);
     if (q[0] < 0 || q[1] < 0 || q[0] > map.width || q[1] > map.height) break;
     const stroke = strokeAcross(map, q, normalOf(dir), Math.max(2, 0.75 * typical));
-    let next: Node;
+    let next: PathNode;
     let isClean = false;
     if (stroke === null) {
       if (gapStart < 0) gapStart = nodes.length;
@@ -411,7 +412,7 @@ export function simplify(path: readonly Vec2[], tolerance: number): number[] {
 }
 
 /** Output points of a path: its Douglas–Peucker vertices (0.5 px) plus a node every `spacing` px of arc. */
-function samplePoints(nodes: readonly Node[], spacing: number): TracePoint[] {
+export function samplePoints(nodes: readonly PathNode[], spacing: number): TracePoint[] {
   if (nodes.length === 0) return [];
   const keep = new Set(
     simplify(
@@ -421,7 +422,7 @@ function samplePoints(nodes: readonly Node[], spacing: number): TracePoint[] {
   );
   let since = 0;
   for (let i = 1; i < nodes.length; i++) {
-    since += norm(sub((nodes[i] as Node).px, (nodes[i - 1] as Node).px));
+    since += norm(sub((nodes[i] as PathNode).px, (nodes[i - 1] as PathNode).px));
     if (keep.has(i)) since = 0;
     else if (since >= spacing) {
       keep.add(i);
@@ -431,15 +432,15 @@ function samplePoints(nodes: readonly Node[], spacing: number): TracePoint[] {
   return [...keep]
     .sort((a, b) => a - b)
     .map((i) => {
-      const n = nodes[i] as Node;
+      const n = nodes[i] as PathNode;
       return { px: n.px, lineWidthPx: n.width };
     });
 }
 
-/** Thrown when there is no curve near the start click. */
+/** Thrown when there is no curve near the start click, or the picked colour is the paper's. */
 export class NoCurveError extends Error {
-  constructor() {
-    super('No curve near the start point');
+  constructor(message = 'No curve near the start point') {
+    super(message);
     this.name = 'NoCurveError';
   }
 }
@@ -462,7 +463,7 @@ export async function traceGuided(
   const initial = options.direction ?? strokeDirection(map, options.start);
   const centred = centreOn(map, options.start, initial);
   if (centred === null) throw new NoCurveError();
-  const start: Node = { px: centred.px, width: centred.width };
+  const start: PathNode = { px: centred.px, width: centred.width };
   let heading = unit(options.direction ?? strokeDirection(map, start.px));
   if (
     options.end !== undefined &&

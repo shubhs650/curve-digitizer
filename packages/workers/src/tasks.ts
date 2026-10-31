@@ -3,6 +3,7 @@ import { cdzRead, cdzWrite } from './tasks/cdz.ts';
 import { exportFile } from './tasks/export.ts';
 import { imageToPng } from './tasks/image.ts';
 import { processImage } from './tasks/process.ts';
+import { maskCurves } from './tasks/mask.ts';
 import { traceCurve } from './tasks/trace.ts';
 import { pdfClose, pdfCrop, pdfCropPng, pdfOpen, pdfThumbnail } from './tasks/pdf.ts';
 
@@ -18,5 +19,12 @@ export const renderTasks = {
 } satisfies TaskSet;
 export type RenderTasks = typeof renderTasks;
 
-export const computeTasks = { exportFile, cdzWrite, cdzRead, processImage, traceCurve } satisfies TaskSet;
+export const computeTasks = {
+  exportFile,
+  cdzWrite,
+  cdzRead,
+  processImage,
+  traceCurve,
+  maskCurves,
+} satisfies TaskSet;
 export type ComputeTasks = typeof computeTasks;
