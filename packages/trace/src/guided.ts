@@ -71,6 +71,8 @@ interface TraceBase {
   readonly points: readonly TracePoint[];
   /** Every accepted centre, in order. */
   readonly path: readonly Vec2[];
+  /** Stroke width at each `path` centre, px, so the caller can re-sample at another density (`samplePoints`). */
+  readonly widths: readonly number[];
   readonly color: Rgb;
 }
 
@@ -502,9 +504,18 @@ export async function traceGuided(
   }
   hooks.tick?.(1);
   const path = nodes.map((n) => n.px);
+  const widths = nodes.map((n) => n.width);
   const points = samplePoints(nodes, spacing);
   if (branches.length > 0) {
-    return { status: 'ambiguous', points, path, color, at: path[path.length - 1] ?? start.px, branches };
+    return {
+      status: 'ambiguous',
+      points,
+      path,
+      widths,
+      color,
+      at: path[path.length - 1] ?? start.px,
+      branches,
+    };
   }
-  return { status: 'done', points, path, color, reachedEnd: forward.reachedEnd };
+  return { status: 'done', points, path, widths, color, reachedEnd: forward.reachedEnd };
 }

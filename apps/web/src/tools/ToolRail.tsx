@@ -3,6 +3,7 @@ import {
   ColorLineRegular,
   CursorRegular,
   HandRightRegular,
+  PenSparkleRegular,
   PinRegular,
   RulerRegular,
   TargetRegular,
@@ -40,6 +41,7 @@ export const RAIL_TOOLS: readonly RailTool[] = [
   { id: 'point', label: 'Add points', shortcut: 'P', icon: <TargetRegular /> },
   { id: 'pan', label: 'Pan', shortcut: 'H', icon: <HandRightRegular /> },
   { id: 'calibrate', label: 'Calibrate', shortcut: 'C', icon: <RulerRegular /> },
+  { id: 'trace', label: 'Guided trace', shortcut: 'T', icon: <PenSparkleRegular /> },
   { id: 'mask', label: 'Colour mask', shortcut: 'M', icon: <ColorLineRegular /> },
 ];
 

@@ -23,6 +23,7 @@ When not typing in a field.
 | <kbd>P</kbd> | Add points tool |
 | <kbd>H</kbd> | Pan tool |
 | <kbd>C</kbd> | Calibrate tool |
+| <kbd>T</kbd> | Guided trace tool |
 | <kbd>M</kbd> | Colour mask tool |
 | <kbd>L</kbd> | Loupe on or off |
 | <kbd>S</kbd> | Magnetic snap on or off |

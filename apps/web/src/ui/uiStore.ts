@@ -4,7 +4,7 @@ import { create } from 'zustand';
 // belongs in the project, through ProjectStore.dispatch.
 
 /** Canvas tools on the tool rail. */
-export type ToolId = 'select' | 'point' | 'pan' | 'calibrate' | 'mask';
+export type ToolId = 'select' | 'point' | 'pan' | 'calibrate' | 'trace' | 'mask';
 
 const NO_POINTS: ReadonlySet<string> = new Set();
 const NO_PROJECTS: ReadonlySet<string> = new Set();
