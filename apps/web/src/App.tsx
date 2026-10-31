@@ -11,6 +11,9 @@ import { PdfPageView } from './pdf/PdfPageView';
 import { ProjectSidebar } from './project/ProjectSidebar';
 import { ProjectEmpty } from './project/ProjectEmpty';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
+import { ErrorBoundary } from './report/ErrorBoundary';
+import { ErrorReportDialog } from './report/ErrorReportDialog';
+import { useGlobalErrors } from './report/useGlobalErrors';
 import { usePwaUpdate } from './pwa/usePwaUpdate';
 import { useActiveGraph, useProject, useWorkspace, WorkspaceProvider } from './session/context';
 import { createWorkspace } from './session/createWorkspace';
@@ -59,16 +62,26 @@ export function App({ workspace: injected }: AppProps) {
   return (
     <FluentProvider theme={themes[theme]} data-theme={theme}>
       <WorkspaceProvider workspace={workspace}>
-        <Shell
-          theme={theme}
-          onToggleTheme={() => {
-            setTheme(otherTheme);
-          }}
-        />
+        <ErrorBoundary>
+          <Shell
+            theme={theme}
+            onToggleTheme={() => {
+              setTheme(otherTheme);
+            }}
+          />
+        </ErrorBoundary>
+        <ErrorReportDialog />
+        <GlobalErrors />
         <Notices />
       </WorkspaceProvider>
     </FluentProvider>
   );
+}
+
+/** Outside the error boundary, so uncaught errors still reach the reporter after a crash. */
+function GlobalErrors() {
+  useGlobalErrors();
+  return null;
 }
 
 function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () => void }) {

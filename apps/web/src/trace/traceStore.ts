@@ -25,6 +25,8 @@ export interface TraceSession {
   readonly branches: readonly TraceBranch[];
   readonly reachedEnd: boolean;
   readonly error: string | null;
+  /** What was thrown when the trace failed, for the error reporter. */
+  readonly cause?: unknown;
 }
 
 /** Spacing of output points along the trace, px (the density setting); re-samples a finished trace live. */

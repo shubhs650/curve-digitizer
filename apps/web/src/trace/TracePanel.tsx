@@ -5,6 +5,7 @@ import {
   Caption1,
   Caption1Strong,
   Field,
+  Link,
   makeStyles,
   ProgressBar,
   SpinButton,
@@ -14,6 +15,7 @@ import { PenSparkleRegular } from '@fluentui/react-icons';
 import { useMemo } from 'react';
 import { newDataset } from '../inspector/DatasetsPanel';
 import { useActiveDataset, useDispatch, useWorkspace } from '../session/context';
+import { useReportStore } from '../report/reportStore';
 import { useUiStore } from '../ui/uiStore';
 import { cancelTrace, clearTrace, runTrace } from './runTrace';
 import { tracePoints } from './tracePoints';
@@ -174,7 +176,18 @@ function SessionView({ graph, session }: { graph: Graph; session: TraceSession }
       )}
       {session.phase === 'error' && session.error !== null && (
         <Caption1 role="alert" className={styles.error}>
-          {session.error}. Click on a curve to start again.
+          {session.error}. Click on a curve to start again.{' '}
+          <Link
+            as="button"
+            inline
+            onClick={() => {
+              useReportStore
+                .getState()
+                .open({ error: session.cause ?? session.error, title: 'Trace failed' });
+            }}
+          >
+            Report this error…
+          </Link>
         </Caption1>
       )}
       {session.phase === 'done' && (

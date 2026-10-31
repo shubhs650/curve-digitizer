@@ -3,6 +3,7 @@ import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '../App';
+import { useReportStore } from '../report/reportStore';
 import { workspaceWithGraph } from '../test/workspace';
 import { useUiStore } from '../ui/uiStore';
 import { DEFAULT_SPACING_PX, type TraceSession, useTraceStore } from './traceStore';
@@ -122,12 +123,18 @@ describe('TracePanel', () => {
     expect(panel.getByRole('button', { name: 'Add 9 points to a new dataset' })).toBeTruthy();
   });
 
-  it('shows errors and clears', async () => {
+  it('shows errors, offers to report them, and clears', async () => {
     const { user, panel, session } = await setup();
-    session({ phase: 'error', nodes: [], error: 'No curve near the start point' });
+    const cause = new Error('No curve near the start point');
+    session({ phase: 'error', nodes: [], error: cause.message, cause });
     expect(panel.getByRole('alert').textContent).toBe(
-      'No curve near the start point. Click on a curve to start again.',
+      'No curve near the start point. Click on a curve to start again. Report this error…',
     );
+    await user.click(panel.getByRole('button', { name: 'Report this error…' }));
+    expect(useReportStore.getState().pending).toMatchObject({ error: cause, title: 'Trace failed' });
+    act(() => {
+      useReportStore.getState().close();
+    });
     await user.click(panel.getByRole('button', { name: 'Clear' }));
     expect(useTraceStore.getState().session).toBeNull();
   });
