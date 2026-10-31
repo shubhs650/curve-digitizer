@@ -54,6 +54,6 @@ With the select tool (V):
 
 ## Zooming and panning
 
-Use the mouse wheel or + and − to zoom, 0 to fit the image and 1 for actual size. Pan with the pan tool (H), Space+drag, the middle mouse button, or the arrow keys when nothing is selected.
+Use the mouse wheel or + and − to zoom, 0 to fit the image and 1 for actual size. Ctrl+wheel, pinch, Ctrl + and Ctrl − also zoom the graph rather than the whole app, and Ctrl 0 fits it. Pan with the pan tool (H), Space+drag, the middle mouse button, or the arrow keys when nothing is selected.
 
 Every change can be undone with Ctrl+Z and redone with Ctrl+Y.

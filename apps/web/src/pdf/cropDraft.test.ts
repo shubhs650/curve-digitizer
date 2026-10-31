@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { cropRotation, rectFromDisplay, rectToDisplayFractions, turn, wholePage } from './cropDraft';
+import {
+  cropRotation,
+  HANDLES,
+  moveRect,
+  rectFromDisplay,
+  rectToDisplayFractions,
+  resizeRect,
+  turn,
+  wholePage,
+} from './cropDraft';
 
 const A4 = { width: 595, height: 842, rotation: 0 } as const;
 const LANDSCAPE = { ...A4, rotation: 90 } as const;
@@ -45,5 +54,29 @@ describe('crop geometry', () => {
       });
     }
     expect(rectToDisplayFractions(A4, wholePage(A4))).toEqual({ left: 0, top: 0, width: 1, height: 1 });
+  });
+});
+
+describe('crop rectangle editing', () => {
+  const page = { width: 600, height: 800 };
+  const rect = { left: 100, top: 100, right: 300, bottom: 200 };
+
+  it('moves the rectangle, keeping it on the page', () => {
+    expect(moveRect(rect, [50, 20], page)).toEqual({ left: 150, top: 120, right: 350, bottom: 220 });
+    expect(moveRect(rect, [-500, 1000], page)).toEqual({ left: 0, top: 700, right: 200, bottom: 800 });
+  });
+
+  it('resizes from a corner or an edge, clamped to the page', () => {
+    expect(resizeRect(rect, 'se', [10, 30], page)).toEqual({ left: 100, top: 100, right: 310, bottom: 230 });
+    expect(resizeRect(rect, 'n', [99, -150], page)).toEqual({ left: 100, top: 0, right: 300, bottom: 200 });
+    expect(resizeRect(rect, 'w', [-20, 5], page)).toEqual({ left: 80, top: 100, right: 300, bottom: 200 });
+  });
+
+  it('flips instead of turning inside out when a handle passes the opposite edge', () => {
+    expect(resizeRect(rect, 'e', [-250, 0], page)).toEqual({ left: 50, top: 100, right: 100, bottom: 200 });
+  });
+
+  it('lists all eight handles', () => {
+    expect([...HANDLES].sort()).toEqual(['e', 'n', 'ne', 'nw', 's', 'se', 'sw', 'w']);
   });
 });

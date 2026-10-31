@@ -33,6 +33,8 @@ const useStyles = makeStyles({
     gap: tokens.spacingVerticalS,
     padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
     overflowY: 'auto',
+    // Children keep their height and the panel scrolls; shrinking squashed Fluent buttons, which clip.
+    '& > *': { flexShrink: 0 },
   },
   row: {
     display: 'flex',

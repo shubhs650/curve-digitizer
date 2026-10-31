@@ -16,6 +16,8 @@ const useStyles = makeStyles({
     padding: tokens.spacingHorizontalS,
     minHeight: 0,
     overflowY: 'auto',
+    // Children keep their height and the panel scrolls; shrinking squashed Fluent buttons, which clip.
+    '& > *': { flexShrink: 0 },
   },
   list: {
     listStyleType: 'none',

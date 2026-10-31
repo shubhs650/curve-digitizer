@@ -14,7 +14,7 @@ Password-protected PDFs ask for the password. It is used only to open the file i
 ## Cropping a PDF page
 
 1. Under **PDFs** in the sidebar, click the page that holds the graph.
-2. Drag a rectangle around the graph, including the axis labels. **Whole page** selects the page.
+2. Drag a rectangle around the graph, including the axis labels. **Whole page** selects the page. Drag a handle to resize the rectangle, drag inside it to move it, and press Esc to start over. Zoom in to aim precisely: Ctrl+wheel or pinch zooms the page at the pointer, Ctrl + and Ctrl − zoom, Ctrl 0 fits the page, and Space+drag pans.
 3. If the page is sideways, use **Rotate left** or **Rotate right** until the graph reads normally.
 4. Pick a **Resolution**. 300 DPI suits most scanned and vector figures; choose more for fine detail.
 5. Choose **Crop to new graph**.

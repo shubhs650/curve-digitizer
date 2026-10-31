@@ -87,3 +87,49 @@ export function rectToDisplayFractions(
     height: Math.abs(by - ay) / size.height,
   };
 }
+
+/** A rectangle on the page as displayed, in points, y down. */
+export interface DisplayRect {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
+/** The crop rectangle's resize handles: corners and edge midpoints, by compass direction. */
+export type Handle = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+export const HANDLES: readonly Handle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+
+interface Size {
+  readonly width: number;
+  readonly height: number;
+}
+
+/** `rect` shifted by `delta`, stopped at the page edges without changing its size. */
+export function moveRect(rect: DisplayRect, [dx, dy]: Vec2, page: Size): DisplayRect {
+  const width = rect.right - rect.left;
+  const height = rect.bottom - rect.top;
+  const left = Math.min(page.width - width, Math.max(0, rect.left + dx));
+  const top = Math.min(page.height - height, Math.max(0, rect.top + dy));
+  return { left, top, right: left + width, bottom: top + height };
+}
+
+/**
+ * `rect` with the edges `handle` holds moved by `delta`, clamped to the page. Dragging an edge past the opposite
+ * one flips the rectangle, as in drawing programs.
+ */
+export function resizeRect(rect: DisplayRect, handle: Handle, [dx, dy]: Vec2, page: Size): DisplayRect {
+  const clampX = (x: number) => Math.min(page.width, Math.max(0, x));
+  const clampY = (y: number) => Math.min(page.height, Math.max(0, y));
+  let { left, top, right, bottom } = rect;
+  if (handle.includes('w')) left = clampX(left + dx);
+  if (handle.includes('e')) right = clampX(right + dx);
+  if (handle.includes('n')) top = clampY(top + dy);
+  if (handle.includes('s')) bottom = clampY(bottom + dy);
+  return {
+    left: Math.min(left, right),
+    top: Math.min(top, bottom),
+    right: Math.max(left, right),
+    bottom: Math.max(top, bottom),
+  };
+}
