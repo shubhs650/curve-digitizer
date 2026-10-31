@@ -48,6 +48,8 @@ test.describe('help', () => {
 
   test('? opens the cheat sheet, which passes axe', async ({ page }) => {
     await page.goto('/');
+    // The key listener is attached once the app has rendered; "load" can come first on a slow WebKit run.
+    await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
     await page.keyboard.press('?');
     const sheet = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
     await expect(sheet).toBeVisible();
