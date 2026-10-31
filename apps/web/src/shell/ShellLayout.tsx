@@ -225,7 +225,7 @@ function Dock({ children }: { readonly children: ReactNode }) {
         role="separator"
         aria-orientation="horizontal"
         aria-label="Resize the data dock"
-        aria-controls={bodyId}
+        aria-controls={prefs.open ? bodyId : undefined}
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={prefs.open ? height : 0}
@@ -250,7 +250,7 @@ function Dock({ children }: { readonly children: ReactNode }) {
           icon={prefs.open ? <ChevronDownRegular /> : <ChevronUpRegular />}
           aria-label="Data dock"
           aria-expanded={prefs.open}
-          aria-controls={bodyId}
+          aria-controls={prefs.open ? bodyId : undefined}
           onClick={() => {
             setPrefs((p) => ({ ...p, open: !p.open }));
           }}

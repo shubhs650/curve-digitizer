@@ -1,6 +1,15 @@
 import { readFile } from 'node:fs/promises';
 import { type Page } from '@playwright/test';
-import { downloadName, expect, graphProject, pageXY, sampleImage, seedProject, test } from './fixtures';
+import {
+  downloadName,
+  expect,
+  graphProject,
+  pageXY,
+  sampleImage,
+  seedProject,
+  test,
+  withDockOpen,
+} from './fixtures';
 
 // Task 1.10: projects autosave within 5 s and reopen after the tab is killed (R3); a saved .cdz opens on another
 // device with the same project.json and byte-identical images (R2).
@@ -72,6 +81,7 @@ interface StoredPoints {
 
 test.describe('project files', () => {
   test.beforeEach(async ({ page }) => {
+    await withDockOpen(page);
     await page.goto('/');
     await seedProject(page, PROJECT, { 'graphs/g1/original.png': sampleImage('vector-clean') });
     await expect(canvas(page)).toHaveAttribute('data-state', 'ready');
@@ -124,6 +134,7 @@ test.describe('project files', () => {
     const original = await storedJson(page, PROJECT.id);
 
     const other = await otherContext.newPage();
+    await withDockOpen(other);
     await other.goto('/');
     await expect(other.getByText('No saved projects yet.')).toBeVisible();
     await other

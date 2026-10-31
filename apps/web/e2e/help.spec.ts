@@ -53,7 +53,8 @@ test.describe('help', () => {
     await page.keyboard.press('?');
     const sheet = page.getByRole('dialog', { name: 'Keyboard shortcuts' });
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByRole('table')).toHaveCount(5);
+    // One table per group of help/shortcuts.ts.
+    await expect(sheet.getByRole('table')).toHaveCount(6);
     await animationsSettled(page);
     const results = await axe(page).withTags(WCAG_AA).analyze();
     expect(results.violations).toEqual([]);

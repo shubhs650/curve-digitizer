@@ -1,5 +1,15 @@
 import { type Page } from '@playwright/test';
-import { canvasView, graphProject, pageXY, sampleImage, seedProject, expect, test, axe } from './fixtures';
+import {
+  canvasView,
+  graphProject,
+  pageXY,
+  sampleImage,
+  seedProject,
+  expect,
+  test,
+  axe,
+  withDockOpen,
+} from './fixtures';
 
 // Task 1.6: the data dock's live table follows the canvas, edits points in place and copies to the clipboard.
 
@@ -32,6 +42,7 @@ const cell = (page: Page, row: number, col: number) =>
 
 test.describe('data table', () => {
   test.beforeEach(async ({ page }) => {
+    await withDockOpen(page);
     await page.goto('/');
     await seedProject(page, graphProject('vector-clean', { width: 2400, height: 1600 }, [DATASET]), {
       'graphs/g1/original.png': sampleImage('vector-clean'),

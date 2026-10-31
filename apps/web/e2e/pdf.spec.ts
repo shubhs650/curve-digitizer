@@ -26,7 +26,11 @@ async function open(page: Page, path: string) {
 async function expectRenderedPages(page: Page, file: string, count: number) {
   const thumbs = pages(page, file).getByRole('img');
   await expect(thumbs).toHaveCount(count);
-  for (let i = 0; i < count; i++) await expect(thumbs.nth(i)).toHaveAttribute('data-ready', 'true');
+  // Thumbnails render as they scroll into the sidebar's view.
+  for (let i = 0; i < count; i++) {
+    await thumbs.nth(i).scrollIntoViewIfNeeded();
+    await expect(thumbs.nth(i)).toHaveAttribute('data-ready', 'true');
+  }
 }
 
 test.describe('PDF input', () => {
