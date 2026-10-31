@@ -1,7 +1,8 @@
-import type { Dataset, Graph, Point, Vec2 } from '@cd/core';
+import type { Dataset, Fit, Graph, Point, Vec2 } from '@cd/core';
 import { valueToPixel } from '@cd/math';
 import { formatValue } from '../calibration/format';
 import { placePoint } from '../points/cache';
+import { pointValue, residual } from '../fit/fitInputs';
 
 // The data table's model (task 1.6, PRD §4.11): one row per point of a dataset, in pick order. Values are shown
 // at the precision the calibration resolves; copies carry full precision.
@@ -33,7 +34,6 @@ export function columns(graph: Graph, dataset: Dataset): readonly Column[] {
     { id: 'pxY', header: 'y px', editable: true },
     { id: 'origin', header: 'Origin', editable: false },
     { id: 'excluded', header: 'Excluded', editable: false },
-    // Filled in by fitting (M3); the column is here so the layout does not move when fits arrive.
     { id: 'residual', header: 'Residual', editable: false },
   ];
 }
@@ -46,7 +46,13 @@ const ORIGINS: Readonly<Record<Point['origin'], string>> = {
 };
 
 /** A cell as shown: values at the calibration's resolution, pixels to 0.01 px. */
-export function cellText(graph: Graph, point: Point, index: number, column: Column['id']): string {
+export function cellText(
+  graph: Graph,
+  point: Point,
+  index: number,
+  column: Column['id'],
+  fit: Fit | null = null,
+): string {
   const c = graph.calibration;
   const shown = (v: number, which: 'x' | 'y') =>
     c === null
@@ -74,8 +80,12 @@ export function cellText(graph: Graph, point: Point, index: number, column: Colu
       return ORIGINS[point.origin];
     case 'excluded':
       return point.excludedFromFit ? 'yes' : '';
-    case 'residual':
-      return '—';
+    case 'residual': {
+      const v = fit === null ? null : pointValue(graph, point);
+      if (fit === null || v === null) return '—';
+      const r = residual(fit, v);
+      return Number.isFinite(r) ? String(Number(r.toPrecision(3))) : '—';
+    }
   }
 }
 

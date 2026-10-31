@@ -33,6 +33,8 @@ export interface UiState {
   readonly shortcutsOpen: boolean;
   /** Projects exported at least once this session, which ticks the guide's last step. */
   readonly exportedProjects: ReadonlySet<string>;
+  /** The bottom dock's tab. */
+  readonly dockTab: DockTab;
   /** Shows a graph; also leaves the crop view. */
   readonly setActiveGraph: (graphId: string | null) => void;
   readonly setActiveDataset: (graphId: string, datasetId: string) => void;
@@ -44,7 +46,10 @@ export interface UiState {
   readonly setShortcutsOpen: (open: boolean) => void;
   readonly setShowProcessed: (show: boolean) => void;
   readonly markExported: (projectId: string) => void;
+  readonly setDockTab: (tab: DockTab) => void;
 }
+
+export type DockTab = 'table' | 'fit';
 
 export const useUiStore = create<UiState>()((set) => ({
   activeGraphId: null,
@@ -57,6 +62,7 @@ export const useUiStore = create<UiState>()((set) => ({
   shortcutsOpen: false,
   showProcessed: false,
   exportedProjects: NO_PROJECTS,
+  dockTab: 'table',
   setActiveGraph: (activeGraphId) => {
     set((s) =>
       s.activeGraphId === activeGraphId
@@ -94,5 +100,8 @@ export const useUiStore = create<UiState>()((set) => ({
         ? {}
         : { exportedProjects: new Set([...s.exportedProjects, projectId]) },
     );
+  },
+  setDockTab: (dockTab) => {
+    set({ dockTab });
   },
 }));

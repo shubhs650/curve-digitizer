@@ -1,4 +1,5 @@
-import type { Graph } from '@cd/core';
+import type { Fit, Graph } from '@cd/core';
+import { fitPathPx } from '../fit/fitInputs';
 import { HitIndex } from './hitIndex';
 import { toScreen, type Vec2, type ViewTransform } from './viewTransform';
 
@@ -12,13 +13,39 @@ export interface OverlayPoint {
   readonly color: string;
 }
 
+/** A fit curve in image px (task 3.2): accepted fits solid, the fit panel's preview dashed. */
+export interface OverlayCurve {
+  readonly key: string;
+  readonly px: readonly Vec2[];
+  readonly color: string;
+  readonly preview: boolean;
+}
+
 /** Everything the overlay draws for one graph, derived from the project; rebuilt when the graph changes. */
 export interface OverlayModel {
   readonly points: readonly OverlayPoint[];
   readonly hits: HitIndex<OverlayPoint>;
+  readonly curves: readonly OverlayCurve[];
 }
 
-export function overlayModel(graph: Graph): OverlayModel {
+type CurveFit = Pick<Fit, 'model' | 'params' | 'space' | 'domain'>;
+
+export function overlayModel(
+  graph: Graph,
+  preview: { readonly datasetId: string; readonly fit: CurveFit } | null = null,
+): OverlayModel {
+  const color = (datasetId: string) => graph.datasets.find((d) => d.id === datasetId)?.color ?? '#000000';
+  const curves: OverlayCurve[] = graph.fits
+    .filter((f) => preview?.datasetId !== f.datasetId)
+    .map((f) => ({ key: f.id, px: fitPathPx(graph, f), color: color(f.datasetId), preview: false }));
+  if (preview !== null) {
+    curves.push({
+      key: 'preview',
+      px: fitPathPx(graph, preview.fit),
+      color: color(preview.datasetId),
+      preview: true,
+    });
+  }
   const points = graph.datasets.flatMap((d) =>
     d.points.map((p) => ({
       key: `${d.id}/${p.id}`,
@@ -28,7 +55,7 @@ export function overlayModel(graph: Graph): OverlayModel {
       color: d.color,
     })),
   );
-  return { points, hits: new HitIndex(points) };
+  return { points, hits: new HitIndex(points), curves };
 }
 
 /** What changes the overlay's look without changing the project. */
@@ -48,6 +75,24 @@ export function paintOverlay(
   model: OverlayModel,
   state: OverlayState,
 ): void {
+  // Curves under the points, with a white casing so a fit stays visible over the curve it was fitted to.
+  for (const curve of model.curves) {
+    if (curve.px.length < 2) continue;
+    ctx.beginPath();
+    curve.px.forEach((p, i) => {
+      const [x, y] = toScreen(view, p);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.setLineDash(curve.preview ? [6, 4] : []);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = curve.color;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
   for (const point of model.points) {
     const [x, y] = toScreen(view, point.px);
     const emphasised = point.key === state.hovered || state.selected.has(point.key);

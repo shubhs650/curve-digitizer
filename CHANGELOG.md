@@ -4,6 +4,10 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
+### Added
+
+- Fit tab in the dock under the canvas: **Recommend fits** tries polynomials (degree 1–9), power, exponential, logarithmic, rational, cubic spline, monotone (PCHIP) spline and piecewise linear models, ranks them by AICc and recommends the simplest one the points support; or pick a model and its degree, order, knots or breakpoints yourself. Fits are made on the log of the values on log axes, leave out excluded points, run off the main thread with progress and Cancel, and show a residual plot. The kept fit is drawn over the image (the candidate being previewed dashed), fills the table's Residual column, and says when its points have changed since. Docs page "Fitting curves".
+
 ## [0.2.0] - 2026-10-31
 
 Milestone M2, smart tracing: pre-processing filters with an "Enhance for tracing" preset, the guided tracer, the colour mask, X-step sampling and per-point uncertainty from the measured line width. Still entirely in the browser and offline.

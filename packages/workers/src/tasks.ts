@@ -6,6 +6,7 @@ import { processImage } from './tasks/process.ts';
 import { maskCurves } from './tasks/mask.ts';
 import { traceCurve } from './tasks/trace.ts';
 import { sampleCurveXs } from './tasks/xstep.ts';
+import { fitDataset } from './tasks/fit.ts';
 import { pdfClose, pdfCrop, pdfCropPng, pdfOpen, pdfThumbnail } from './tasks/pdf.ts';
 
 // Task registries per worker type. Compute runs the filter stack (task 2.1), the tracers and the fits.
@@ -28,5 +29,6 @@ export const computeTasks = {
   traceCurve,
   maskCurves,
   sampleCurveXs,
+  fitDataset,
 } satisfies TaskSet;
 export type ComputeTasks = typeof computeTasks;
