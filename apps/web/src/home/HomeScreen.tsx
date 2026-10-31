@@ -11,14 +11,17 @@ import {
   makeStyles,
   Text,
   Title2,
+  Title3,
   tokens,
 } from '@fluentui/react-components';
-import { AddRegular, DeleteRegular, FolderOpenRegular } from '@fluentui/react-icons';
+import { AddRegular, DeleteRegular, FolderOpenRegular, ImageSparkleRegular } from '@fluentui/react-icons';
 import { useState } from 'react';
 import { OpenFileButton } from '../input/OpenFileButton';
 import { useWorkspace, useWorkspaceState } from '../session/context';
 import type { ProjectSummary } from '../storage/repository';
 import { useNotify } from '../ui/notices';
+import { useUiStore } from '../ui/uiStore';
+import { DEMOS, openDemo } from './demos';
 
 const useStyles = makeStyles({
   home: {
@@ -55,6 +58,14 @@ const useStyles = makeStyles({
     flexGrow: 1,
     minWidth: 0,
   },
+  demos: {
+    listStyleType: 'none',
+    margin: 0,
+    padding: 0,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+    gap: tokens.spacingHorizontalS,
+  },
 });
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -69,6 +80,7 @@ export function HomeScreen({ onFiles }: HomeScreenProps) {
   const workspace = useWorkspace();
   const { projects } = useWorkspaceState();
   const notify = useNotify();
+  const setActiveGraph = useUiStore((st) => st.setActiveGraph);
   const [toDelete, setToDelete] = useState<ProjectSummary | null>(null);
 
   const run = (what: string, action: () => Promise<unknown>) => {
@@ -132,6 +144,32 @@ export function HomeScreen({ onFiles }: HomeScreenProps) {
           ))}
         </ul>
       )}
+      <Title3 as="h3">Try a sample</Title3>
+      <Caption1>
+        Each sample opens as a new, calibrated project with an empty dataset per curve, ready for points or a
+        trace.
+      </Caption1>
+      <ul aria-label="Samples" className={styles.demos}>
+        {DEMOS.map((demo) => (
+          <li key={demo.sample} className={styles.row}>
+            <div className={styles.rowText}>
+              <Text weight="semibold">{demo.title}</Text>
+              <Caption1>{demo.summary}</Caption1>
+            </div>
+            <Button
+              icon={<ImageSparkleRegular />}
+              aria-label={`Open the ${demo.title} sample`}
+              onClick={() => {
+                run(`Could not open the ${demo.title} sample`, async () => {
+                  setActiveGraph(await openDemo(workspace, demo));
+                });
+              }}
+            >
+              Open
+            </Button>
+          </li>
+        ))}
+      </ul>
       {/* Mounted only while open: a mounted Dialog makes Tabster add focusable sentinels to <body>, which axe flags. */}
       {toDelete !== null && (
         <Dialog

@@ -29,6 +29,7 @@ const ORDER = [
   'export',
   'projects',
   'keyboard-shortcuts',
+  'roadmap',
 ];
 const HIDDEN = new Set(['README']);
 

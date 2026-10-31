@@ -4,6 +4,10 @@ Curve Digitizer turns a graph in a PDF or an image into numbers. Everything happ
 
 The sidebar shows a **Getting started** checklist with the four steps below. Each step ticks itself when it is done, and the current step says what to do next. You can hide the checklist with its close button and bring it back with **Show the getting-started guide**.
 
+## Try a sample first
+
+The home screen lists four samples under **Try a sample**: clean pump curves, a tilted 1970s scan, a log-log S-N family with crossing curves, and a dark-background chart. **Open** one and it becomes a new project with the graph already calibrated and an empty dataset for each curve, so you can go straight to step 3. Samples load from the app itself and work offline.
+
 ## 1. Crop
 
 Open a PDF with **Open PDF or image…** on the home screen, or drop the file anywhere on the window. Pick a page under **PDFs**, drag a rectangle around the graph and choose **Crop to new graph**. An image (PNG, JPEG, WebP) becomes a graph straight away; you can also paste one with Ctrl+V.
@@ -34,3 +38,4 @@ See [Exporting](export.md).
 
 - [Projects, autosave and .cdz files](projects.md)
 - [Keyboard shortcuts](keyboard-shortcuts.md)
+- [Roadmap](roadmap.md)
