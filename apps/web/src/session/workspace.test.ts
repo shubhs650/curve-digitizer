@@ -283,6 +283,15 @@ describe('Workspace PDF crops', () => {
     expect(store.project.graphs).toEqual([]);
   });
 
+  it('renders a crop for a reference overlay without adding it to the project', async () => {
+    const { workspace, store, sourceId, pdf } = await withPdf();
+    const before = store.project;
+    const result = await workspace.renderCropPng(sourceId, REQUEST);
+    expect(result).toEqual({ png: PNG, width: 900, height: 600, dpi: 300, capped: false, renderMs: 1 });
+    expect(pdf.crops).toEqual([{ key: sourceId, ...REQUEST }]);
+    expect(store.project).toBe(before);
+  });
+
   it('caps the DPI of a crop over the pixel budget and says so (R7)', async () => {
     const { workspace, store, sourceId } = await withPdf();
     // A whole A1 sheet at 600 DPI would be about 278 Mpx.
