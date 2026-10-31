@@ -4,6 +4,10 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
+## [0.4.0] - 2026-10-31
+
+Laptop-ready UI: every control keeps its size from 768 px tablets to 1920 px desktops, Ctrl/pinch zoom works on the PDF page and the graph instead of the whole app, and a redesigned home screen, header, sidebar and panels. Layout checks at seven window sizes and screenshot comparisons now run in CI (ADR 47, `docs/UX_STUDY.md`).
+
 ### Fixed
 
 - Buttons in the sidebar and the Crop panel (Add PDF or image, Save .cdz, Export, All projects, Whole page) no longer shrink to a few pixels on laptop screens; the panels scroll instead.
