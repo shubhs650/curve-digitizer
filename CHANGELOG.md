@@ -6,7 +6,7 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ### Added
 
-- Pre-processing filters for the tracers (brightness, contrast with auto stretch, grayscale, invert, threshold, despeckle, grid-line suppression that copes with tilted scans, isolate colour), run off the main thread and cached; docs page "Pre-processing".
+- Pre-processing panel in the inspector: a stack of filters for the tracers (brightness, contrast with auto stretch, grayscale, invert, threshold, despeckle, grid-line suppression that copes with tilted scans, isolate colour), the one-click "Enhance for tracing" preset, a live before/after preview computed off the main thread, and an "Add Invert" suggestion on dark-background charts. Docs page "Pre-processing".
 
 ## [0.1.0] - 2026-10-31
 

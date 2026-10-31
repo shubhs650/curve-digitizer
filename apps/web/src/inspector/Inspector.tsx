@@ -3,6 +3,7 @@ import { makeStyles } from '@fluentui/react-components';
 import { CalibrationPanel } from '../calibration/CalibrationPanel';
 import { GraphSourcePanel } from '../pdf/GraphSourcePanel';
 import { PointsPanel } from '../points/PointsPanel';
+import { ProcessingPanel } from '../processing/ProcessingPanel';
 import { DatasetsPanel } from './DatasetsPanel';
 
 const useStyles = makeStyles({
@@ -22,6 +23,7 @@ export function Inspector({ graph }: { graph: Graph }) {
       <CalibrationPanel graph={graph} />
       <DatasetsPanel graph={graph} />
       <PointsPanel graph={graph} />
+      <ProcessingPanel graph={graph} />
     </div>
   );
 }

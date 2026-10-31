@@ -27,6 +27,8 @@ export interface UiState {
   /** Selected points of the active graph, as overlay keys `${datasetId}/${pointId}`. */
   readonly selection: ReadonlySet<string>;
   readonly cropPage: CropPage | null;
+  /** The canvas shows the processed image (pre-processing before/after preview) instead of the original. */
+  readonly showProcessed: boolean;
   /** The keyboard shortcut cheat sheet is open. */
   readonly shortcutsOpen: boolean;
   /** Projects exported at least once this session, which ticks the guide's last step. */
@@ -40,6 +42,7 @@ export interface UiState {
   readonly setSelection: (selection: ReadonlySet<string>) => void;
   readonly setCropPage: (page: CropPage | null) => void;
   readonly setShortcutsOpen: (open: boolean) => void;
+  readonly setShowProcessed: (show: boolean) => void;
   readonly markExported: (projectId: string) => void;
 }
 
@@ -52,6 +55,7 @@ export const useUiStore = create<UiState>()((set) => ({
   selection: NO_POINTS,
   cropPage: null,
   shortcutsOpen: false,
+  showProcessed: false,
   exportedProjects: NO_PROJECTS,
   setActiveGraph: (activeGraphId) => {
     set((s) =>
@@ -80,6 +84,9 @@ export const useUiStore = create<UiState>()((set) => ({
   },
   setShortcutsOpen: (shortcutsOpen) => {
     set({ shortcutsOpen });
+  },
+  setShowProcessed: (showProcessed) => {
+    set({ showProcessed });
   },
   markExported: (projectId) => {
     set((s) =>

@@ -126,7 +126,10 @@ describe('shortcut cheat sheet', () => {
     // The shortcut listener is attached once the app has rendered; a key pressed earlier goes nowhere.
     await screen.findByRole('heading', { name: 'Projects' });
     await user.keyboard('?');
-    const dialog = within(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' }));
+    // Generous timeout: the first open renders every group, which takes over a second on a loaded CI runner.
+    const dialog = within(
+      await screen.findByRole('dialog', { name: 'Keyboard shortcuts' }, { timeout: 5000 }),
+    );
     for (const group of ['Anywhere', 'Tools', 'Graph canvas', 'Points', 'Data table']) {
       expect(dialog.getByRole('table', { name: new RegExp(`^${group}`) })).toBeTruthy();
     }
