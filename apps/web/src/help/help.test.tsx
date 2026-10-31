@@ -123,6 +123,8 @@ describe('shortcut cheat sheet', () => {
   it('opens on ? and from the header, listing every group', async () => {
     const user = userEvent.setup();
     render(<App workspace={testWorkspace()} />);
+    // The shortcut listener is attached once the app has rendered; a key pressed earlier goes nowhere.
+    await screen.findByRole('heading', { name: 'Projects' });
     await user.keyboard('?');
     const dialog = within(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' }));
     for (const group of ['Anywhere', 'Tools', 'Graph canvas', 'Points', 'Data table']) {
