@@ -1,6 +1,16 @@
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { axe, expect, graphProject, pageXY, sampleImage, SAMPLES, seedProject, test } from './fixtures';
+import {
+  axe,
+  expect,
+  graphProject,
+  pageXY,
+  sampleImage,
+  SAMPLES,
+  seedProject,
+  test,
+  UNTRACED,
+} from './fixtures';
 
 // Task 2.6: X-step sampling on vector-clean through the real canvas, compute worker and panel, by step and by
 // list, with P5 (no long task). A6's accuracy is scored by test:samples on the same picks.
@@ -52,6 +62,8 @@ async function clickImage(page: Page, px: Vec2): Promise<void> {
   const [x, y] = await pageXY(page, px);
   await page.mouse.click(x, y);
 }
+
+test.use(UNTRACED);
 
 test.describe('X-step', () => {
   test.beforeEach(async ({ page }) => {
