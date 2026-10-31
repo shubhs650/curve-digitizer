@@ -67,7 +67,9 @@ test.describe('M1 acceptance', () => {
       ['Y1', '0'],
       ['Y2', '5'],
     ] as const) {
-      await calibration(page).getByRole('textbox', { name: `${name} value` }).fill(value);
+      await calibration(page)
+        .getByRole('textbox', { name: `${name} value` })
+        .fill(value);
     }
     await expect(calibration(page).getByTestId('calibration-status')).toHaveText('Calibrated');
 
