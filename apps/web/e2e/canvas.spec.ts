@@ -1,5 +1,14 @@
 import { type Page } from '@playwright/test';
-import { canvasView, graphProject, pageXY, sampleImage, seedProject, expect, test } from './fixtures';
+import {
+  canvasView,
+  graphProject,
+  pageXY,
+  sampleImage,
+  seedProject,
+  expect,
+  test,
+  UNTRACED,
+} from './fixtures';
 
 // Task 1.2: zoom/pan, overlay, hit-testing and loupe; no long task on the main thread while doing it.
 
@@ -37,6 +46,8 @@ async function readoutXY(page: Page): Promise<[number, number]> {
   if (!match) throw new Error(`unexpected readout "${text}"`);
   return [Number(match[1]), Number(match[2])];
 }
+
+test.use(UNTRACED);
 
 test.describe('canvas', () => {
   test.beforeEach(async ({ page }) => {

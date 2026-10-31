@@ -1,7 +1,17 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { downloadName, expect, graphProject, sampleImage, SAMPLES, seedProject, test } from './fixtures';
+import {
+  downloadName,
+  expect,
+  graphProject,
+  sampleImage,
+  SAMPLES,
+  seedProject,
+  settled,
+  test,
+  UNTRACED,
+} from './fixtures';
 
 // Task 1.9: CSV (long, wide), Excel workbook and audit JSON downloads, built in a worker. Task 3.4: the workbook
 // with fits, chart and image within the P6 time.
@@ -135,6 +145,8 @@ async function download(page: Page, item: RegExp) {
   return { name: downloadName(file), bytes: readFileSync(path) };
 }
 
+test.use(UNTRACED);
+
 test.describe('export', () => {
   test('CSV long and wide carry the units, source and recomputed values', async ({ page }) => {
     await page.goto('/');
@@ -188,6 +200,13 @@ test.describe('export', () => {
   }) => {
     await page.goto('/');
     await seedProject(page, fourDatasetProject(), { 'graphs/g1/original.png': sampleImage('vector-clean') });
+    // P5 here is about the export. Opening this project is a long task of its own (issue #46), and its entry
+    // can arrive after an observer registered right after the click; start observing once the page is idle.
+    await expect(page.getByRole('application', { name: /^Graph image/ })).toHaveAttribute(
+      'data-state',
+      'ready',
+    );
+    await settled(page);
     await page.evaluate(() => {
       const w = window as unknown as { longTasks: number[] };
       w.longTasks = [];

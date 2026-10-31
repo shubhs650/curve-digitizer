@@ -1,6 +1,16 @@
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { axe, expect, graphProject, pageXY, sampleImage, SAMPLES, seedProject, test } from './fixtures';
+import {
+  axe,
+  expect,
+  graphProject,
+  pageXY,
+  sampleImage,
+  SAMPLES,
+  seedProject,
+  test,
+  UNTRACED,
+} from './fixtures';
 
 // Task 2.4: the guided trace tool on vector-clean through the real canvas, compute worker and panel, with the
 // P4 timing (a 2000 px-wide curve in ≤ 1 s with ≥ 4 progress events/s) and P5 (no long task). A3's accuracy
@@ -48,6 +58,8 @@ function lastRun(page: Page) {
     return { ms: t1 - t0, events };
   });
 }
+
+test.use(UNTRACED);
 
 test.describe('guided trace', () => {
   test.beforeEach(async ({ page }) => {

@@ -1,6 +1,16 @@
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { axe, expect, graphProject, pageXY, sampleImage, SAMPLES, seedProject, test } from './fixtures';
+import {
+  axe,
+  expect,
+  graphProject,
+  pageXY,
+  sampleImage,
+  SAMPLES,
+  seedProject,
+  test,
+  UNTRACED,
+} from './fixtures';
 
 // Task 2.5: the colour-mask tool on vector-clean through the real canvas, compute worker and panel. A5's
 // recovery is scored by test:samples on the same pick; here it goes through the UI end to end.
@@ -30,6 +40,8 @@ const panel = (page: Page) => page.getByRole('region', { name: 'Colour mask' });
 /** Main-thread tasks over 100 ms since the observer started (P5). */
 const longTasks = (page: Page) =>
   page.evaluate(() => (window as unknown as { longTasks: number[] }).longTasks.filter((d) => d > 100));
+
+test.use(UNTRACED);
 
 test.describe('colour mask', () => {
   test.beforeEach(async ({ page }) => {

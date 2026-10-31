@@ -60,6 +60,13 @@ async function webkitProfile(
 export { expect };
 
 /**
+ * For tests that watch for long tasks (P5). Playwright's trace recorder snapshots the whole DOM in the page's
+ * main thread before and after every action; on a loaded runner one snapshot alone exceeds 100 ms and is
+ * counted as the app's. Use as a top-level `test.use(UNTRACED)` in files with such tests.
+ */
+export const UNTRACED = { trace: 'off' } as const;
+
+/**
  * axe over the page, leaving out Tabster's focus sentinels: Fluent inserts aria-hidden, focusable `<i>`
  * elements that hand focus straight on, which WebKit gets and axe reports as aria-hidden-focus.
  */
@@ -155,6 +162,31 @@ export async function canvasView(page: Page): Promise<{ view: CanvasView; left: 
 export async function pageXY(page: Page, px: readonly [number, number]): Promise<[number, number]> {
   const { view, left, top } = await canvasView(page);
   return [left + px[0] * view.scale + view.offset[0], top + px[1] * view.scale + view.offset[1]];
+}
+
+/**
+ * Waits until the page has rendered two frames and then had idle time, so work started earlier (and the
+ * long-task entries it produces) is over before a test starts measuring the next operation.
+ */
+export async function settled(page: Page): Promise<void> {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const idle = () => {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(
+              () => {
+                resolve();
+              },
+              { timeout: 2000 },
+            );
+          } else setTimeout(resolve, 200);
+        };
+        requestAnimationFrame(() => {
+          requestAnimationFrame(idle);
+        });
+      }),
+  );
 }
 
 /**

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { axe, expect, graphProject, sampleImage, SAMPLES, seedProject, test } from './fixtures';
+import { axe, expect, graphProject, sampleImage, SAMPLES, seedProject, test, UNTRACED } from './fixtures';
 
 // Task 3.2: the fit panel on vector-clean's Pump B (H = 38·e^(−0.012 Q)) through the real dock, compute worker
 // and canvas, with P5 (no long task while fitting).
@@ -78,6 +78,8 @@ async function overlayPixels(page: Page): Promise<number> {
     return count;
   }, COLOR);
 }
+
+test.use(UNTRACED);
 
 test.describe('Fit panel', () => {
   test.beforeEach(async ({ page }) => {
