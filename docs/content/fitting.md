@@ -53,4 +53,3 @@ Every snippet starts with a comment giving the model, the dataset, the X range t
 - **Log axes**: the code takes x and returns y in data units; the log10 steps are inside it.
 - **Excel**: paste the formula into the cell next to your first X value (set the cell in the dialog, A2 by default) and fill down. Excel keeps 15 significant digits of typed numbers, which is still within 1e-9 of the app. Knot tables use `LET`, which needs Excel 2021 or Microsoft 365; on older Excel use the VBA function, which works from a worksheet as `=pump_b(A2)`.
 - Where a fit is undefined (x ≤ 0 for a power law or a log axis) the code returns NaN, or #NUM! in Excel.
-
