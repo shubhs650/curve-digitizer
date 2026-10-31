@@ -95,7 +95,7 @@ test.describe('help', () => {
     await expect(page).toHaveURL(/\/docs$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Getting started' })).toBeVisible();
     const nav = page.getByRole('navigation', { name: 'Documentation' });
-    await expect(nav.getByRole('link')).toHaveCount(11);
+    await expect(nav.getByRole('link')).toHaveCount(12);
 
     await nav.getByRole('link', { name: 'Keyboard shortcuts' }).click();
     await expect(page).toHaveURL(/\/docs\/keyboard-shortcuts$/);
