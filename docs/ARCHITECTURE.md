@@ -116,6 +116,8 @@ For each requested X: compute the pixel column (through `M`), find curve crossin
 Within radius r of the click, find the nearest pixel whose thinness score is a local maximum along the gradient direction; move the point there.
 
 ### 8.5 Fitting
+As built (task 3.1, ADR 39): closed-form laws in data units fitted by Levenberg–Marquardt in fit space, shapes (polynomial, rational, splines, piecewise) in fit space, AICc with documented parameter counts, and a recommendation that keeps the simplest fit within ΔAICc 10 of the best; the outline below is the original design it refines.
+
 Linear least squares via QR for polynomial/log-linearised models; Levenberg-Marquardt for nonlinear (rational); natural cubic spline and PCHIP from standard formulas; piecewise linear with breakpoints from user input or from a change-point heuristic. AICc = `n ln(RSS/n) + 2k + 2k(k+1)/(n-k-1)`. Fits are computed in axis space (log for log axes). Extrapolation warning when a query X is outside `domain`.
 
 ## 9. Quality gates (CI)

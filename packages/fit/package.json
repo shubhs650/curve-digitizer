@@ -7,5 +7,9 @@
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@cd/core": "workspace:*",
+    "@cd/math": "workspace:*"
   }
 }

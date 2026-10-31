@@ -190,3 +190,27 @@ export function applyHomogeneous(m: Mat3, [x, y]: Vec2): Vec2 {
   const w = m[6] * x + m[7] * y + m[8];
   return [(m[0] * x + m[1] * y + m[2]) / w, (m[3] * x + m[4] * y + m[5]) / w];
 }
+
+/** Euclidean norm of column j of A, scaled against overflow (unlike `Math.hypot(...)`, any number of rows). */
+export function columnNorm(a: Matrix, j: number): number {
+  let scale = 0;
+  for (const row of a) scale = Math.max(scale, Math.abs(at(row, j)));
+  if (!(scale > 0)) return scale === 0 ? 0 : Number.NaN;
+  let sum = 0;
+  for (const row of a) sum += (at(row, j) / scale) ** 2;
+  return scale * Math.sqrt(sum);
+}
+
+/**
+ * {@link lstsq} with every column of A scaled to unit norm first and the solution scaled back, as
+ * `numpy.polyfit` does: for bases such as 1, x, …, x⁹ whose column norms span many decades, the rank test then
+ * judges the directions of the columns rather than their sizes.
+ */
+export function lstsqScaled(a: Matrix, b: readonly number[]): number[] {
+  const { cols } = shape(a);
+  const norms = Array.from({ length: cols }, (_, j) => columnNorm(a, j) || 1);
+  return lstsq(
+    a.map((row) => row.map((v, j) => v / at(norms, j))),
+    b,
+  ).map((x, j) => x / at(norms, j));
+}
