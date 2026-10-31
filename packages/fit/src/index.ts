@@ -32,4 +32,7 @@ export {
   LANGUAGES,
   type Language,
   type LanguageId,
+  type SheetFit,
+  sheetFit,
+  type SheetTable,
 } from './codegen/index.ts';

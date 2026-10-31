@@ -1,4 +1,4 @@
-// A8 (docs/ACCEPTANCE_TARGETS.md): the generated Python, JavaScript, C and Excel code computes the in-app fit
+// A8 (docs/ACCEPTANCE_TARGETS.md): the generated Python, JavaScript, C and Excel code (and the workbook's Fit sheet formulas) computes the in-app fit
 // within 1e-9 relative at 50 X values. Python, JavaScript and C are run (on CI they must run: the runner has
 // python3 and a C compiler, and NumPy is installed into a throwaway venv when the system Python lacks it;
 // elsewhere a missing tool skips its language); Excel goes through the formula evaluator. VBA and
@@ -8,7 +8,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { type CodeFit, evaluateFit, generateCode, identifier, recommendFits } from '@cd/fit';
+import { type CodeFit, evaluateFit, generateCode, identifier, recommendFits, sheetFit } from '@cd/fit';
 import { formulaNumber } from './excelFormula.ts';
 
 const RELATIVE = 1e-9;
@@ -241,5 +241,18 @@ describe('A8: generated code agrees with the app', () => {
       return c.xs.map((x) => formulaNumber(formula, { B2: Number(x.toPrecision(15)) }));
     });
     expectAgreement('Excel', results);
+  });
+
+  it('Excel workbook Fit sheet: named parameter ranges read by a live formula (task 3.4)', () => {
+    const results = CASES.map((c) => {
+      const sheet = sheetFit(c.fit, identifier(c.datasetName), c.datasetName);
+      const formula = sheet.formula('A20');
+      // Cells hold full doubles; a single-cell name is a number, a column an array.
+      const names = Object.fromEntries(
+        sheet.tables.map((t) => [t.name, t.values.length === 1 ? (t.values[0] ?? NaN) : t.values]),
+      );
+      return c.xs.map((x) => formulaNumber(formula, { ...names, A20: x }));
+    });
+    expectAgreement('Excel Fit sheet', results);
   });
 });

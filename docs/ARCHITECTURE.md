@@ -23,7 +23,7 @@ Doc version 1.0 (2026-10-30). Read `docs/PRD.md` first. This document is the con
 | Workers | Comlink for RPC | One render worker, one compute worker pool (pre-process/trace/fit) |
 | Storage | OPFS (project files, PDF bytes, crops), IndexedDB (project index) | Via `idb-keyval`/light wrapper |
 | Zip | fflate | `.cdz` read/write |
-| Excel | ExcelJS | Formulas, named ranges, charts, images |
+| Excel | Hand-written SpreadsheetML + fflate (ADR 27, 43) | Formulas, named ranges, charts, images |
 | Math | Own `@cd/math` (linear algebra, least squares, splines, AICc) | Small; tested against SciPy/NumPy fixtures |
 | Tests | Vitest (unit), Playwright (e2e + visual), fixtures from `samples/` | CI gates in §9 |
 | PWA | vite-plugin-pwa (Workbox), file handlers in manifest | Core-first precache; PDFium runtime-cached |
@@ -41,7 +41,7 @@ curve-digitizer/
 │   ├── image/                   # pre-processing filters, grid suppression, color distance, thinning
 │   ├── trace/                   # guided cost-map tracer, color-mask tracer, X-step sampler, magnetic snap
 │   ├── fit/                     # fit models, ranking, code generators (py/js/xlsx/vba/matlab/c)
-│   ├── export/                  # CSV, XLSX (ExcelJS), JSON
+│   ├── export/                  # CSV, XLSX (hand-written SpreadsheetML, ADR 27/43), JSON
 │   ├── pdf/                     # EmbedPDF wrapper: open, thumbnails, crop-render at DPI, guardrails
 │   └── workers/                 # worker entry points + Comlink interfaces (depends on image/trace/fit/pdf)
 ├── samples/                     # bundled sample projects + ground truth (also CI fixtures)

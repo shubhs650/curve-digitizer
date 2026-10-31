@@ -11,6 +11,7 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 - Calculator tab in the dock: type X values to read Y for every function dataset, from its fit (extrapolation marked) or between its points on the chart's paper; **Compare** adds A − B and A / B for two datasets; **Copy results** copies the table as tab-separated text. Docs page "Calculator and comparing curves".
 - Reference overlay: lay an image file, or a crop of a PDF page (**Use as reference**), over a graph to compare editions or crops, with opacity and offset. A viewing aid, not saved with the project.
 - Error reporter: error messages, a failed trace and the crash screen offer **Report…**, which shows the error, version, browser and step for review, optionally with the anonymized project, then opens a prefilled GitHub issue or copies the text. Nothing is sent from the app.
+- Excel workbook v2: each Data sheet has a chart of the points and fits and the graph image; a Fit sheet holds every kept fit's parameters in named cells with live formulas over its valid range (change x or a coefficient and the values and chart follow); a VBA sheet has each fit as a function; the Project sheet summarises the fits.
 
 ## [0.2.0] - 2026-10-31
 

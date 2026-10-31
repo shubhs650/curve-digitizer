@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@cd/core": "workspace:*",
+    "@cd/fit": "workspace:*",
     "@cd/math": "workspace:*",
     "fflate": "0.8.3"
   }

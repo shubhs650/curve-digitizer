@@ -10,6 +10,7 @@ import { vba } from './vba.ts';
 export type { CodeForm } from './form.ts';
 export { LANGUAGES, type Language, type LanguageId } from './languages.ts';
 export { type CodeFit, identifier } from './text.ts';
+export { type SheetFit, sheetFit, type SheetTable } from './excelSheet.ts';
 
 const GENERATORS: Readonly<Record<LanguageId, (context: EmitContext) => string>> = {
   python,

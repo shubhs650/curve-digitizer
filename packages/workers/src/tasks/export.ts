@@ -13,7 +13,7 @@ export interface ExportFileInput {
   /** ISO 8601. */
   readonly exportedAt: string;
   readonly userAgent: string;
-  /** Graph images by path, for the audit's SHA-256 references; transferred in. */
+  /** Graph images by path, for the audit's SHA-256 references and the workbook's images; transferred in. */
   readonly images?: Readonly<Record<string, ArrayBuffer>>;
 }
 
@@ -38,6 +38,7 @@ export const exportFile: Task<ExportFileInput, ExportFileOutput> = {
       if (!g) throw new ExportError(`No graph with id "${String(input.graphId)}"`);
       return g;
     };
+    const images = new Map(Object.entries(input.images ?? {}).map(([k, v]) => [k, new Uint8Array(v)]));
     ctx.throwIfCancelled();
     switch (format) {
       case 'csvLong':
@@ -45,14 +46,13 @@ export const exportFile: Task<ExportFileInput, ExportFileOutput> = {
       case 'csvWide':
         return { bytes: encode(BOM + csvWide(project, graph(), info)), mimeType: 'text/csv' };
       case 'xlsx': {
-        const bytes = projectWorkbook(project, info);
+        const bytes = projectWorkbook(project, info, images);
         return {
           bytes: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
           mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         };
       }
       case 'audit': {
-        const images = new Map(Object.entries(input.images ?? {}).map(([k, v]) => [k, new Uint8Array(v)]));
         const audit = await createAudit(project, images, {
           exportedAt: input.exportedAt,
           appVersion: input.appVersion,
