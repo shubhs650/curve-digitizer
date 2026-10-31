@@ -339,7 +339,8 @@ export function GraphCanvas({
           if (current?.pointerId === event.pointerId && current.kind === 'pan') {
             const delta: Vec2 = [pointer.screen[0] - current.last[0], pointer.screen[1] - current.last[1]];
             current.last = pointer.screen;
-            setView(panBy(view, delta));
+            // Several moves can arrive before React re-renders; pan from the latest view, not this render's.
+            setView((v) => (v ? panBy(v, delta) : v));
             return;
           }
           if (current?.pointerId === event.pointerId) tool.onDrag?.(pointer);

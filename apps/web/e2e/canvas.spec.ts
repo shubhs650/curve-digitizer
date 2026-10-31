@@ -102,6 +102,49 @@ test.describe('canvas', () => {
     expect((await canvasView(page)).view.offset[0]).toBeCloseTo(back[0] + 40, 0);
   });
 
+  test('keeps every move of a pan that arrives before the next render', async ({ page }) => {
+    const start = (await canvasView(page)).view.offset;
+    const [x, y] = await pageXY(page, [1200, 800]);
+    await page.mouse.move(x, y);
+    await page.evaluate(() => {
+      document.addEventListener(
+        'pointerdown',
+        (event) => {
+          document.body.dataset.pointerId = String(event.pointerId);
+        },
+        { once: true, capture: true },
+      );
+    });
+    await page.mouse.down({ button: 'middle' });
+    // Two moves in one task are both seen before React re-renders, as on a busy frame.
+    await page.evaluate(
+      ([cx, cy]) => {
+        const layer = document.querySelector<HTMLCanvasElement>('canvas[role="application"]');
+        if (!layer) throw new Error('no canvas');
+        const pointerId = Number(document.body.dataset.pointerId);
+        for (const [dx, dy] of [
+          [20, 10],
+          [40, 20],
+        ] as const) {
+          layer.dispatchEvent(
+            new PointerEvent('pointermove', {
+              bubbles: true,
+              pointerId,
+              buttons: 4,
+              clientX: cx + dx,
+              clientY: cy + dy,
+            }),
+          );
+        }
+      },
+      [x, y],
+    );
+    await page.mouse.up({ button: 'middle' });
+    const panned = (await canvasView(page)).view.offset;
+    expect(panned[0] - start[0]).toBeCloseTo(40, 0);
+    expect(panned[1] - start[1]).toBeCloseTo(20, 0);
+  });
+
   test('draws points and hit-tests them under the cursor', async ({ page }) => {
     const [x, y] = await pageXY(page, [1200.5, 700.5]);
     await page.mouse.move(x + 3, y - 2);
