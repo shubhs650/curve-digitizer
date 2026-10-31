@@ -71,6 +71,12 @@ describe('sampleStrokeColor', () => {
     expect(pixelRgb(img, 6.5, 3.5)).toEqual([143, 187, 217]);
   });
 
+  it('returns a bright stroke’s colour on a dark background', () => {
+    const img = raster(12, 12, (_, y) => (y >= 5 && y <= 7 ? [76, 201, 240] : [30, 34, 39]));
+    const picked = sampleStrokeColor(img, 6.5, 6.5);
+    expect(deltaE(rgbToLab(...picked), rgbToLab(76, 201, 240))).toBeLessThan(3);
+  });
+
   it('reads grey rasters', () => {
     const grey = { width: 2, height: 1, channels: 1 as const, data: Uint8Array.from([255, 255]) };
     expect(sampleStrokeColor(grey, 0, 0)).toEqual([255, 255, 255]);

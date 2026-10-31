@@ -72,22 +72,33 @@ export function pixelRgb(raster: Raster, x: number, y: number): Rgb {
 }
 
 /**
- * Mean colour of the `radius` neighbourhood of (x, y), weighted by darkness so an eyedropper click on a thin
- * anti-aliased stroke returns the stroke's colour rather than a blend with the paper around it.
+ * Mean colour of the `radius` neighbourhood of (x, y), weighted by each pixel's difference from the
+ * neighbourhood's median colour (the paper, around a thin stroke) to the fourth power, so an eyedropper click on
+ * a thin anti-aliased stroke returns the stroke's colour rather than a blend with the paper around it. Works for
+ * dark ink on light paper and bright ink on a dark background alike.
  */
-export function sampleStrokeColor(raster: Raster, x: number, y: number, radius = 2): Rgb {
-  let w = 0;
-  const sum = [0, 0, 0];
+export function sampleStrokeColor(raster: Raster, x: number, y: number, radius = 4): Rgb {
+  const colors: Rgb[] = [];
   for (let dy = -radius; dy <= radius; dy++) {
     for (let dx = -radius; dx <= radius; dx++) {
       const px = Math.floor(x) + dx;
       const py = Math.floor(y) + dy;
       if (px < 0 || py < 0 || px >= raster.width || py >= raster.height) continue;
-      const c = pixelRgb(raster, px, py);
-      const weight = (1 - (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) / 255) ** 4;
-      w += weight;
-      for (let k = 0; k < 3; k++) sum[k] = (sum[k] ?? 0) + weight * c[k as 0 | 1 | 2];
+      colors.push(pixelRgb(raster, px, py));
     }
+  }
+  if (colors.length === 0) return pixelRgb(raster, x, y);
+  const median = [0, 1, 2].map((c) => {
+    const values = colors.map((v) => v[c as 0 | 1 | 2]).sort((a, b) => a - b);
+    return values[Math.floor(values.length / 2)] ?? 0;
+  });
+  let w = 0;
+  const sum = [0, 0, 0];
+  for (const c of colors) {
+    const weight =
+      (Math.hypot(c[0] - (median[0] ?? 0), c[1] - (median[1] ?? 0), c[2] - (median[2] ?? 0)) / 442) ** 4;
+    w += weight;
+    for (let k = 0; k < 3; k++) sum[k] = (sum[k] ?? 0) + weight * c[k as 0 | 1 | 2];
   }
   if (w === 0) return pixelRgb(raster, x, y);
   return [(sum[0] ?? 0) / w, (sum[1] ?? 0) / w, (sum[2] ?? 0) / w];

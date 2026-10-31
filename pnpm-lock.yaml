@@ -180,6 +180,9 @@ importers:
       '@cd/pdf':
         specifier: workspace:*
         version: link:../pdf
+      '@cd/trace':
+        specifier: workspace:*
+        version: link:../trace
       comlink:
         specifier: ^4.4.2
         version: 4.4.2

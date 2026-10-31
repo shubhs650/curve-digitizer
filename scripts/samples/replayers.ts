@@ -3,7 +3,7 @@
 // acceptance targets as todo. Expected owners (docs/MILESTONES.md): calibrate 1.3, manualPick 1.4,
 // trace 2.3, colourMask 2.5, xStep 2.6.
 import { fitCalibration, valueToAxis } from '@cd/math';
-import { snapToCurve } from '@cd/trace';
+import { snapToCurve, traceGuided } from '@cd/trace';
 import type { Sample } from './sample.ts';
 import type { ReplayOutputs } from './score.ts';
 import type { Op, OpKind } from './truth.ts';
@@ -33,7 +33,13 @@ const manualPick: Replayer<'manualPick'> = (op, sample) => {
   };
 };
 
-export const replayers: ReplayerRegistry = { calibrate, manualPick };
+/** Task 2.3: the guided tracer from the start pick to the end pick on the unprocessed image, default settings. */
+const trace: Replayer<'trace'> = async (op, sample) => {
+  const result = await traceGuided(sample.image(), { start: op.start, end: op.end });
+  return { points: result.points.map((p) => p.px), prompted: result.status === 'ambiguous' };
+};
+
+export const replayers: ReplayerRegistry = { calibrate, manualPick, trace };
 
 /** The task in docs/MILESTONES.md that delivers each replayer, for the todo message. */
 export const REPLAYER_TASKS: Readonly<Record<OpKind, string>> = {

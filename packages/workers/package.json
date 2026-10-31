@@ -13,6 +13,7 @@
     "@cd/export": "workspace:*",
     "@cd/image": "workspace:*",
     "@cd/pdf": "workspace:*",
+    "@cd/trace": "workspace:*",
     "comlink": "^4.4.2"
   }
 }
