@@ -40,6 +40,8 @@ jobs:
     name: e2e (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # ADR 45: Chromium gates merges; Firefox and WebKit still run and show failures, but never block one.
+    continue-on-error: ${{ matrix.browser != 'chromium' }}
     strategy:
       fail-fast: false
       matrix:
