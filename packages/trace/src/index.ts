@@ -4,3 +4,4 @@ export * from './snap.ts';
 export * from './guided.ts';
 export * from './ink.ts';
 export * from './colourMask.ts';
+export * from './xstep.ts';

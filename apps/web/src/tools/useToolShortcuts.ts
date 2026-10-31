@@ -3,7 +3,7 @@ import { isEditableTarget } from '../input/files';
 import { useUiStore } from '../ui/uiStore';
 import { RAIL_TOOLS } from './ToolRail';
 
-/** Single-key tool shortcuts (V, P, H, C, T, M, L, S), ignored while typing in a field or with a modifier held. */
+/** Single-key tool shortcuts (V, P, H, C, T, M, X, L, S), ignored while typing in a field or with a modifier held. */
 export function useToolShortcuts(): void {
   const setTool = useUiStore((s) => s.setTool);
   const toggleLoupe = useUiStore((s) => s.toggleLoupe);

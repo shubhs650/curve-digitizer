@@ -25,6 +25,7 @@ When not typing in a field.
 | <kbd>C</kbd> | Calibrate tool |
 | <kbd>T</kbd> | Guided trace tool |
 | <kbd>M</kbd> | Colour mask tool |
+| <kbd>X</kbd> | X-step tool |
 | <kbd>L</kbd> | Loupe on or off |
 | <kbd>S</kbd> | Magnetic snap on or off |
 

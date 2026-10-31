@@ -4,7 +4,7 @@
 // trace 2.3, colourMask 2.5, xStep 2.6.
 import { fitCalibration, valueToAxis } from '@cd/math';
 import { sampleStrokeColor } from '@cd/image';
-import { nearestComponent, snapToCurve, traceColourMask, traceGuided } from '@cd/trace';
+import { nearestComponent, sampleXSteps, snapToCurve, traceColourMask, traceGuided } from '@cd/trace';
 import type { Sample } from './sample.ts';
 import type { ReplayOutputs } from './score.ts';
 import type { Op, OpKind } from './truth.ts';
@@ -52,7 +52,26 @@ const colourMask: Replayer<'colourMask'> = async (op, sample) => {
   return { paths: kept ? [kept.path] : [] };
 };
 
-export const replayers: ReplayerRegistry = { calibrate, manualPick, trace, colourMask };
+/**
+ * Task 2.6: the X-step sampler from the start click at the recorded X values, default settings, through the
+ * sample's exact calibration (calibration error is A1's; A6 scores the sampler alone). Missing X values are
+ * left out, which fails the point count.
+ */
+const xStep: Replayer<'xStep'> = async (op, sample) => {
+  const { truth } = sample;
+  const result = await sampleXSteps(sample.image(), {
+    start: op.start,
+    xs: op.xs,
+    matrix: truth.pxToAxis,
+    axes: { x: truth.axes.x.type, y: truth.axes.y.type },
+  });
+  return {
+    points: result.points.flatMap((p) => (p.px ? [p.px] : [])),
+    outliers: result.points.filter((p) => p.outlier).length,
+  };
+};
+
+export const replayers: ReplayerRegistry = { calibrate, manualPick, trace, colourMask, xStep };
 
 /** The task in docs/MILESTONES.md that delivers each replayer, for the todo message. */
 export const REPLAYER_TASKS: Readonly<Record<OpKind, string>> = {

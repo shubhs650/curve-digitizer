@@ -9,6 +9,7 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 - Pre-processing panel in the inspector: a stack of filters for the tracers (brightness, contrast with auto stretch, grayscale, invert, threshold, despeckle, grid-line suppression that copes with tilted scans, isolate colour), the one-click "Enhance for tracing" preset, a live before/after preview computed off the main thread, and an "Add Invert" suggestion on dark-background charts. Docs page "Pre-processing".
 - Guided trace tool (T): click the start of a curve and where to stop (or trace it to its ends); the trace follows the curve through crossings, grid lines and gaps off the main thread with progress and Cancel, asks which way to go where the curve splits, and adds points at an adjustable spacing in one step. The eyedropper colour can be applied to the dataset.
 - Colour mask tool (M): click a curve to find every curve of its colour, tune the colour tolerance, keep or drop the curves found, and add points along the kept ones in one step. Runs off the main thread with progress and Cancel.
+- X-step tool (X): enter a step (From, To, Step) or a list of X values, click a curve, and get one point at each X, read along the traced curve through the calibration. Outliers are drawn red and added excluded from fits; X values the curve does not reach are reported. Runs off the main thread with progress and Cancel.
 
 ## [0.1.0] - 2026-10-31
 

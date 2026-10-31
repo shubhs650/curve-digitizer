@@ -33,6 +33,17 @@ The colour mask finds every curve of one colour at once, which suits clean chart
 
 The mask reads the [pre-processed](preprocessing.md) image. Where another curve is drawn over this one, or a line is dashed, the pieces are joined across gaps of up to 16 pixels. When two curves of the same colour cross, use the guided tracer instead.
 
+## X-step
+
+X-step places one point on a curve at each X value you ask for, such as every 5 m³/h, so the dataset lines up with a table or with other curves. The graph must be calibrated first, and the active dataset must be a function dataset (a path dataset has no single Y for each X).
+
+1. In the **X-step** panel choose **Every step** and enter **From**, **To** and **Step** (left empty, they take a round range across the image), or choose **List** and type the X values separated by commas, spaces or new lines. The panel counts the X values, in the X axis unit.
+2. Press **X** for the X-step tool (or **X-step (X)** in the panel) and click the curve.
+3. The tool traces the curve as the guided tracer does and reads the point where it crosses each X. The points are drawn on the canvas. A point that jumps away from its neighbours is an outlier: it is drawn red with a cross, and is added excluded from fits so you can check it and move it with the select tool. X values the curve does not reach are listed and skipped.
+4. Press **Add points** to add them to the active dataset (or to a new dataset in the curve colour). This is one step to undo. Esc or **Clear** discards the result.
+
+On log axes the X values are read on the log scale, so a list such as 1, 10, 100 lands on the decades.
+
 ## Selecting and editing points
 
 With the select tool (V):

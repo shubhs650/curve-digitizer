@@ -9,6 +9,7 @@ import type { ViewTransform } from '../canvas/viewTransform';
 import { bitmapPixels } from '../points/pixels';
 import { useMaskTool } from '../mask/useMaskTool';
 import { paintMarquee, usePointTools } from '../points/usePointTools';
+import { useXStepTool } from '../xstep/useXStepTool';
 import { useProcessedImage } from '../processing/processedImage';
 import { useTraceTool } from '../trace/useTraceTool';
 import { useUiStore } from '../ui/uiStore';
@@ -29,6 +30,7 @@ export function GraphEditor({ graph }: { graph: Graph }) {
   const editor = useCalibrationEditor(graph);
   const calibrate = useCalibrateTool(editor);
   const mask = useMaskTool(graph);
+  const xstep = useXStepTool(graph);
   const trace = useTraceTool(graph);
   const { picks } = editor.draft;
   const { marquee } = points;
@@ -59,5 +61,7 @@ export function GraphEditor({ graph }: { graph: Graph }) {
       return <GraphCanvas {...common} tool={trace.tool} decorate={trace.decorate} />;
     case 'mask':
       return <GraphCanvas {...common} tool={mask.tool} decorate={mask.decorate} />;
+    case 'xstep':
+      return <GraphCanvas {...common} tool={xstep.tool} decorate={xstep.decorate} />;
   }
 }

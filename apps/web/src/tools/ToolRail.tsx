@@ -2,6 +2,7 @@ import { makeStyles, ToggleButton, Tooltip, tokens } from '@fluentui/react-compo
 import {
   ColorLineRegular,
   CursorRegular,
+  DataScatterRegular,
   HandRightRegular,
   PenSparkleRegular,
   PinRegular,
@@ -43,6 +44,7 @@ export const RAIL_TOOLS: readonly RailTool[] = [
   { id: 'calibrate', label: 'Calibrate', shortcut: 'C', icon: <RulerRegular /> },
   { id: 'trace', label: 'Guided trace', shortcut: 'T', icon: <PenSparkleRegular /> },
   { id: 'mask', label: 'Colour mask', shortcut: 'M', icon: <ColorLineRegular /> },
+  { id: 'xstep', label: 'X-step', shortcut: 'X', icon: <DataScatterRegular /> },
 ];
 
 export function ToolRail() {

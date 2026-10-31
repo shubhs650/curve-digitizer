@@ -9,6 +9,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@cd/image": "workspace:*"
+    "@cd/image": "workspace:*",
+    "@cd/math": "workspace:*"
   }
 }
