@@ -7,6 +7,7 @@ import { GraphCanvas } from '../canvas/GraphCanvas';
 import { type BitmapState, useGraphBitmap } from '../canvas/useGraphBitmap';
 import type { ViewTransform } from '../canvas/viewTransform';
 import { bitmapPixels } from '../points/pixels';
+import { useMaskTool } from '../mask/useMaskTool';
 import { paintMarquee, usePointTools } from '../points/usePointTools';
 import { useProcessedImage } from '../processing/processedImage';
 import { useUiStore } from '../ui/uiStore';
@@ -26,6 +27,7 @@ export function GraphEditor({ graph }: { graph: Graph }) {
   const points = usePointTools(graph, pixels);
   const editor = useCalibrationEditor(graph);
   const calibrate = useCalibrateTool(editor);
+  const mask = useMaskTool(graph);
   const { picks } = editor.draft;
   const { marquee } = points;
   const decorateCalibration = useCallback(
@@ -51,5 +53,7 @@ export function GraphEditor({ graph }: { graph: Graph }) {
       return <GraphCanvas {...common} tool={points.select} decorate={decorateMarquee} />;
     case 'pan':
       return <GraphCanvas {...common} />;
+    case 'mask':
+      return <GraphCanvas {...common} tool={mask.tool} decorate={mask.decorate} />;
   }
 }

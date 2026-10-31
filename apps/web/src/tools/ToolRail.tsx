@@ -1,5 +1,6 @@
 import { makeStyles, ToggleButton, Tooltip, tokens } from '@fluentui/react-components';
 import {
+  ColorLineRegular,
   CursorRegular,
   HandRightRegular,
   PinRegular,
@@ -39,6 +40,7 @@ export const RAIL_TOOLS: readonly RailTool[] = [
   { id: 'point', label: 'Add points', shortcut: 'P', icon: <TargetRegular /> },
   { id: 'pan', label: 'Pan', shortcut: 'H', icon: <HandRightRegular /> },
   { id: 'calibrate', label: 'Calibrate', shortcut: 'C', icon: <RulerRegular /> },
+  { id: 'mask', label: 'Colour mask', shortcut: 'M', icon: <ColorLineRegular /> },
 ];
 
 export function ToolRail() {

@@ -105,7 +105,7 @@ As built (task 2.3, ADR 34): a colour ink model and a ray-cone corridor search w
 5. Output: ordered px path, simplified with Douglas-Peucker to a tolerance of 0.5 px, then sampled to points (density setting), each with `origin:'trace'` and estimated line width.
 
 ### 8.2 Colour-mask trace
-Colour distance in CIELAB; threshold → mask; morphological open; Zhang-Suen thinning; connected components; order each component by walking; drop components below a length threshold; user picks components to keep.
+Colour distance in CIELAB; threshold → mask; morphological open; Zhang-Suen thinning; connected components; order each component by walking; drop components below a length threshold; user picks components to keep. Details as built (open by reconstruction, Lü–Wang thinning, joining pieces across gaps) are in ADR 35.
 
 ### 8.3 X-step sampler
 For each requested X: compute the pixel column (through `M`), find curve crossings in the processed image near the previously found Y (continuity), snap to centerline, emit point; mark outliers where the jump exceeds a threshold.

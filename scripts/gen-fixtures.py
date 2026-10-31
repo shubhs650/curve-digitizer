@@ -351,8 +351,9 @@ def reference_median(img, r):
     return out
 
 
-def reference_zhang_suen(mask):
-    """Zhang-Suen thinning as published (1984), written from the paper: two sub-iterations until stable."""
+def reference_zhang_suen(mask, min_neighbours=2):
+    """Zhang-Suen thinning as published (1984), written from the paper: two sub-iterations until stable.
+    min_neighbours=3 is the Lu-Wang (1986) correction, which keeps diagonal strokes two pixels thick."""
     img = np.pad(mask.astype(np.uint8), 1)
     changed = True
     while changed:
@@ -372,7 +373,7 @@ def reference_zhang_suen(mask):
                         cond = p2 * p4 * p6 == 0 and p4 * p6 * p8 == 0
                     else:
                         cond = p2 * p4 * p8 == 0 and p2 * p6 * p8 == 0
-                    if 2 <= b <= 6 and a == 1 and cond:
+                    if min_neighbours <= b <= 6 and a == 1 and cond:
                         remove.append((y, x))
             for y, x in remove:
                 img[y, x] = 0
@@ -405,8 +406,12 @@ def filter_cases():
     ring = (((yy - 9.5) ** 2 + (xx - 9.5) ** 2 <= 64) & ((yy - 9.5) ** 2 + (xx - 9.5) ** 2 >= 16)).astype(np.uint8)
     shapes["ring"] = ring
     shapes["random"] = (rng.random((14, 18)) < 0.55).astype(np.uint8)
+    # A 45 degree stroke two pixels thick, which plain Zhang-Suen erases completely.
+    shapes["diagonal"] = ((xx - yy >= 0) & (xx - yy <= 1) & (xx >= 2) & (xx <= 17)).astype(np.uint8)
     thinning = [{"name": n, "width": m.shape[1], "height": m.shape[0], "mask": m.flatten().tolist(),
-                 "skeleton": reference_zhang_suen(m).flatten().astype(int).tolist()} for n, m in shapes.items()]
+                 "skeleton": reference_zhang_suen(m).flatten().astype(int).tolist(),
+                 "skeletonLuWang": reference_zhang_suen(m, 3).flatten().astype(int).tolist()}
+                for n, m in shapes.items()]
     return {"lab": {"rgb": colours.tolist(), "lab": lab.tolist()}, "median": medians, "thinning": thinning}
 
 

@@ -6,9 +6,16 @@ import type { Mask } from './raster.ts';
  * pixel wide that keeps the topology of the mask. With P2…P9 the neighbours clockwise from north, B the number
  * of set neighbours and A the number of 0→1 transitions around them, a pixel is removed when 2 ≤ B ≤ 6, A = 1
  * and, in sub-iteration 1, P2·P4·P6 = 0 and P4·P6·P8 = 0 (in sub-iteration 2, P2·P4·P8 = 0 and P2·P6·P8 = 0).
- * Pixels outside the image count as unset.
+ * Pixels outside the image count as unset. `keepDiagonals` applies the Lü–Wang correction (Lü & Wang 1986,
+ * "A comment on 'A fast parallel algorithm for thinning digital patterns'"): 3 ≤ B ≤ 6, which stops 45° strokes
+ * two pixels thick from being erased completely, at the cost of leaving them two pixels thick.
  */
-export function thin(mask: Mask, tick?: () => void): Mask {
+export function thin(
+  mask: Mask,
+  tick?: () => void,
+  options: { readonly keepDiagonals?: boolean } = {},
+): Mask {
+  const minNeighbours = options.keepDiagonals === true ? 3 : 2;
   const { width, height } = mask;
   const img = Uint8Array.from(mask.data);
   const at = (x: number, y: number): number =>
@@ -35,7 +42,7 @@ export function thin(mask: Mask, tick?: () => void): Mask {
         const p8 = at(x - 1, y);
         const p9 = at(x - 1, y - 1);
         const b = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
-        if (b < 2 || b > 6) continue;
+        if (b < minNeighbours || b > 6) continue;
         const ring = [p2, p3, p4, p5, p6, p7, p8, p9, p2];
         let a = 0;
         for (let k = 0; k < 8; k++) if (ring[k] === 0 && ring[k + 1] === 1) a++;
