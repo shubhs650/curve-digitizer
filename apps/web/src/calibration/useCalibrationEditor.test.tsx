@@ -1,4 +1,4 @@
-import { addDataset, type Dataset, type Vec2 } from '@cd/core';
+import { addDataset, type Dataset, replaceGraphRender, type Vec2 } from '@cd/core';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -72,7 +72,7 @@ async function setup() {
       current().editor.edit((d) => ({ ...d, values: { ...d.values, ...values } }));
     });
   };
-  return { store, current, placeAll, type };
+  return { store, graphId, current, placeAll, type };
 }
 
 describe('useCalibrationEditor', () => {
@@ -175,5 +175,25 @@ describe('useCalibrationEditor', () => {
     });
     expect(current().editor.draft.picks[0]).toEqual([412, 1450]);
     expect(current().editor.active).toBe(1);
+  });
+
+  it('drops half-placed picks when the graph is re-rendered, since every pixel moved', async () => {
+    const { store, graphId, current } = await setup();
+    act(() => {
+      current().editor.place(0, [400, 1450]);
+    });
+    const { source, image, calibration, datasets } = current().graph;
+    act(() => {
+      store.dispatch(
+        replaceGraphRender(graphId, {
+          source,
+          image: { ...image, path: 'graphs/g/render-600dpi.png' },
+          calibration,
+          datasets,
+        }),
+      );
+    });
+    expect(current().editor.draft.picks).toEqual([null, null, null, null]);
+    expect(current().editor.active).toBe(0);
   });
 });

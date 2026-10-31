@@ -5,6 +5,8 @@ chart.pdf               three A4-landscape vector pages: vector-clean, sn-family
 chart-password.pdf      chart.pdf with the user password "open-sesame" (AES-256)
 chart-no-copy.pdf       chart.pdf with only an owner password: viewing and printing allowed, copying and
                         content extraction not (the app must refuse to crop it, as Adobe Reader's snapshot tool does)
+chart-a1.pdf            chart.pdf's first page scaled up to A1 (2384 × 1684 pt), so a 600 DPI crop of the whole
+                        page (≈ 278 Mpx) is over the 50 Mpx budget and must be capped (R7, task 1.8)
 
 Needs pypdf (BSD-3, dev-time only) and node with the repo's Playwright. Output is deterministic except for
 the encryption salts, so re-running changes the two encrypted files' bytes but not their behaviour.
@@ -47,8 +49,20 @@ def main() -> None:
     with open(OUT / "chart-no-copy.pdf", "wb") as f:
         restricted.write(f)
 
-    for name in ("chart.pdf", "chart-password.pdf", "chart-no-copy.pdf"):
+    write_a1()
+
+    for name in ("chart.pdf", "chart-password.pdf", "chart-no-copy.pdf", "chart-a1.pdf"):
         print(f"{OUT / name}  {(OUT / name).stat().st_size} bytes")
+
+
+def write_a1() -> None:
+    large = PdfWriter()
+    large.add_page(PdfReader(OUT / "chart.pdf").pages[0])
+    page = large.pages[0]
+    page.scale_to(2384, 1684)
+    large.add_metadata({"/Title": "Curve Digitizer PDF fixture (A1)", "/Producer": "scripts/gen-pdf-fixtures.py"})
+    with open(OUT / "chart-a1.pdf", "wb") as f:
+        large.write(f)
 
 
 if __name__ == "__main__":

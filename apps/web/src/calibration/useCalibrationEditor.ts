@@ -1,4 +1,4 @@
-import { type Calibration, type Graph, setCalibration, type Vec2 } from '@cd/core';
+import { type Calibration, type Graph, type ImageRef, setCalibration, type Vec2 } from '@cd/core';
 import { useCallback, useMemo } from 'react';
 import { create } from 'zustand';
 import { useDispatch } from '../session/context';
@@ -17,6 +17,8 @@ interface EditorEntry {
   readonly draft: CalibrationDraft;
   /** The project's calibration when the draft was last saved or loaded; a different one (undo) resets the draft. */
   readonly basis: Calibration | null;
+  /** The render the picks are in; a re-render at another DPI (or its undo) moves every pixel, so it resets too. */
+  readonly image: ImageRef;
   readonly active: PickIndex | null;
 }
 
@@ -68,14 +70,15 @@ export function useCalibrationEditor(graph: Graph): CalibrationEditor {
   const put = useEditorStore((s) => s.put);
   const entry: EditorEntry = useMemo(
     () =>
-      stored !== undefined && stored.basis === graph.calibration
+      stored !== undefined && stored.basis === graph.calibration && stored.image === graph.image
         ? stored
         : {
             draft: draftFromCalibration(graph.calibration),
             basis: graph.calibration,
+            image: graph.image,
             active: graph.calibration === null ? 0 : null,
           },
-    [stored, graph.calibration],
+    [stored, graph.calibration, graph.image],
   );
   const evaluation = useMemo(() => evaluateDraft(entry.draft), [entry.draft]);
 
@@ -89,7 +92,7 @@ export function useCalibrationEditor(graph: Graph): CalibrationEditor {
         );
         if (saved) basis = result.calibration;
       }
-      put(graph.id, { draft, basis, active });
+      put(graph.id, { draft, basis, image: graph.image, active });
     },
     [dispatch, graph, entry.basis, put],
   );
@@ -129,6 +132,7 @@ export function useCalibrationEditor(graph: Graph): CalibrationEditor {
     put(graph.id, {
       draft: { ...EMPTY_DRAFT, xAxis: entry.draft.xAxis, yAxis: entry.draft.yAxis },
       basis: null,
+      image: graph.image,
       active: 0,
     });
   }, [dispatch, put, graph, entry.draft]);

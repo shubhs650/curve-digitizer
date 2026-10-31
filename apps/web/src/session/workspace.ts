@@ -1,6 +1,18 @@
-import { addGraph, addSource, createProject, type Graph, type Project, ProjectStore } from '@cd/core';
+import {
+  addGraph,
+  addSource,
+  createProject,
+  type Graph,
+  type ImageRef,
+  type PdfCropSource,
+  type Project,
+  ProjectStore,
+  replaceGraphRender,
+} from '@cd/core';
 import { type ImageType, pngSize, sniffImageType } from '@cd/image';
+import { capDpi } from '@cd/pdf/geometry';
 import type { PageGeometry, PdfOpenOutput, PdfPermissions, RgbaImage } from '@cd/workers';
+import { rescaleGraph } from '../pdf/rescale';
 import type { ProjectRepository, ProjectSummary } from '../storage/repository';
 import type { PdfBackend } from './pdf';
 
@@ -54,6 +66,27 @@ export type PdfImportResult =
   | { readonly status: 'existing'; readonly sourceId: string }
   | { readonly status: 'needsPassword'; readonly wrong: boolean }
   | { readonly status: 'failed'; readonly message: string; readonly unavailable: boolean };
+
+/** A region of a source PDF page to render as a graph image (ADR 28). */
+export interface CropRequest {
+  /** 0-based. */
+  readonly pageIndex: number;
+  readonly rectPt: PdfCropSource['rectPt'];
+  /** As asked for; capped to the pixel budget before rendering (R7). */
+  readonly dpi: number;
+  readonly rotation: PdfCropSource['rotation'];
+}
+
+export interface RenderResult {
+  /** The DPI rendered at, after the cap. */
+  readonly dpi: number;
+  /** True when the asked-for DPI would have gone over the pixel budget (R7). */
+  readonly capped: boolean;
+  readonly renderMs: number;
+}
+
+/** Name of the performance measure each crop render records, read back by the P3 timing test. */
+export const CROP_RENDER_MEASURE = 'pdf-crop-render';
 
 export interface WorkspaceState {
   readonly projects: readonly ProjectSummary[];
@@ -281,6 +314,82 @@ export class Workspace {
     return this.#deps.pdf.thumbnail(sourceId, pageIndex, maxSide);
   }
 
+  /**
+   * Renders a region of a page of an open source PDF and adds it to the project as a new Graph. The DPI is
+   * capped to the pixel budget first (R7); the result says the DPI used.
+   */
+  async cropPdf(
+    sourceId: string,
+    request: CropRequest,
+  ): Promise<RenderResult & { readonly graphId: string }> {
+    const store = this.#requireStore();
+    const source = store.project.sources.find((s) => s.id === sourceId);
+    const graphId = this.#deps.newId();
+    const { image, ...result } = await this.#renderCrop(sourceId, request, `graphs/${graphId}/original.png`);
+    store.dispatch(
+      addGraph({
+        id: graphId,
+        name: `${baseName(source?.fileName ?? '', 'PDF')} p${String(request.pageIndex + 1)}`,
+        source: { kind: 'pdfCrop', sourceId, ...request, dpi: result.dpi },
+        image,
+        processing: [],
+        calibration: null,
+        datasets: [],
+        fits: [],
+        view: { zoom: 1, pan: [0, 0] },
+      }),
+    );
+    return { graphId, ...result };
+  }
+
+  /**
+   * Renders a PDF-crop graph's region again at another DPI ("Re-render at higher DPI"), rescaling every pixel
+   * position by the DPI ratio, as one undoable step. The previous render stays in storage for the undo.
+   */
+  async rerenderGraph(graphId: string, dpi: number): Promise<RenderResult> {
+    const store = this.#requireStore();
+    const graph = store.project.graphs.find((g) => g.id === graphId);
+    if (!graph) throw new Error(`No graph ${graphId}`);
+    const { source } = graph;
+    if (source.kind !== 'pdfCrop') throw new Error(`${graph.name} is not a PDF crop`);
+    const target = capDpi(source.rectPt, dpi).dpi;
+    if (target === source.dpi) throw new Error(`${graph.name} is already rendered at ${String(target)} DPI`);
+    const { image, ...result } = await this.#renderCrop(
+      source.sourceId,
+      { ...source, dpi },
+      `graphs/${graphId}/render-${String(target)}dpi.png`,
+    );
+    // The graph may have changed while the worker rendered; rescale what is there now.
+    const current = store.project.graphs.find((g) => g.id === graphId) ?? graph;
+    store.dispatch(
+      replaceGraphRender(graphId, {
+        source: { ...source, dpi: result.dpi },
+        image,
+        ...rescaleGraph(current, result.dpi / source.dpi),
+      }),
+    );
+    return result;
+  }
+
+  async #renderCrop(
+    sourceId: string,
+    request: CropRequest,
+    path: string,
+  ): Promise<RenderResult & { readonly image: ImageRef }> {
+    const store = this.#requireStore();
+    const state = this.#state.pdf[sourceId];
+    if (state?.status !== 'open') throw new Error('The PDF is not open');
+    if (!state.permissions.copy) {
+      throw new Error("This PDF's permissions do not allow copying its content, so it cannot be cropped.");
+    }
+    const { dpi, capped } = capDpi(request.rectPt, request.dpi);
+    const start = performance.now();
+    const { png, width, height, renderMs } = await this.#deps.pdf.cropPng({ key: sourceId, ...request, dpi });
+    performance.measure(CROP_RENDER_MEASURE, { start, duration: renderMs, detail: { width, height, dpi } });
+    await this.#deps.repo.writeFile(store.project.id, path, png);
+    return { dpi, capped, renderMs, image: { path, width, height } };
+  }
+
   /** Bytes of a file of the open project, e.g. a graph's `image.path`. */
   readFile(path: string): Promise<Uint8Array> {
     const store = this.#state.store;
@@ -316,6 +425,12 @@ export class Workspace {
       fits: [],
       view: { zoom: 1, pan: [0, 0] },
     };
+  }
+
+  #requireStore(): ProjectStore {
+    const store = this.#state.store;
+    if (!store) throw new Error('No project is open');
+    return store;
   }
 
   #attach(project: Project): ProjectStore {

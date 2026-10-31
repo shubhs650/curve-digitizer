@@ -1,4 +1,4 @@
-import { renameProject } from '@cd/core';
+import { addDataset, renameProject } from '@cd/core';
 import { describe, expect, it, vi } from 'vitest';
 import { MemoryRepository } from '../storage/memory';
 import type { ProjectRepository } from '../storage/repository';
@@ -247,5 +247,107 @@ describe('Workspace PDFs', () => {
     const { workspace } = setup();
     await workspace.createProject();
     expect(await workspace.openSource('gone')).toMatchObject({ status: 'failed', unavailable: false });
+  });
+});
+
+describe('Workspace PDF crops', () => {
+  const REQUEST = { pageIndex: 1, rectPt: [72, 72, 288, 216], dpi: 300, rotation: 0 } as const;
+
+  async function withPdf(bytes = PLAIN_PDF) {
+    const context = setup();
+    const result = await context.workspace.importPdf(pdfFile(bytes, 'ASME VIII.pdf'));
+    if (result.status !== 'added') throw new Error('expected the PDF to open');
+    const store = context.workspace.state.store;
+    if (!store) throw new Error('no project');
+    return { ...context, store, sourceId: result.sourceId };
+  }
+
+  it('crops a page region into a new graph that records where it came from', async () => {
+    const { workspace, store, sourceId, pdf, repo } = await withPdf();
+    const result = await workspace.cropPdf(sourceId, REQUEST);
+    expect(result).toEqual({ graphId: 'id3', dpi: 300, capped: false, renderMs: 1 });
+    expect(pdf.crops).toEqual([{ key: sourceId, ...REQUEST }]);
+    expect(store.project.graphs).toEqual([
+      expect.objectContaining({
+        id: 'id3',
+        name: 'ASME VIII p2',
+        source: { kind: 'pdfCrop', sourceId, ...REQUEST },
+        image: { path: 'graphs/id3/original.png', width: 900, height: 600 },
+      }),
+    ]);
+    expect(await repo.readFile(store.project.id, 'graphs/id3/original.png')).toEqual(PNG);
+    store.undo();
+    expect(store.project.graphs).toEqual([]);
+  });
+
+  it('caps the DPI of a crop over the pixel budget and says so (R7)', async () => {
+    const { workspace, store, sourceId } = await withPdf();
+    // A whole A1 sheet at 600 DPI would be about 278 Mpx.
+    const result = await workspace.cropPdf(sourceId, { ...REQUEST, rectPt: [0, 0, 2384, 1684], dpi: 600 });
+    expect(result.capped).toBe(true);
+    expect(result.dpi).toBeLessThan(600);
+    const graph = store.project.graphs[0];
+    expect(graph?.source).toMatchObject({ dpi: result.dpi });
+    expect((graph?.image.width ?? 0) * (graph?.image.height ?? 0)).toBeLessThanOrEqual(50_000_000);
+  });
+
+  it('refuses to crop a PDF whose permissions forbid copying (R6), or one that is not open', async () => {
+    const { workspace, sourceId, store } = await withPdf(NO_COPY_PDF);
+    await expect(workspace.cropPdf(sourceId, REQUEST)).rejects.toThrow(/copying/);
+    await expect(workspace.cropPdf('missing', REQUEST)).rejects.toThrow(/not open/);
+    expect(store.project.graphs).toEqual([]);
+  });
+
+  it('re-renders a crop at a higher DPI, rescaling its points and calibration in one undo step', async () => {
+    const { workspace, store, sourceId, repo } = await withPdf();
+    const { graphId } = await workspace.cropPdf(sourceId, { ...REQUEST, dpi: 150 });
+    const points = [
+      { id: 'p1', px: [100.5, 80.25] as const },
+      { id: 'p2', px: [300, 40] as const },
+    ].map((p) => ({
+      ...p,
+      value: [0, 0] as const,
+      sigma: [0, 0] as const,
+      excludedFromFit: false,
+      outOfRange: false,
+      origin: 'manual' as const,
+    }));
+    store.dispatch(
+      addDataset(graphId, {
+        id: 'd1',
+        name: 'A',
+        color: '#000000',
+        mode: 'function',
+        xUnit: '',
+        yUnit: '',
+        sourceRef: '',
+        notes: '',
+        points,
+      }),
+    );
+    const before = store.project.graphs[0];
+
+    const result = await workspace.rerenderGraph(graphId, 300);
+    expect(result).toEqual({ dpi: 300, capped: false, renderMs: 1 });
+    const after = store.project.graphs[0];
+    expect(after?.source).toMatchObject({ dpi: 300, rectPt: REQUEST.rectPt });
+    expect(after?.image).toEqual({ path: `graphs/${graphId}/render-300dpi.png`, width: 900, height: 600 });
+    expect(await repo.readFile(store.project.id, after?.image.path ?? '')).toEqual(PNG);
+    expect(after?.datasets[0]?.points.map((p) => p.px)).toEqual([
+      [201, 160.5],
+      [600, 80],
+    ]);
+
+    store.undo();
+    expect(store.project.graphs[0]).toEqual(before);
+  });
+
+  it('refuses to re-render at the same DPI or a graph that is not a PDF crop', async () => {
+    const { workspace, sourceId } = await withPdf();
+    const { graphId } = await workspace.cropPdf(sourceId, REQUEST);
+    await expect(workspace.rerenderGraph(graphId, 300)).rejects.toThrow(/already/);
+    await workspace.importImages([{ name: 'x.png', bytes: PNG }]);
+    const image = workspace.state.store?.project.graphs[1]?.id ?? '';
+    await expect(workspace.rerenderGraph(image, 600)).rejects.toThrow(/not a PDF crop/);
   });
 });

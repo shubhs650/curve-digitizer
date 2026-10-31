@@ -21,6 +21,7 @@ export type { ImageToPngInput, ImageToPngOutput } from './tasks/image.ts';
 export type {
   PdfCloseInput,
   PdfCropInput,
+  PdfCropPngOutput,
   PdfOpenInput,
   PdfOpenOutput,
   PdfThumbnailInput,

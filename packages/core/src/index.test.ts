@@ -31,6 +31,7 @@ describe('@cd/core public API', () => {
       'removeSource',
       'renameGraph',
       'renameProject',
+      'replaceGraphRender',
       'replacePoints',
       'runMigrations',
       'serializeAudit',

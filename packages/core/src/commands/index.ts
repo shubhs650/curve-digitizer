@@ -1,6 +1,6 @@
 export { type Command, CommandError } from './command.ts';
 export { renameProject, updateSettings } from './project.ts';
-export { addGraph, removeGraph, renameGraph } from './graph.ts';
+export { addGraph, type GraphRender, removeGraph, renameGraph, replaceGraphRender } from './graph.ts';
 export {
   addDataset,
   type DatasetPatch,

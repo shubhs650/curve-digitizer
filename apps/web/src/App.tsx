@@ -4,7 +4,9 @@ import { useUndoShortcuts } from './history/useUndoShortcuts';
 import { HomeScreen } from './home/HomeScreen';
 import { Inspector } from './inspector/Inspector';
 import { useImageInput } from './input/useImageInput';
+import { CropPanel } from './pdf/CropPanel';
 import { PasswordDialog } from './pdf/PasswordDialog';
+import { PdfPageView } from './pdf/PdfPageView';
 import { ProjectSidebar } from './project/ProjectSidebar';
 import { ProjectEmpty } from './project/ProjectEmpty';
 import { UpdatePrompt } from './pwa/UpdatePrompt';
@@ -21,6 +23,7 @@ import { useToolShortcuts } from './tools/useToolShortcuts';
 import { DEFAULT_THEME, otherTheme, themes } from './theme';
 import type { ThemeName } from './theme';
 import { Notices, useNotify } from './ui/notices';
+import { useUiStore } from './ui/uiStore';
 
 // Layout lives on an inner element: FluentProvider copies its own className onto tooltip/dialog portal
 // nodes, so a full-height style there would make every portal cover the page.
@@ -74,6 +77,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
   const dragging = useImageInput(onFiles);
   const project = useProject();
   const graph = useActiveGraph();
+  const cropPage = useUiStore((s) => (project === null ? null : s.cropPage));
   useProjectList();
   useToolShortcuts();
   useUndoShortcuts();
@@ -92,11 +96,19 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
       <ShellLayout
         sidebarOpen={sidebarOpen}
         sidebar={<ProjectSidebar onFiles={onFiles} />}
-        rail={project !== null && <ToolRail />}
-        inspector={graph !== null && <Inspector key={graph.id} graph={graph} />}
+        rail={project !== null && cropPage === null && <ToolRail />}
+        inspector={
+          cropPage !== null ? (
+            <CropPanel page={cropPage} />
+          ) : (
+            graph !== null && <Inspector key={graph.id} graph={graph} />
+          )
+        }
         canvas={
           project === null ? (
             <HomeScreen onFiles={onFiles} />
+          ) : cropPage !== null ? (
+            <PdfPageView key={`${cropPage.sourceId}/${String(cropPage.pageIndex)}`} page={cropPage} />
           ) : graph === null ? (
             <ProjectEmpty onFiles={onFiles} />
           ) : (

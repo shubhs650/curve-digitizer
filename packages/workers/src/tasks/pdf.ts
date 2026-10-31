@@ -119,6 +119,36 @@ export const pdfCrop: Task<PdfCropInput, RgbaImage> = {
   transferables: transferRgba,
 };
 
+export interface PdfCropPngOutput {
+  /** The crop as a PNG, ready to store as a graph image; transferred out. */
+  readonly png: ArrayBuffer;
+  readonly width: number;
+  readonly height: number;
+  /** Time PDFium spent rendering, without the PNG encode (P3). */
+  readonly renderMs: number;
+}
+
+/**
+ * Renders a crop and encodes it as PNG in the worker, so a crop of up to 50 Mpx never crosses to the main
+ * thread as raw pixels.
+ */
+export const pdfCropPng: Task<PdfCropInput, PdfCropPngOutput> = {
+  async run({ key, ...request }, ctx) {
+    const start = performance.now();
+    const { width, height, rgba } = opened(key).renderCrop(request);
+    const renderMs = performance.now() - start;
+    ctx.throwIfCancelled();
+    const canvas = new OffscreenCanvas(width, height);
+    const context = canvas.getContext('2d');
+    if (context === null) throw new Error('OffscreenCanvas 2D context unavailable');
+    context.putImageData(new ImageData(new Uint8ClampedArray(rgba.buffer), width, height), 0, 0);
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    ctx.throwIfCancelled();
+    return { png: await blob.arrayBuffer(), width, height, renderMs };
+  },
+  transferables: (output) => [output.png],
+};
+
 export interface PdfCloseInput {
   readonly key: string;
 }
