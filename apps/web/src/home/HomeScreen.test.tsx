@@ -1,10 +1,13 @@
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import { testWorkspace, TINY_PNG as PNG } from '../test/workspace';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 function setup() {
   const workspace = testWorkspace();
@@ -63,5 +66,18 @@ describe('home screen and image input', () => {
     );
     expect(await screen.findByText('Could not open notes.png')).toBeTruthy();
     expect(screen.getByText('No project open.')).toBeTruthy();
+  });
+
+  it('opens a sample in one click as a calibrated project with its datasets', async () => {
+    const fetch = vi.fn(() => Promise.resolve(new Response(PNG)));
+    vi.stubGlobal('fetch', fetch);
+    const { user } = setup();
+    await user.click(await screen.findByRole('button', { name: 'Open the Pump curves sample' }));
+    const sidebar = within(await screen.findByRole('complementary', { name: 'Project and pages' }));
+    const graphs = within(await sidebar.findByRole('list', { name: 'Graphs' }));
+    expect(graphs.getByRole('button', { name: 'Pump curves' }).getAttribute('aria-current')).toBe('true');
+    for (const name of ['Pump A', 'Pump B', 'Pump C'])
+      expect((await screen.findAllByText(name)).length).toBeGreaterThan(0);
+    expect(fetch).toHaveBeenCalledOnce();
   });
 });

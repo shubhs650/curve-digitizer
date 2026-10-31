@@ -1,6 +1,6 @@
 # Samples
 
-Synthetic charts with exact ground truth. They are the CI fixtures for the accuracy targets in `docs/ACCEPTANCE_TARGETS.md` and, from M3, the one-click demo projects (PRD §4.12).
+Synthetic charts with exact ground truth. They are the CI fixtures for the accuracy targets in `docs/ACCEPTANCE_TARGETS.md` and the one-click demo projects on the home screen (PRD §4.12, ADR 44: each opens calibrated from its recorded calibration clicks, with an empty dataset per curve; `apps/web/src/home/demos.ts`, kept in step with these files by its test).
 
 | Sample | What it is | Targets measured on it |
 |---|---|---|
