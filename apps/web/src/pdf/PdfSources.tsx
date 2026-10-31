@@ -2,8 +2,8 @@ import type { SourceFile } from '@cd/core';
 import {
   Button,
   Caption1,
-  Caption1Strong,
   makeStyles,
+  mergeClasses,
   MessageBar,
   MessageBarBody,
   Spinner,
@@ -12,6 +12,7 @@ import {
 } from '@fluentui/react-components';
 import { DocumentPdfRegular, LockClosedRegular } from '@fluentui/react-icons';
 import { useEffect } from 'react';
+import { useSidebarStyles } from '../project/ProjectSidebar';
 import { useWorkspace, useWorkspaceState } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
 import { useCropDraft } from './cropDraft';
@@ -19,6 +20,11 @@ import { PdfThumbnail } from './PdfThumbnail';
 import { usePdfActions } from './usePdfActions';
 
 const useStyles = makeStyles({
+  section: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalM,
+  },
   source: {
     display: 'flex',
     flexDirection: 'column',
@@ -43,22 +49,35 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     gap: tokens.spacingVerticalXXS,
+    width: '100%',
     minWidth: 0,
-    paddingBlock: tokens.spacingVerticalXS,
+    paddingBlock: tokens.spacingVerticalS,
     paddingInline: tokens.spacingHorizontalXS,
+    border: `${tokens.strokeWidthThin} solid transparent`,
+  },
+  current: {
+    border: `${tokens.strokeWidthThick} solid ${tokens.colorBrandStroke1}`,
+    backgroundColor: tokens.colorBrandBackground2,
+  },
+  muted: {
+    color: tokens.colorNeutralForeground3,
   },
 });
 
 /** The open project's source PDFs and their pages (PRD §4.1); a page opens in the crop view. */
 export function PdfSources({ sources }: { readonly sources: readonly SourceFile[] }) {
+  const styles = useStyles();
+  const sidebarStyles = useSidebarStyles();
   if (sources.length === 0) return null;
   return (
-    <>
-      <Caption1Strong id="pdfs-heading">PDFs</Caption1Strong>
+    <section className={styles.section} aria-labelledby="pdfs-heading">
+      <h3 id="pdfs-heading" className={sidebarStyles.sectionTitle}>
+        PDFs
+      </h3>
       {sources.map((source) => (
         <PdfSource key={source.id} source={source} />
       ))}
-    </>
+    </section>
   );
 }
 
@@ -85,7 +104,7 @@ function PdfSource({ source }: { readonly source: SourceFile }) {
           {source.fileName}
         </Text>
       </div>
-      <Caption1>{pages}</Caption1>
+      <Caption1 className={styles.muted}>{pages}</Caption1>
       {(state === undefined || state.status === 'opening') && <Spinner size="tiny" label="Opening…" />}
       {state?.status === 'locked' && (
         <Button
@@ -120,8 +139,8 @@ function PdfSource({ source }: { readonly source: SourceFile }) {
               return (
                 <li key={i}>
                   <Button
-                    appearance={current ? 'secondary' : 'subtle'}
-                    className={styles.page}
+                    appearance="subtle"
+                    className={mergeClasses(styles.page, current && styles.current)}
                     aria-current={current ? 'true' : undefined}
                     title={`Crop from page ${String(i + 1)}`}
                     onClick={() => {

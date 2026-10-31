@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Caption1,
-  Caption1Strong,
   Field,
   makeStyles,
   MessageBar,
@@ -21,6 +20,7 @@ import { type CalibrationDraft, type DraftEvaluation, PICKS, type PickIndex, typ
 import { formatValue } from './format';
 import { PICK_COLOURS } from './overlay';
 import { useCalibrationEditor } from './useCalibrationEditor';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
@@ -90,7 +90,7 @@ export function CalibrationPanel({ graph }: { graph: Graph }) {
   return (
     <section aria-labelledby="calibration-heading" className={styles.panel}>
       <div className={styles.header}>
-        <Caption1Strong id="calibration-heading">Calibration</Caption1Strong>
+        <PanelTitle id="calibration-heading">Calibration</PanelTitle>
         <Badge
           appearance="tint"
           color={calibrated ? 'success' : 'informative'}

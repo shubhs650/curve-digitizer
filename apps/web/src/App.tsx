@@ -105,6 +105,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
         theme={theme}
         onToggleTheme={onToggleTheme}
         sidebarOpen={sidebarOpen}
+        projectName={project?.name ?? null}
         onToggleSidebar={() => {
           setSidebarOpen((open) => !open);
         }}
@@ -112,7 +113,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
       <UpdatePrompt open={update.needRefresh} onReload={update.reload} onDismiss={update.dismiss} />
       <ShellLayout
         sidebarOpen={sidebarOpen}
-        sidebar={<ProjectSidebar onFiles={onFiles} />}
+        sidebar={project !== null && <ProjectSidebar onFiles={onFiles} />}
         rail={graph !== null && cropPage === null && <ToolRail />}
         inspector={
           cropPage !== null ? (

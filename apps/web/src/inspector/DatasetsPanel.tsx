@@ -10,7 +10,6 @@ import {
 import {
   Button,
   Caption1,
-  Caption1Strong,
   Field,
   makeStyles,
   Radio,
@@ -23,6 +22,7 @@ import { useId } from 'react';
 import { useActiveDataset, useDispatch } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
 import { NumberField, TextField } from './fields';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
@@ -125,7 +125,7 @@ export function DatasetsPanel({ graph }: { graph: Graph }) {
   return (
     <section aria-labelledby="datasets-heading" className={styles.panel}>
       <div className={styles.header}>
-        <Caption1Strong id="datasets-heading">Datasets</Caption1Strong>
+        <PanelTitle id="datasets-heading">Datasets</PanelTitle>
         <Button size="small" appearance="subtle" icon={<AddRegular />} onClick={add}>
           Add dataset
         </Button>

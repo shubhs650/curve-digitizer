@@ -30,7 +30,7 @@ export function guideSteps(
       done: graph !== null,
       hint: hasPdf
         ? 'Click a page under PDFs, drag a rectangle around the graph, then choose Crop to new graph.'
-        : 'Open a PDF of the graph (or an image of it) with the button below, or drop the file on the window.',
+        : 'Open a PDF of the graph (or an image of it) with Add PDF or image at the top, or drop the file on the window.',
     },
     {
       id: 'calibrate',
@@ -48,7 +48,7 @@ export function guideSteps(
       id: 'export',
       title: 'Export',
       done: exported,
-      hint: 'Use Export below: CSV for this graph, or the Excel workbook for every graph.',
+      hint: 'Use Export at the top of this panel: CSV for this graph, or the Excel workbook for every graph.',
     },
   ];
 }

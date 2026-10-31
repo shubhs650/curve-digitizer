@@ -113,7 +113,7 @@ test.describe('PDFium unavailable (R5)', () => {
     await page.goto('/');
     await open(page, pdf('chart.pdf'));
     await expect(page.getByText('PDF support could not be loaded').first()).toBeVisible();
-    await expect(page.getByText('No project open.')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
 
     await open(page, SAMPLE_PNG);
     await expect(page.getByRole('application', { name: /Graph image: source/ })).toHaveAttribute(

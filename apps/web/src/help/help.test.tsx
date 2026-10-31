@@ -29,8 +29,11 @@ const stepStates = () =>
     .map((li) => li.textContent);
 
 describe('getting-started guide', () => {
-  it('shows Crop as the next step before anything is open', () => {
-    render(<App workspace={testWorkspace()} />);
+  it('shows Crop as the next step in a new, empty project', async () => {
+    const workspace = testWorkspace();
+    render(<App workspace={workspace} />);
+    await workspace.createProject();
+    await screen.findByRole('complementary', { name: 'Project and pages' });
     expect(stepStates()[0]).toMatch(/^1\. Crop, next/);
     expect(guide().getByText(/Open a PDF of the graph/)).toBeTruthy();
   });
@@ -109,12 +112,22 @@ describe('getting-started guide', () => {
 
   it('can be hidden and brought back, and stays hidden', async () => {
     const user = userEvent.setup();
-    render(<App workspace={testWorkspace()} />);
+    const workspace = testWorkspace();
+    render(<App workspace={workspace} />);
+    await workspace.createProject();
+    await screen.findByRole('complementary', { name: 'Project and pages' });
     await user.click(sidebar().getByRole('button', { name: 'Hide the getting-started guide' }));
     expect(sidebar().queryByRole('region', { name: 'Getting started' })).toBeNull();
     cleanup();
-    render(<App workspace={testWorkspace()} />);
-    await user.click(sidebar().getByRole('button', { name: 'Show the getting-started guide' }));
+    const again = testWorkspace();
+    render(<App workspace={again} />);
+    await again.createProject();
+    await user.click(
+      await within(await screen.findByRole('complementary', { name: 'Project and pages' })).findByRole(
+        'button',
+        { name: 'Show the getting-started guide' },
+      ),
+    );
     expect(guide().getByText(/Open a PDF/)).toBeTruthy();
   });
 });

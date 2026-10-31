@@ -3,7 +3,6 @@ import { toHexColor } from '@cd/image';
 import {
   Button,
   Caption1,
-  Caption1Strong,
   Field,
   Input,
   makeStyles,
@@ -21,13 +20,14 @@ import { cancelXStep, clearXStep, pathDatasetBlock } from './runXStep';
 import { defaultRange, resolveXs } from './xValues';
 import { type XStepSession, useXStepSession, useXStepStore } from './xstepStore';
 import { xstepPoints } from './xstepPoints';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   muted: { color: tokens.colorNeutralForeground3 },
@@ -58,7 +58,7 @@ export function XStepPanel({ graph }: { graph: Graph }) {
   if (graph.calibration === null || blocked !== null) {
     return (
       <section aria-labelledby="xstep-heading" className={styles.panel}>
-        <Caption1Strong id="xstep-heading">X-step</Caption1Strong>
+        <PanelTitle id="xstep-heading">X-step</PanelTitle>
         <Caption1 className={styles.muted}>
           {graph.calibration === null
             ? 'Calibrate the graph first: the X values are read through the axes.'
@@ -73,7 +73,7 @@ export function XStepPanel({ graph }: { graph: Graph }) {
 
   return (
     <section aria-labelledby="xstep-heading" className={styles.panel}>
-      <Caption1Strong id="xstep-heading">X-step</Caption1Strong>
+      <PanelTitle id="xstep-heading">X-step</PanelTitle>
       <Caption1 className={styles.muted}>Places one point on a curve at each X value.</Caption1>
       <RadioGroup
         layout="horizontal"

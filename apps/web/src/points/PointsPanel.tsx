@@ -1,18 +1,19 @@
 import { type Graph, removePoints, updateSettings } from '@cd/core';
-import { Button, Caption1, Caption1Strong, makeStyles, Switch, tokens } from '@fluentui/react-components';
+import { Button, Caption1, makeStyles, Switch, tokens } from '@fluentui/react-components';
 import { DeleteRegular } from '@fluentui/react-icons';
 import { calibratedReadout } from '../calibration/format';
 import { NumberField } from '../inspector/fields';
 import { useDispatch, useProject } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
 import { selectedPoints } from './usePointTools';
+import { PanelTitle } from '../ui/PanelTitle';
 
 const useStyles = makeStyles({
   panel: {
     display: 'flex',
     flexDirection: 'column',
     gap: tokens.spacingVerticalS,
-    padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalM}`,
+    padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalM} ${tokens.spacingVerticalL}`,
     borderTop: `${tokens.strokeWidthThin} solid ${tokens.colorNeutralStroke2}`,
   },
   muted: {
@@ -40,7 +41,7 @@ export function PointsPanel({ graph }: { graph: Graph }) {
 
   return (
     <section aria-labelledby="points-heading" className={styles.panel}>
-      <Caption1Strong id="points-heading">Points</Caption1Strong>
+      <PanelTitle id="points-heading">Points</PanelTitle>
       <Caption1 className={styles.muted}>
         Add points with P. Click a point to select it, Shift+click for more, drag to move; arrow keys nudge 1
         px (Shift: 0.1 px) and Delete removes.
