@@ -13,11 +13,13 @@ import {
   Select,
   tokens,
 } from '@fluentui/react-components';
+import { CodeRegular } from '@fluentui/react-icons';
 import { useId, useMemo, useState } from 'react';
 import { useDispatch } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
 import { fitBlock, fitInputs, isStale, toStoredFit } from './fitInputs';
 import { type FitSession, useFitSession, useFitStore } from './fitStore';
+import { CodeDialog } from './CodeDialog';
 import { ResidualPlot } from './ResidualPlot';
 import { cancelFit, clearFit, runFit } from './runFit';
 
@@ -184,6 +186,7 @@ function FitWorkspace({ graph, dataset }: { readonly graph: Graph; readonly data
   const optionId = useId();
   const spec = specFrom(model, option);
   const optionLabel = OPTION_LABEL[model];
+  const [codeOpen, setCodeOpen] = useState(false);
 
   // The residual plot follows the previewed candidate, else the dataset's accepted fit.
   const shown = session?.result?.fits[session.previewIndex] ?? stored;
@@ -311,12 +314,31 @@ function FitWorkspace({ graph, dataset }: { readonly graph: Graph; readonly data
             <Button
               size="small"
               appearance="subtle"
+              icon={<CodeRegular />}
+              onClick={() => {
+                setCodeOpen(true);
+              }}
+            >
+              Code
+            </Button>
+            <Button
+              size="small"
+              appearance="subtle"
               onClick={() => {
                 dispatch(setDatasetFit(graph.id, dataset.id, null));
               }}
             >
               Remove fit
             </Button>
+            {codeOpen && (
+              <CodeDialog
+                fit={stored}
+                datasetName={dataset.name}
+                onClose={() => {
+                  setCodeOpen(false);
+                }}
+              />
+            )}
           </div>
         )}
       </div>

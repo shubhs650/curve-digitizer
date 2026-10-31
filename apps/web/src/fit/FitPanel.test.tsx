@@ -2,7 +2,7 @@ import { addDataset, insertPoints, setCalibration } from '@cd/core';
 import { recommendFits } from '@cd/fit';
 import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import { EMPTY_DRAFT, evaluateDraft } from '../calibration/draft';
 import { newDataset } from '../inspector/DatasetsPanel';
@@ -178,6 +178,52 @@ describe('FitPanel', () => {
       );
     });
     expect(dock().getByText(/points changed since this fit/)).toBeTruthy();
+  });
+
+  it('shows the stored fit as code in six languages, to copy', async () => {
+    const { user, graph, dock, calibrate, addCurve } = await setup();
+    calibrate();
+    addCurve();
+    await user.click(dock().getByRole('tab', { name: 'Fit' }));
+    const g = graph();
+    const dataset = g.datasets[0];
+    if (!dataset) throw new Error('expected a dataset');
+    const inputs = fitInputs(g, dataset);
+    act(() => {
+      useFitStore.setState({
+        session: {
+          graphId: g.id,
+          datasetId: dataset.id,
+          running: false,
+          fraction: 1,
+          result: recommendFits(inputs.x, inputs.y, inputs.space),
+          spec: undefined,
+          error: null,
+          previewIndex: 0,
+        },
+      });
+    });
+    await user.click(dock().getByRole('button', { name: 'Use this fit' }));
+    await user.click(dock().getByRole('button', { name: 'Code' }));
+    const dialog = within(screen.getByRole('dialog', { name: 'Code for Dataset 1' }));
+    expect(dialog.getAllByRole('tab')).toHaveLength(6);
+    for (const name of ['Python', 'JavaScript', 'Excel formula', 'VBA', 'MATLAB', 'C/C++'])
+      expect(dialog.getByRole('tab', { name })).toBeTruthy();
+    expect(dialog.getByRole('region', { name: 'Python code' }).textContent).toMatch(/def dataset_1\(x\):/);
+
+    await user.click(dialog.getByRole('tab', { name: 'Excel formula' }));
+    const cell = dialog.getByRole('textbox', { name: 'X value cell' });
+    await user.clear(cell);
+    await user.type(cell, 'b7');
+    const formula = dialog.getByRole('region', { name: 'Excel formula code' }).textContent;
+    expect(formula).toMatch(/^=.*B7/);
+
+    const writeText = vi.fn(() => Promise.resolve());
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    await user.click(dialog.getByRole('button', { name: 'Copy' }));
+    expect(writeText).toHaveBeenCalledWith(formula.trimEnd());
+    await user.click(dialog.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
   it('refuses path datasets', async () => {

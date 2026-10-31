@@ -22,3 +22,14 @@ export {
 } from './recommend.ts';
 export { evaluateFit, type FitValue, sampleFit } from './evaluate.ts';
 export { oscillates } from './warnings.ts';
+export {
+  codeFileName,
+  type CodeFit,
+  type CodeForm,
+  type CodeOptions,
+  generateCode,
+  identifier,
+  LANGUAGES,
+  type Language,
+  type LanguageId,
+} from './codegen/index.ts';

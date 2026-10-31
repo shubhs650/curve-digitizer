@@ -7,6 +7,7 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 ### Added
 
 - Fit tab in the dock under the canvas: **Recommend fits** tries polynomials (degree 1–9), power, exponential, logarithmic, rational, cubic spline, monotone (PCHIP) spline and piecewise linear models, ranks them by AICc and recommends the simplest one the points support; or pick a model and its degree, order, knots or breakpoints yourself. Fits are made on the log of the values on log axes, leave out excluded points, run off the main thread with progress and Cancel, and show a residual plot. The kept fit is drawn over the image (the candidate being previewed dashed), fills the table's Residual column, and says when its points have changed since. Docs page "Fitting curves".
+- Code export for a kept fit: **Code** shows it in Python (NumPy), JavaScript, an Excel formula, a VBA function, MATLAB/Octave and C/C++, each with a comment giving the model, the valid X range and the fit statistics; splines and piecewise lines come as a knot table plus an interpolation snippet. Copy or download; every language agrees with the app within 1e-9 (A8).
 
 ## [0.2.0] - 2026-10-31
 

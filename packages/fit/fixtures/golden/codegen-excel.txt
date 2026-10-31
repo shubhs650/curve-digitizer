@@ -1,0 +1,41 @@
+==== poly3 ====
+=52.3+A2*(0.0841+A2*(-0.00312+A2*(-0.0000127)))+N("Curve Digitizer fit: Polynomial, degree 3; Dataset: Pump A head; Valid for 0 <= x <= 120 (42 fitted points); R^2 = 0.999312, RMSE = 0.0832")
+
+==== poly2-loglog ====
+=10^(1.2+LOG10(A2)*(-0.8+LOG10(A2)*0.05))+N("Curve Digitizer fit: Polynomial, degree 2; Dataset: Friction factor; Valid for 1 <= x <= 1000 (30 fitted points); R^2 = 0.99871, RMSE = 0.0041 (in log10 y)")
+
+==== power ====
+=7.25*A2^(-1.3)+N("Curve Digitizer fit: Power law, y = a * x^b; Dataset: Drag; Valid for 1 <= x <= 20 (25 fitted points); R^2 = 0.9991, RMSE = 0.012")
+
+==== power-loglog ====
+=0.0123*A2^1.85+N("Curve Digitizer fit: Power law, y = a * x^b; Dataset: NPSHr (m); Valid for 10 <= x <= 5000 (18 fitted points); R^2 = 0.99952, RMSE = 0.0063 (in log10 y)")
+
+==== exp-decay ====
+=-3*EXP(-0.2*A2)+N("Curve Digitizer fit: Exponential, y = a * exp(b * x); Dataset: Cooling; Valid for 0 <= x <= 25 (40 fitted points); R^2 = 0.9987, RMSE = 0.0201")
+
+==== exp-semilog ====
+=0.0025*EXP(0.0715*A2)+N("Curve Digitizer fit: Exponential, y = a * exp(b * x); Dataset: Leakage current; Valid for -40 <= x <= 125 (34 fitted points); R^2 = 0.99934, RMSE = 0.0122 (in log10 y)")
+
+==== log ====
+=1.5-2*LN(A2)+N("Curve Digitizer fit: Logarithmic, y = a + b * ln(x); Dataset: Settlement; Valid for 0.5 <= x <= 60 (22 fitted points); R^2 = 0.9978, RMSE = 0.051")
+
+==== rational21 ====
+=(3+A2*(2+A2*0.1))/(1+A2*0.25)+N("Curve Digitizer fit: Rational, degree 2/1; Dataset: Efficiency; Valid for 0 <= x <= 40 (36 fitted points); R^2 = 0.99963, RMSE = 0.073")
+
+==== rational11-logx ====
+=(-0.4+LOG10(A2)*1.7)/(1+LOG10(A2)*(-0.12))+N("Curve Digitizer fit: Rational, degree 1/1; Dataset: Gain; Valid for 0.1 <= x <= 100 (28 fitted points); R^2 = 0.9969, RMSE = 0.034")
+
+==== spline ====
+=LET(x,A2,u,x,knots,{0,1.25,2.5,4,5.5,8,10},values,{1,2.1,1.6,0.2,-1.05,0.5,0.92},slopes,{1.18989985450807,0.260200290983857,-0.790701018443498,-1.07315586802924,-0.216675509439551,0.637529163726336,-0.00376458186316789},i,MIN(IFERROR(MATCH(u,knots,1),1),6),lo,INDEX(knots,i),h,INDEX(knots,i+1)-lo,s,(u-lo)/h,sq,s*s,cu,sq*s,v,(2*cu-3*sq+1)*INDEX(values,i)+(cu-2*sq+s)*h*INDEX(slopes,i)+(-2*cu+3*sq)*INDEX(values,i+1)+(cu-sq)*h*INDEX(slopes,i+1),v)+N("Curve Digitizer fit: Cubic spline, 7 knots; Dataset: Torque; Valid for 0 <= x <= 10 (80 fitted points); R^2 = 0.99841, RMSE = 0.0287")
+
+==== spline-loglog ====
+=LET(x,A2,u,LOG10(x),knots,{-2,-1.3,-0.6,0,0.5,1},values,{-1.1,-0.35,0.21,0.18,-0.42,-1.3},slopes,{1.10119273769709,1.01190023889154,0.465492021022456,-0.689170568561873,-1.58595126612518,-1.84702436693741},i,MIN(IFERROR(MATCH(u,knots,1),1),5),lo,INDEX(knots,i),h,INDEX(knots,i+1)-lo,s,(u-lo)/h,sq,s*s,cu,sq*s,v,(2*cu-3*sq+1)*INDEX(values,i)+(cu-2*sq+s)*h*INDEX(slopes,i)+(-2*cu+3*sq)*INDEX(values,i+1)+(cu-sq)*h*INDEX(slopes,i+1),10^v)+N("Curve Digitizer fit: Cubic spline, 6 knots; Dataset: Response spectrum; Valid for 0.01 <= x <= 10 (64 fitted points); R^2 = 0.99902, RMSE = 0.0097 (in log10 y)")
+
+==== pchip ====
+=LET(x,A2,u,x,knots,{0,10,20,35,50,70,90,100},values,{0,0.8,3.1,9.5,21,44,71,80},slopes,{0.005,0.118709677419355,0.293032514930325,0.548230912476723,0.911320754716981,1.242,1.05652173913043,0.75},i,MIN(IFERROR(MATCH(u,knots,1),1),7),lo,INDEX(knots,i),h,INDEX(knots,i+1)-lo,s,(u-lo)/h,sq,s*s,cu,sq*s,v,(2*cu-3*sq+1)*INDEX(values,i)+(cu-2*sq+s)*h*INDEX(slopes,i)+(-2*cu+3*sq)*INDEX(values,i+1)+(cu-sq)*h*INDEX(slopes,i+1),v)+N("Curve Digitizer fit: Monotone spline (PCHIP), 8 knots; Dataset: Valve Cv; Valid for 0 <= x <= 100 (21 fitted points); R^2 = 0.99977, RMSE = 0.38")
+
+==== piecewise ====
+=LET(x,A2,u,x,knots,{-20,40,85,125},values,{100,100.2,60,0},i,MIN(IFERROR(MATCH(u,knots,1),1),3),lo,INDEX(knots,i),h,INDEX(knots,i+1)-lo,s,(u-lo)/h,v,INDEX(values,i)+s*(INDEX(values,i+1)-INDEX(values,i)),v)+N("Curve Digitizer fit: Piecewise linear, 3 segments; Dataset: Derating; Valid for -20 <= x <= 125 (50 fitted points); R^2 = 0.99993, RMSE = 0.19")
+
+==== piecewise-logx ====
+=LET(x,A2,u,LOG10(x),knots,{3,6,8},values,{450,210,205},i,MIN(IFERROR(MATCH(u,knots,1),1),2),lo,INDEX(knots,i),h,INDEX(knots,i+1)-lo,s,(u-lo)/h,v,INDEX(values,i)+s*(INDEX(values,i+1)-INDEX(values,i)),v)+N("Curve Digitizer fit: Piecewise linear, 2 segments; Dataset: Fatigue; Valid for 1000 <= x <= 100000000 (33 fitted points); R^2 = 0.9958, RMSE = 4.1")

@@ -458,6 +458,7 @@ def spline_cases(rng):
         pchip = PchipInterpolator(t, v, extrapolate=True)
         cases.append({"name": name, "knots": t.tolist(), "values": v.tolist(), "queries": queries.tolist(),
                       "natural": natural(queries).tolist(), "naturalSecond": natural(t, 2).tolist(),
+                      "naturalSlopes": natural(t, 1).tolist(),
                       "pchip": pchip(queries).tolist(), "pchipSlopes": pchip(t, 1).tolist()})
     return cases
 

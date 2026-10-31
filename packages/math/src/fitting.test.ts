@@ -3,11 +3,13 @@ import { levenbergMarquardt } from './lm.ts';
 import { polyfit, polyval } from './poly.ts';
 import {
   evalCubicSpline,
+  evalHermite,
   knotInterval,
   linearSpline,
   lsqSplineValues,
   naturalSpline,
   naturalSplineSecondDerivatives,
+  naturalSplineSlopes,
   pchip,
   pchipSlopes,
 } from './spline.ts';
@@ -53,6 +55,17 @@ describe('splines', () => {
       c.queries.map((u) => evalCubicSpline(c.knots, c.values, m, u)),
       c.natural,
       { rel: 1e-12 },
+    );
+  });
+
+  it.each(fitsFixture.splines)('natural spline knot slopes match scipy CubicSpline ($name)', (c) => {
+    const d = naturalSplineSlopes(c.knots, c.values);
+    expectAllClose(d, c.naturalSlopes, { rel: 1e-12, abs: 1e-12 });
+    // The Hermite cubic with these slopes is the same spline, the form the code generators export.
+    expectAllClose(
+      c.queries.map((u) => evalHermite(c.knots, c.values, d, u)),
+      c.natural,
+      { rel: 1e-12, abs: 1e-12 },
     );
   });
 
