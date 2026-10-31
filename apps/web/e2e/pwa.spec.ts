@@ -79,7 +79,7 @@ test.describe('PWA', () => {
 
     // Exercise styling paths: theme switch re-renders every Griffel class, the tooltip mounts a portal.
     await page.getByRole('button', { name: 'Dark theme' }).click();
-    await page.getByRole('button', { name: 'Project sidebar' }).hover();
+    await page.getByRole('link', { name: 'Open Engineering Tools home' }).hover();
     await expect(page.getByRole('tooltip')).toBeVisible();
 
     // The policy is live: a fetch to another origin is refused by the browser.

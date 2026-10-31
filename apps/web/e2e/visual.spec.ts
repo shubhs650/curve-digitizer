@@ -12,10 +12,14 @@ import {
 // v0.4.0 visual baselines (ADR 47): the home screen, the crop view and a graph at laptop and desktop sizes, in
 // both themes. Layout rules live in layout.spec.ts; these catch what geometry checks cannot (spacing, colour,
 // a panel that looks broken). Baselines are Chromium on Linux; update them with
-// `pnpm test:e2e --project=chromium visual.spec.ts --update-snapshots` after an intended change.
+// `npx playwright test apps/web/e2e/visual.spec.ts --project=chromium --update-snapshots` after an intended change.
 
 const STYLE = new URL('visual/visual.css', import.meta.url).pathname;
 const SHOT = { stylePath: STYLE, maxDiffPixelRatio: 0.01, animations: 'disabled' } as const;
+
+// Glyph hinting follows the machine's fontconfig, which differs between runners and sandboxes; turning it off
+// in Chromium makes text rasterise the same everywhere.
+test.use({ launchOptions: { args: ['--font-render-hinting=none', '--disable-font-subpixel-positioning'] } });
 
 const FIXTURES = new URL('../../../packages/pdf/fixtures/', import.meta.url);
 const CHART_PDF = new URL('chart.pdf', FIXTURES).pathname;
