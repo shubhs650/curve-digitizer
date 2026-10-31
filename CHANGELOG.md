@@ -4,6 +4,26 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
+## [0.2.0] - 2026-10-31
+
+Milestone M2, smart tracing: pre-processing filters with an "Enhance for tracing" preset, the guided tracer, the colour mask, X-step sampling and per-point uncertainty from the measured line width. Still entirely in the browser and offline.
+
+### Acceptance (docs/ACCEPTANCE_TARGETS.md, M2)
+
+| Target | Result | How |
+|---|---|---|
+| A3 guided trace ≤ 1.0 px RMS on vector-clean, ≤ 2.0 px on scan-tilted | pass: 0.07–0.10 px (vector-clean), 0.07–0.15 px (scan-tilted), 100 % coverage | `test:samples` |
+| A4 sn-family intersections crossed, no wrong branch, no prompt | pass: 2 intersections per curve, 0 wrong-branch points, no prompt | `test:samples` |
+| A5 colour mask recovers ≥ 98 % of curve length on vector-clean | pass: 100 % of each curve | `test:samples` |
+| A6 X-step at 25 X values on vector-clean ≤ 0.5 px RMS, 0 outliers | pass: 0.04–0.09 px, 0 outliers | `test:samples` |
+| A9 uncertainty present, positive, ≥ 0.5 px-equivalent for every point | pass, including rows averaged from points at one X | unit |
+| P4 guided trace of a 2000 px curve ≤ 1 s, progress ≥ 4/s | pass on Chromium: 341 ms, about 15 progress events/s; Firefox and WebKit within the 2 s allowed by ADR 36 | e2e timing |
+| P5 no main-thread long task > 100 ms (tracing) | pass for the guided trace, colour mask and X-step runs | e2e `PerformanceObserver('longtask')` |
+
+Also replayed on every sample as regression checks: the `dark-bg` traces (0.04–0.05 px RMS) and calibrations, and the line width each tool measures (median within 0.5 px of the drawn width).
+
+Manual items carried over from M1: U1 (two first-time users, PDF to CSV in under 3 minutes) **not yet run**; U2 automated part passes (the new T, M and X tools are in the cheat sheet and the docs page, and the keyboard crosshair clicks with whichever canvas tool is active), the keyboard-only walkthrough is still to do; P7 passed in 0.1.0 (57 MB) and is re-run by the e2e suite.
+
 ### Added
 
 - Pre-processing panel in the inspector: a stack of filters for the tracers (brightness, contrast with auto stretch, grayscale, invert, threshold, despeckle, grid-line suppression that copes with tilted scans, isolate colour), the one-click "Enhance for tracing" preset, a live before/after preview computed off the main thread, and an "Add Invert" suggestion on dark-background charts. Docs page "Pre-processing".

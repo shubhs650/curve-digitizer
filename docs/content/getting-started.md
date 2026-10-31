@@ -20,6 +20,8 @@ See [Calibration](calibration.md).
 
 Press **P** for the add points tool and click along the curve. Points snap onto the line. Add a dataset for each further curve.
 
+Or let the app follow the curve for you: **T** traces one curve from a click, through crossings and grid lines; **M** finds every curve of the colour you click; **X** places one point at each X value you ask for. On a faded scan or a dark chart, [pre-processing](preprocessing.md) makes the curves easier to follow.
+
 See [Digitizing points](digitizing.md) and [The data table](data-table.md).
 
 ## 4. Export
