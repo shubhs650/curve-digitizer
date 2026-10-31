@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { expect, test } from './fixtures';
+import { expect, serveDist, test, waitForServiceWorker } from './fixtures';
 
 // Task 1.12: the M1 targets that need the whole app rather than one feature: P1 (cold load) and R1 (the full
 // workflow offline). The others are covered by the feature specs (see docs/ACCEPTANCE_TARGETS.md).
@@ -36,17 +36,18 @@ test.describe('M1 acceptance', () => {
     expect(ms).toBeLessThan(P1_INTERACTIVE_MS);
   });
 
-  test('R1: after one PDF open, the whole workflow runs offline', async ({ page, context }) => {
+  test('R1: after one PDF open, the whole workflow runs offline', async ({ page }) => {
     test.setTimeout(60_000);
-    await page.goto('/');
-    await page.evaluate(async () => {
-      await navigator.serviceWorker.ready;
-    });
-    await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
+    const host = await serveDist();
+    await page.goto(host.origin);
+    await waitForServiceWorker(page);
     await page.getByTestId('open-file-input').first().setInputFiles(CHART_PDF);
     await expect(pageButton(page)).toBeVisible();
+    // The service worker stores PDFium after handing it to the page; wait for both files before going offline.
+    await page.waitForFunction(async () => (await (await caches.open('pdfium')).keys()).length >= 2);
 
-    await context.setOffline(true);
+    // The host goes away: from here on only this browser's caches and storage can answer.
+    await host.close();
     await page.reload();
     // The open project comes back from this device's storage, and PDFium from the service worker's cache.
     await pageButton(page).click();

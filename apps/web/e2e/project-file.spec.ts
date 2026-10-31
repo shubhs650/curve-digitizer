@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { type Page } from '@playwright/test';
-import { graphProject, pageXY, sampleImage, seedProject, expect, test } from './fixtures';
+import { downloadName, expect, graphProject, pageXY, sampleImage, seedProject, test } from './fixtures';
 
 // Task 1.10: projects autosave within 5 s and reopen after the tab is killed (R3); a saved .cdz opens on another
 // device with the same project.json and byte-identical images (R2).
@@ -114,7 +114,7 @@ test.describe('project files', () => {
     const downloading = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Save .cdz' }).click();
     const download = await downloading;
-    expect(download.suggestedFilename()).toBe('E2E vector-clean.cdz');
+    expect(downloadName(download)).toBe('E2E vector-clean.cdz');
     const path = await download.path();
     const original = await storedJson(page, PROJECT.id);
 

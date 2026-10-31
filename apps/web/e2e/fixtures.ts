@@ -1,13 +1,18 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { extname, join } from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import {
   test as base,
   type BrowserContext,
   devices,
   expect,
+  type Download,
   type Page,
   type PlaywrightWorkerArgs,
 } from '@playwright/test';
+import { CROSS_ORIGIN_ISOLATION_HEADERS } from '../config/headers';
 
 /**
  * Playwright's test with one change for WebKit: its default contexts are ephemeral, and an ephemeral WebKit
@@ -158,4 +163,69 @@ export async function pageXY(page: Page, px: readonly [number, number]): Promise
  */
 export async function animationsSettled(page: Page): Promise<void> {
   await page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished)));
+}
+
+/** A download's file name. WebKit's downloads suggest spaces as underscores; the names tested have none of their own. */
+export function downloadName(download: Download): string {
+  return download.suggestedFilename().replaceAll('_', ' ');
+}
+
+const CONTENT_TYPES: Readonly<Record<string, string>> = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.wasm': 'application/wasm',
+  '.webmanifest': 'application/manifest+json',
+};
+
+export interface StaticHost {
+  readonly origin: string;
+  /** Stops serving and drops open connections: the host is gone, as when the device goes offline. */
+  readonly close: () => Promise<void>;
+}
+
+/**
+ * A second static server over the production build, with the same isolation headers as the host. Lets a test
+ * change what is deployed (a byte-different sw.js) or take the host away, which works in every browser where
+ * `context.setOffline` does not (WebKit fails a reload under it).
+ */
+export async function serveDist(
+  transform: (path: string, body: Buffer) => Buffer = (_, body) => body,
+): Promise<StaticHost> {
+  const dist = join(import.meta.dirname, '..', 'dist');
+  const server = createServer((request, response) => {
+    const path = new URL(request.url ?? '/', 'http://localhost').pathname;
+    const file = join(dist, path === '/' ? 'index.html' : path);
+    if (!file.startsWith(dist) || !existsSync(file)) {
+      response.writeHead(404).end();
+      return;
+    }
+    response.writeHead(200, {
+      ...CROSS_ORIGIN_ISOLATION_HEADERS,
+      'content-type': CONTENT_TYPES[extname(file)] ?? 'application/octet-stream',
+      'cache-control': 'no-cache',
+    });
+    response.end(transform(path, readFileSync(file)));
+  });
+  await new Promise<void>((resolve) => server.listen(0, 'localhost', resolve));
+  return {
+    origin: `http://localhost:${String((server.address() as AddressInfo).port)}/`,
+    close: () =>
+      new Promise<void>((resolve) => {
+        server.close(() => {
+          resolve();
+        });
+        server.closeAllConnections();
+      }),
+  };
+}
+
+/** Resolves once a service worker controls the page, i.e. the app shell is precached and served offline. */
+export async function waitForServiceWorker(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
 }

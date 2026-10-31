@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { type Page } from '@playwright/test';
-import { graphProject, sampleImage, SAMPLES, seedProject, expect, test } from './fixtures';
+import { downloadName, expect, graphProject, sampleImage, SAMPLES, seedProject, test } from './fixtures';
 
 // Task 1.9: CSV (long, wide), Excel workbook and audit JSON downloads, built in a worker.
 
@@ -57,7 +57,7 @@ async function download(page: Page, item: RegExp) {
     page.getByRole('menuitem', { name: item }).click(),
   ]);
   const path = await file.path();
-  return { name: file.suggestedFilename(), bytes: readFileSync(path) };
+  return { name: downloadName(file), bytes: readFileSync(path) };
 }
 
 test.describe('export', () => {
