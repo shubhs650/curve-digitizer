@@ -59,6 +59,9 @@ importers:
       '@cd/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@cd/fit':
+        specifier: workspace:*
+        version: link:../../packages/fit
       '@cd/image':
         specifier: workspace:*
         version: link:../../packages/image
@@ -187,6 +190,9 @@ importers:
       '@cd/export':
         specifier: workspace:*
         version: link:../export
+      '@cd/fit':
+        specifier: workspace:*
+        version: link:../fit
       '@cd/image':
         specifier: workspace:*
         version: link:../image

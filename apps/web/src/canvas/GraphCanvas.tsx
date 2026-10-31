@@ -2,6 +2,7 @@ import type { Graph } from '@cd/core';
 import { Caption1, makeStyles, Spinner, tokens } from '@fluentui/react-components';
 import { type PointerEvent as ReactPointerEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { calibratedReadout } from '../calibration/format';
+import { usePreviewFit } from '../fit/fitStore';
 import { useUiStore } from '../ui/uiStore';
 import { Loupe } from './Loupe';
 import { HIT_RADIUS, overlayModel, type OverlayState, paintOverlay } from './overlay';
@@ -126,7 +127,8 @@ export function GraphCanvas({
   const drag = useRef<Drag | null>(null);
   const [dragging, setDragging] = useState<Drag['kind'] | null>(null);
 
-  const model = useMemo(() => overlayModel(graph), [graph]);
+  const preview = usePreviewFit(graph.id);
+  const model = useMemo(() => overlayModel(graph, preview), [graph, preview]);
   const overlay = useMemo<OverlayState>(() => ({ hovered, selected: selection }), [hovered, selection]);
   const imageSize = graph.image;
 

@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@cd/core": "workspace:*",
+    "@cd/fit": "workspace:*",
     "@cd/image": "workspace:*",
     "@cd/math": "workspace:*",
     "@cd/pdf": "workspace:*",

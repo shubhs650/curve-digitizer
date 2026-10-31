@@ -1,10 +1,20 @@
 import { type Dataset, type Graph, type Point, replacePoints } from '@cd/core';
-import { Button, Caption1, makeStyles, mergeClasses, Select, tokens } from '@fluentui/react-components';
+import {
+  Button,
+  Caption1,
+  makeStyles,
+  mergeClasses,
+  Select,
+  Tab,
+  TabList,
+  tokens,
+} from '@fluentui/react-components';
+import { FitPanel } from '../fit/FitPanel';
 import { CopyRegular } from '@fluentui/react-icons';
 import { type KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import { useActiveDataset, useActiveGraph, useDispatch } from '../session/context';
 import { useNotify } from '../ui/notices';
-import { useUiStore } from '../ui/uiStore';
+import { type DockTab, useUiStore } from '../ui/uiStore';
 import { cellText, type Column, columns, type EditableColumn, editPoint, editText, tableTsv } from './rows';
 
 /** Fixed row height, CSS px; rows are windowed, so a 10 000-point trace renders only the visible ones. */
@@ -20,7 +30,7 @@ const SIGMA_TITLE =
 const HEADER_TITLES: Partial<Record<Column['id'], string>> = {
   sigmaX: `σx, the X ${SIGMA_TITLE}`,
   sigmaY: `σy, the Y ${SIGMA_TITLE}`,
-  residual: 'Distance to the fit, once the dataset is fitted',
+  residual: "y − fit(x) for the dataset's fit, on the fitted axes: log10(y / fit) on a log y axis",
 };
 
 const useStyles = makeStyles({
@@ -28,6 +38,13 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
+    minHeight: 0,
+  },
+  tabs: {
+    paddingInline: tokens.spacingHorizontalS,
+  },
+  tabPanel: {
+    flexGrow: 1,
     minHeight: 0,
   },
   bar: {
@@ -114,10 +131,34 @@ export function DataDock() {
   const styles = useStyles();
   const graph = useActiveGraph();
   const showingGraph = useUiStore((s) => s.cropPage === null);
+  const tab = useUiStore((s) => s.dockTab);
+  const setTab = useUiStore((s) => s.setDockTab);
+  const dataset = useActiveDataset(graph);
   if (!graph || !showingGraph) {
     return <Caption1 className={styles.empty}>Open a graph to see its points here.</Caption1>;
   }
-  return <DataTable key={graph.id} graph={graph} />;
+  return (
+    <div className={styles.dock}>
+      <TabList
+        size="small"
+        className={styles.tabs}
+        selectedValue={tab}
+        onTabSelect={(_, d) => {
+          setTab(d.value as DockTab);
+        }}
+      >
+        <Tab value="table">Table</Tab>
+        <Tab value="fit">Fit</Tab>
+      </TabList>
+      <div role="tabpanel" aria-label={tab === 'table' ? 'Table' : 'Fit'} className={styles.tabPanel}>
+        {tab === 'table' ? (
+          <DataTable key={graph.id} graph={graph} />
+        ) : (
+          <FitPanel key={`${graph.id}/${dataset?.id ?? ''}`} graph={graph} dataset={dataset} />
+        )}
+      </div>
+    </div>
+  );
 }
 
 export function DataTable({ graph }: { readonly graph: Graph }) {
@@ -222,6 +263,7 @@ function PointsGrid({
   readonly selection: ReadonlySet<string>;
   readonly onCopy: (points?: readonly Point[]) => void;
 }) {
+  const fit = graph.fits.find((f) => f.datasetId === dataset.id) ?? null;
   const styles = useStyles();
   const dispatch = useDispatch();
   const setSelection = useUiStore((s) => s.setSelection);
@@ -457,7 +499,7 @@ function PointsGrid({
             }}
           />
         ) : (
-          cellText(graph, point, index, column.id)
+          cellText(graph, point, index, column.id, fit)
         )}
       </td>
     );

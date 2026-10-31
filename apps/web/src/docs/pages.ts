@@ -24,6 +24,7 @@ const ORDER = [
   'digitizing',
   'preprocessing',
   'data-table',
+  'fitting',
   'export',
   'projects',
   'keyboard-shortcuts',

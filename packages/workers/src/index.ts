@@ -34,3 +34,4 @@ export type { ImageSource } from './tasks/source.ts';
 export type { MaskCurvesInput, MaskCurvesResult } from './tasks/mask.ts';
 export type { TraceCurveInput } from './tasks/trace.ts';
 export type { SampleXStepsInput } from './tasks/xstep.ts';
+export type { FitDatasetInput } from './tasks/fit.ts';

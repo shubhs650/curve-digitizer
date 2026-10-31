@@ -13,3 +13,4 @@ export { insertPoints, type PointInsert, type PointRef, removePoints, replacePoi
 export { addSource, removeSource } from './source.ts';
 export { pointValuesOf, type PointValues, setCalibration } from './calibration.ts';
 export { setProcessing } from './processing.ts';
+export { setDatasetFit } from './fit.ts';

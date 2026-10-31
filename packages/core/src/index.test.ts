@@ -37,6 +37,7 @@ describe('@cd/core public API', () => {
       'serializeAudit',
       'serializeProject',
       'setCalibration',
+      'setDatasetFit',
       'setPointFlags',
       'setProcessing',
       'sha256Hex',
