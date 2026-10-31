@@ -40,7 +40,8 @@ test.describe('pre-processing', () => {
 
   test('suggests Invert on a dark chart and previews the processed image', async ({ page }) => {
     const paper: [number, number] = [900, 700];
-    expect(await lumaAt(page, paper)).toBeLessThan(60);
+    // The canvas reports ready before the image layer has necessarily painted (seen on WebKit).
+    await expect.poll(() => lumaAt(page, paper)).toBeLessThan(60);
     const hint = panel(page).getByTestId('dark-background-hint');
     await expect(hint).toBeVisible();
     await hint.getByRole('button', { name: 'Add Invert' }).click();
