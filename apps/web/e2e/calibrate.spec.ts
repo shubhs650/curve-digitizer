@@ -1,6 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { graphProject, pageXY, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { graphProject, pageXY, sampleImage, seedProject, expect, test, axe } from './fixtures';
 
 // Task 1.3: calibrate vector-clean by clicking its ticks, as a user would. A1's accuracy is checked on the exact
 // clicks by test:samples; here clicks land on whole screen pixels of the fitted view.
@@ -83,7 +82,7 @@ test.describe('calibration', () => {
   test('passes axe with the calibration filled in', async ({ page }) => {
     await calibrate(page);
     await expect(panel(page).getByTestId('calibration-status')).toHaveText('Calibrated');
-    const results = await new AxeBuilder({ page })
+    const results = await axe(page)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(results.violations).toEqual([]);

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { expect, type Page, test } from '@playwright/test';
-import { graphProject, sampleImage, SAMPLES, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { graphProject, sampleImage, SAMPLES, seedProject, expect, test } from './fixtures';
 
 // Task 1.9: CSV (long, wide), Excel workbook and audit JSON downloads, built in a worker.
 

@@ -1,5 +1,5 @@
-import { expect, type Page, test } from '@playwright/test';
-import { canvasView, graphProject, pageXY, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { canvasView, graphProject, pageXY, sampleImage, seedProject, expect, test } from './fixtures';
 
 // Task 1.2: zoom/pan, overlay, hit-testing and loupe; no long task on the main thread while doing it.
 

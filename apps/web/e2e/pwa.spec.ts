@@ -1,8 +1,8 @@
+import { expect, test } from './fixtures';
 import { existsSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { AddressInfo, Server } from 'node:net';
 import { extname, join } from 'node:path';
-import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 // Resolves once a service worker controls the page, i.e. the app shell is precached and served offline.
@@ -37,6 +37,16 @@ test.describe('PWA', () => {
     await page.goto('/');
     expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
     expect(await page.evaluate(() => typeof SharedArrayBuffer)).toBe('function');
+  });
+
+  test('does not offer an update after reloading a fresh install', async ({ page }) => {
+    await page.goto('/');
+    await waitForServiceWorker(page);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
+    // Give a spurious "waiting" worker time to show up.
+    await page.waitForTimeout(2000);
+    await expect(page.getByText('New version available')).toHaveCount(0);
   });
 
   test('reloads offline after the first load', async ({ page, context }) => {

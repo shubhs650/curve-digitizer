@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { expect, type Page, test } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // Task 1.12: the M1 targets that need the whole app rather than one feature: P1 (cold load) and R1 (the full
 // workflow offline). The others are covered by the feature specs (see docs/ACCEPTANCE_TARGETS.md).

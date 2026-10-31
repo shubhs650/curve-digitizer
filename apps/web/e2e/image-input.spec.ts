@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
+import { type Page } from '@playwright/test';
+import { expect, test, axe } from './fixtures';
 
 // Task 1.1: images come in through the file picker, a drop or a paste, become Graphs of a project in OPFS,
 // and the project survives a reload.
@@ -65,7 +65,7 @@ test.describe('image input', () => {
   test('the open project passes axe', async ({ page }) => {
     await page.getByTestId('open-file-input').setInputFiles(SAMPLE.pathname);
     await expectGraphShown(page, 'source', '2400 × 1600 px');
-    const results = await new AxeBuilder({ page })
+    const results = await axe(page)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(results.violations).toEqual([]);
@@ -76,7 +76,10 @@ test.describe('image input', () => {
     await expectGraphShown(page, 'dropped', '2400 × 1600 px');
   });
 
-  test('pasting a JPEG converts it in the worker and adds a graph to the open project', async ({ page }) => {
+  test('pasting a JPEG converts it in the worker and adds a graph to the open project', async ({
+    page,
+    browserName,
+  }) => {
     await page.getByTestId('open-file-input').setInputFiles(SAMPLE.pathname);
     await expectGraphShown(page, 'source', '2400 × 1600 px');
 
@@ -91,7 +94,9 @@ test.describe('image input', () => {
       }
       return canvas.toDataURL('image/jpeg').split(',')[1] ?? '';
     });
-    await sendFile(page, 'paste', 'image.jpg', jpeg, 'image/jpeg');
+    // Firefox drops the files of a synthetic paste event's clipboardData, so there the JPEG is dropped instead;
+    // a real paste carries them.
+    await sendFile(page, browserName === 'firefox' ? 'drop' : 'paste', 'image.jpg', jpeg, 'image/jpeg');
     await expectGraphShown(page, 'image', '64 × 48 px');
     await expect(sidebar(page).getByRole('list', { name: 'Graphs' }).getByRole('listitem')).toHaveCount(2);
   });

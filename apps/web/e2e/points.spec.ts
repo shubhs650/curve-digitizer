@@ -1,7 +1,16 @@
 import { readFileSync } from 'node:fs';
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { canvasView, graphProject, pageXY, sampleImage, SAMPLES, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import {
+  canvasView,
+  graphProject,
+  pageXY,
+  sampleImage,
+  SAMPLES,
+  seedProject,
+  expect,
+  test,
+  axe,
+} from './fixtures';
 
 // Task 1.4: manual points with magnetic snap on vector-clean. A2's accuracy is scored on the recorded clicks by
 // test:samples; here the same clicks go through the real canvas, pixel read-back and snap.
@@ -104,17 +113,19 @@ test.describe('manual points', () => {
     await page.keyboard.press('s'); // snap off: the point should land where it is dropped
     await page.keyboard.press('p');
     await clickImage(page, [1200, 1000]);
+    // Firefox puts mouse events on whole CSS pixels, so the point lands up to half a pixel from the target.
+    const placed = await selectedPx(page);
     await clickImage(page, [1400, 1100]);
     await page.keyboard.press('v');
-    const [x, y] = await pageXY(page, [1200, 1000]);
+    const [x, y] = await pageXY(page, placed);
     await page.mouse.move(x, y);
     await page.mouse.down();
     await page.mouse.move(x + 20, y + 10, { steps: 4 });
     await page.mouse.up();
     const { view } = await canvasView(page);
     const moved = await selectedPx(page);
-    expect(moved[0] - 1200).toBeCloseTo(20 / view.scale, 0);
-    expect(moved[1] - 1000).toBeCloseTo(10 / view.scale, 0);
+    expect(moved[0] - placed[0]).toBeCloseTo(20 / view.scale, 0);
+    expect(moved[1] - placed[1]).toBeCloseTo(10 / view.scale, 0);
 
     const [bx, by] = await pageXY(page, [1100, 900]);
     const [ex, ey] = await pageXY(page, [1500, 1200]);
@@ -130,7 +141,7 @@ test.describe('manual points', () => {
     await page.keyboard.press('p');
     await clickImage(page, CLICKS[0] ?? [0, 0]);
     await expect(selectionText(page)).toContainText('snapped');
-    const results = await new AxeBuilder({ page })
+    const results = await axe(page)
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
     expect(results.violations).toEqual([]);

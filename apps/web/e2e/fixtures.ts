@@ -1,5 +1,66 @@
 import { readFileSync } from 'node:fs';
-import { expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import {
+  test as base,
+  type BrowserContext,
+  devices,
+  expect,
+  type Page,
+  type PlaywrightWorkerArgs,
+} from '@playwright/test';
+
+/**
+ * Playwright's test with one change for WebKit: its default contexts are ephemeral, and an ephemeral WebKit
+ * context (like a Safari private window) has no origin private file system, where the app keeps projects. So
+ * WebKit tests run in a persistent profile of their own, as Safari does for a normal window.
+ */
+export const test = base.extend<{ otherContext: BrowserContext }>({
+  context: async ({ browserName, context, playwright, baseURL }, use, testInfo) => {
+    if (browserName !== 'webkit') {
+      await use(context);
+      return;
+    }
+    const persistent = await webkitProfile(playwright, testInfo.outputPath('profile'), baseURL);
+    await use(persistent);
+    await persistent.close();
+  },
+  /** A second, separate browser profile with its own empty storage: another device as far as the app can tell. */
+  otherContext: async ({ browserName, browser, playwright, baseURL }, use, testInfo) => {
+    const other =
+      browserName === 'webkit'
+        ? await webkitProfile(playwright, testInfo.outputPath('other-profile'), baseURL)
+        : await browser.newContext();
+    await use(other);
+    await other.close();
+  },
+});
+
+async function webkitProfile(
+  playwright: PlaywrightWorkerArgs['playwright'],
+  dir: string,
+  baseURL: string | undefined,
+): Promise<BrowserContext> {
+  const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = devices['Desktop Safari'];
+  return playwright.webkit.launchPersistentContext(dir, {
+    viewport,
+    userAgent,
+    deviceScaleFactor,
+    isMobile,
+    hasTouch,
+    ...(baseURL === undefined ? {} : { baseURL }),
+    acceptDownloads: true,
+  });
+}
+
+export { expect };
+
+/**
+ * axe over the page, leaving out Tabster's focus sentinels: Fluent inserts aria-hidden, focusable `<i>`
+ * elements that hand focus straight on, which WebKit gets and axe reports as aria-hidden-focus.
+ */
+export function axe(page: Page): AxeBuilder {
+  return new AxeBuilder({ page }).exclude('[data-tabster-dummy]');
+}
 
 export const SAMPLES = new URL('../../../samples/', import.meta.url);
 

@@ -1,6 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { animationsSettled, graphProject, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { animationsSettled, graphProject, sampleImage, seedProject, expect, test, axe } from './fixtures';
 
 // Task 1.11: the getting-started checklist, the shortcut cheat sheet, the keyboard crosshair (U2) and /docs.
 
@@ -43,7 +42,7 @@ test.describe('help', () => {
       'aria-pressed',
       'true',
     );
-    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
+    const results = await axe(page).withTags(WCAG_AA).analyze();
     expect(results.violations).toEqual([]);
   });
 
@@ -54,7 +53,7 @@ test.describe('help', () => {
     await expect(sheet).toBeVisible();
     await expect(sheet.getByRole('table')).toHaveCount(5);
     await animationsSettled(page);
-    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
+    const results = await axe(page).withTags(WCAG_AA).analyze();
     expect(results.violations).toEqual([]);
     await page.keyboard.press('Escape');
     await expect(sheet).toBeHidden();
@@ -100,7 +99,7 @@ test.describe('help', () => {
     await expect(page).toHaveURL(/\/docs\/keyboard-shortcuts$/);
     await expect(page.getByRole('heading', { level: 1, name: 'Keyboard shortcuts' })).toBeVisible();
     await expect(page).toHaveTitle('Keyboard shortcuts · Curve Digitizer docs');
-    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
+    const results = await axe(page).withTags(WCAG_AA).analyze();
     expect(results.violations).toEqual([]);
 
     await page.getByRole('link', { name: 'Back to the app' }).click();

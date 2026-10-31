@@ -1,6 +1,5 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, type Page, test } from '@playwright/test';
-import { graphProject, pageXY, sampleImage, seedProject } from './fixtures';
+import { type Page } from '@playwright/test';
+import { canvasView, graphProject, pageXY, sampleImage, seedProject, expect, test, axe } from './fixtures';
 
 // Task 1.6: the data dock's live table follows the canvas, edits points in place and copies to the clipboard.
 
@@ -48,7 +47,10 @@ test.describe('data table', () => {
     await page.mouse.click(x, y);
     await expect(grid(page).getByRole('row')).toHaveCount(4);
     await expect(grid(page).getByRole('row').nth(3)).toHaveAttribute('aria-selected', 'true');
-    await expect(cell(page, 2, 5)).toHaveText(/^1800\.\d\d$/);
+    await expect(cell(page, 2, 5)).toHaveText(/^\d+\.\d\d$/);
+    // Within one screen pixel of the click: Firefox delivers mouse events on whole CSS pixels.
+    const { view } = await canvasView(page);
+    expect(Math.abs(Number(await cell(page, 2, 5).textContent()) - 1800)).toBeLessThanOrEqual(1 / view.scale);
 
     await cell(page, 0, 0).click();
     await expect(page.getByTestId('point-selection')).toContainText('x 600.00 px, y 900.00 px');
@@ -65,11 +67,24 @@ test.describe('data table', () => {
     await expect(cell(page, 1, 6)).toHaveText('700.00');
   });
 
-  test('copies the table to the clipboard as tab-separated text', async ({ page, context }) => {
-    await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  test('copies the table to the clipboard as tab-separated text', async ({ page, context, browserName }) => {
+    // Only Chromium lets Playwright grant clipboard reads; elsewhere, record what the app writes.
+    if (browserName === 'chromium') {
+      await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+    } else {
+      await page.evaluate(() => {
+        Object.defineProperty(navigator.clipboard, 'writeText', {
+          configurable: true,
+          value: (text: string) => {
+            document.body.dataset.copied = text;
+            return Promise.resolve();
+          },
+        });
+      });
+    }
     await page.getByRole('button', { name: 'Copy table' }).click();
     await expect(page.getByText('Copied 2 rows').first()).toBeVisible();
-    const text = await page.evaluate(() => navigator.clipboard.readText());
+    const text = await page.evaluate(() => document.body.dataset.copied ?? navigator.clipboard.readText());
     expect(text.split('\r\n')).toEqual([
       'X\tY\tσx\tσy\tx px\ty px\tOrigin\tExcluded',
       '\t\t\t\t600\t900\tmanual\tFALSE',
@@ -80,6 +95,6 @@ test.describe('data table', () => {
 
   test('passes axe with the table showing', async ({ page }) => {
     await cell(page, 0, 0).click();
-    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    expect((await axe(page).analyze()).violations).toEqual([]);
   });
 });
