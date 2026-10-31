@@ -1,6 +1,7 @@
 import {
   addGraph,
   addSource,
+  type CdzContents,
   createProject,
   type Graph,
   type ImageRef,
@@ -25,14 +26,34 @@ export interface EncodedPng {
 /** Re-encodes a non-PNG image as PNG; the app passes a render-worker task. */
 export type PngEncoder = (bytes: Uint8Array, type: Exclude<ImageType, 'png'>) => Promise<EncodedPng>;
 
+/** Zips and unzips `.cdz` files; the app runs both in the compute worker. */
+export interface CdzCodec {
+  write(contents: CdzContents): Promise<Uint8Array>;
+  /** @throws CdzFormatError or ProjectFormatError with a message for the user. */
+  read(bytes: Uint8Array): Promise<CdzContents>;
+}
+
+/** Remembers which project was open, so a crashed or closed tab reopens it (R3). */
+export interface SessionMarker {
+  get(): string | null;
+  set(projectId: string | null): void;
+}
+
 export interface WorkspaceDeps {
   readonly repo: ProjectRepository;
   readonly encodePng: PngEncoder;
   readonly pdf: PdfBackend;
+  readonly cdz: CdzCodec;
+  readonly session: SessionMarker;
   readonly newId: () => string;
   /** ISO 8601 clock. */
   readonly now: () => string;
   readonly appVersion: string;
+}
+
+export interface SavedCdz {
+  readonly bytes: Uint8Array;
+  readonly fileName: string;
 }
 
 /** A file handed to the app by the picker, a drop, a paste or the OS file handler. */
@@ -186,6 +207,7 @@ export class Workspace {
   }
 
   closeProject(): void {
+    this.#deps.session.set(null);
     this.#unsubscribeStore?.();
     this.#unsubscribeStore = null;
     this.#closePdfs();
@@ -195,6 +217,7 @@ export class Workspace {
 
   async deleteProject(id: string): Promise<void> {
     if (this.#state.store?.project.id === id) this.closeProject();
+    if (this.#deps.session.get() === id) this.#deps.session.set(null);
     await this.flush();
     await this.#deps.repo.deleteProject(id);
     await this.refreshProjects();
@@ -256,6 +279,12 @@ export class Workspace {
     const existing = store.project.sources.find((s) => s.sha256 === result.sha256);
     if (existing) {
       await this.#deps.pdf.close(key);
+      // A project opened from a .cdz without its PDFs gets the file back here (re-attached by SHA-256).
+      const stored = await this.#deps.repo.readBlob(store.project.id, sourcePath(existing.id)).then(
+        () => true,
+        () => false,
+      );
+      if (!stored) await this.#deps.repo.writeBlob(store.project.id, sourcePath(existing.id), file);
       if (this.#state.pdf[existing.id]?.status !== 'open') {
         this.#setPdf(existing.id, docState(await this.#deps.pdf.open(existing.id, file, password)));
       }
@@ -293,8 +322,18 @@ export class Workspace {
     if (!store) throw new Error('No project is open');
     this.#setPdf(sourceId, { status: 'opening' });
     let state: PdfDocState;
+    const file = await this.#deps.repo.readBlob(store.project.id, sourcePath(sourceId)).catch(() => null);
+    if (file === null) {
+      const name = store.project.sources.find((s) => s.id === sourceId)?.fileName ?? 'This PDF';
+      state = {
+        status: 'failed',
+        message: `${name} is not stored with this project (it was saved without its PDFs). Open the PDF again to re-attach it.`,
+        unavailable: false,
+      };
+      this.#setPdf(sourceId, state);
+      return state;
+    }
     try {
-      const file = await this.#deps.repo.readBlob(store.project.id, sourcePath(sourceId));
       state = docState(await this.#deps.pdf.open(sourceId, file, password));
     } catch (error) {
       state = {
@@ -390,6 +429,67 @@ export class Workspace {
     return { dpi, capped, renderMs, image: { path, width, height } };
   }
 
+  /**
+   * Reopens the project that was open when the app last ran (closed tab, crash, reload), if it is still on this
+   * device (R3). Everything up to the last autosave is there; the undo history is not.
+   */
+  async restoreSession(): Promise<ProjectStore | null> {
+    const id = this.#deps.session.get();
+    if (id === null || this.#state.store) return this.#state.store;
+    try {
+      return await this.openProject(id);
+    } catch {
+      // Deleted elsewhere, or unreadable: start from the project list.
+      this.#deps.session.set(null);
+      return null;
+    }
+  }
+
+  /**
+   * The open project as a `.cdz` (PROJECT_SCHEMA "Container"): `project.json`, every graph's current image and,
+   * with `embedSources`, the source PDFs. Unsaved changes are saved first.
+   */
+  async saveCdz({ embedSources }: { readonly embedSources: boolean }): Promise<SavedCdz> {
+    const store = this.#requireStore();
+    await this.flush();
+    const project = store.project;
+    const images = new Map<string, Uint8Array>();
+    for (const graph of project.graphs) {
+      images.set(graph.image.path, await this.#deps.repo.readFile(project.id, graph.image.path));
+    }
+    const sources = new Map<string, Uint8Array>();
+    if (embedSources) {
+      for (const source of project.sources) {
+        sources.set(source.id, await this.#deps.repo.readFile(project.id, sourcePath(source.id)));
+      }
+    }
+    const bytes = await this.#deps.cdz.write({
+      project: {
+        ...project,
+        sources: project.sources.map((source) => ({ ...source, embedded: embedSources })),
+      },
+      images,
+      sources,
+    });
+    return { bytes, fileName: project.name };
+  }
+
+  /**
+   * Opens a `.cdz` as a project on this device. A project with the same id already here is kept, and the file
+   * comes in as a copy with a new id, so opening a file never overwrites work.
+   */
+  async importCdz(file: InputFile): Promise<ProjectStore> {
+    const { project: read, images, sources } = await this.#deps.cdz.read(file.bytes);
+    const taken = (await this.#deps.repo.list()).some((p) => p.id === read.id);
+    const project = taken ? { ...read, id: this.#deps.newId(), name: `${read.name} (copy)` } : read;
+    for (const [path, bytes] of images) await this.#deps.repo.writeFile(project.id, path, bytes);
+    for (const [id, bytes] of sources) await this.#deps.repo.writeFile(project.id, sourcePath(id), bytes);
+    await this.#deps.repo.saveProject(project);
+    const store = this.#attach(project);
+    await this.refreshProjects();
+    return store;
+  }
+
   /** Bytes of a file of the open project, e.g. a graph's `image.path`. */
   readFile(path: string): Promise<Uint8Array> {
     const store = this.#state.store;
@@ -437,6 +537,7 @@ export class Workspace {
     this.#unsubscribeStore?.();
     this.#closePdfs();
     const store = new ProjectStore(project, { now: this.#deps.now });
+    this.#deps.session.set(project.id);
     this.#unsubscribeStore = store.subscribe(({ project: changed }) => {
       this.#queueSave(changed);
     });
@@ -456,10 +557,19 @@ export class Workspace {
     }
   }
 
+  /**
+   * Autosave (R3, ADR 31): a change is written as soon as no write is in flight; changes arriving during a write
+   * collapse into one write of the latest state right after it. No debounce, so a reload or crash just after an
+   * edit loses at most the write in flight.
+   */
   #queueSave(project: Project): void {
     const idle = this.#pendingSave === null;
     this.#pendingSave = project;
-    if (!idle) return;
+    if (idle) this.#writeNow();
+  }
+
+  /** Chains a write of the latest pending state after the one in flight. */
+  #writeNow(): void {
     this.#saving = this.#saving
       .then(async () => {
         const latest = this.#pendingSave;

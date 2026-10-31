@@ -82,7 +82,7 @@ export function HomeScreen({ onFiles }: HomeScreenProps) {
       <Title2 as="h2">Projects</Title2>
       <Body1>
         Open a PDF or a PNG, JPEG or WebP image of a graph, drop it anywhere on this window, or paste an image
-        with Ctrl+V. Everything stays on this device.
+        with Ctrl+V. A saved .cdz project opens the same way. Everything stays on this device.
       </Body1>
       <div className={styles.actions}>
         <OpenFileButton appearance="primary" onFiles={onFiles} />

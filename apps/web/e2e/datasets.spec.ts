@@ -33,8 +33,8 @@ test.describe('datasets panel', () => {
     const list = panel.getByRole('list', { name: 'Datasets' });
     await expect(list.getByRole('button')).toHaveText([/T = 300 °C/, /Dataset 2/]);
 
+    // A reload reopens the project that was open (R3).
     await page.reload();
-    await page.getByRole('button', { name: 'Open E2E vector-clean' }).click();
     await inspector(page)
       .getByRole('button', { name: /T = 300 °C/ })
       .click();

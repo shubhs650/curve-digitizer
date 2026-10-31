@@ -5,6 +5,7 @@ import { OpenFileButton } from '../input/OpenFileButton';
 import { PdfSources } from '../pdf/PdfSources';
 import { useActiveGraph, useProject, useWorkspace } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
+import { SaveProjectButton } from './SaveProjectButton';
 
 const useStyles = makeStyles({
   sidebar: {
@@ -88,6 +89,7 @@ export function ProjectSidebar({ onFiles }: ProjectSidebarProps) {
         </ul>
       )}
       <OpenFileButton label="Add PDF or image…" onFiles={onFiles} />
+      <SaveProjectButton project={project} />
       <ExportMenu project={project} graph={active} />
       <PdfSources sources={project.sources} />
     </div>

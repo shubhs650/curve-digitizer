@@ -1,13 +1,13 @@
 import { useCallback } from 'react';
-import { isPdfFile, readInputFiles } from '../input/files';
+import { isCdzFile, isPdfFile, readInputFiles } from '../input/files';
 import { usePdfActions } from '../pdf/usePdfActions';
 import { useNotify } from '../ui/notices';
 import { useUiStore } from '../ui/uiStore';
 import { useWorkspace } from './context';
 
 /**
- * Adds PDFs as sources and images as Graphs, shows the last new Graph and reports files that could not be
- * opened. PDFs go one at a time, since each may ask for a password.
+ * Opens `.cdz` projects, adds PDFs as sources and images as Graphs, shows the last new Graph and reports files
+ * that could not be opened. PDFs go one at a time, since each may ask for a password.
  */
 export function useImportFiles(): (files: File[]) => void {
   const workspace = useWorkspace();
@@ -18,7 +18,21 @@ export function useImportFiles(): (files: File[]) => void {
   return useCallback(
     (files: File[]) => {
       void (async () => {
-        const images = files.filter((file) => !isPdfFile(file));
+        for (const cdz of files.filter(isCdzFile)) {
+          try {
+            const [input] = await readInputFiles([cdz]);
+            if (!input) continue;
+            const store = await workspace.importCdz(input);
+            setActiveGraph(store.project.graphs[0]?.id ?? null);
+          } catch (error) {
+            notify({
+              intent: 'error',
+              title: `Could not open ${cdz.name}`,
+              body: error instanceof Error ? error.message : String(error),
+            });
+          }
+        }
+        const images = files.filter((file) => !isPdfFile(file) && !isCdzFile(file));
         for (const pdf of files.filter(isPdfFile)) await importPdf(pdf);
         if (images.length === 0) return;
         try {
