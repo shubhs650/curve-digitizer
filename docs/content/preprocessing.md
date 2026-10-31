@@ -2,6 +2,17 @@
 
 Pre-processing cleans up a graph's image for the tracers without changing the image itself. Filters form a stack that runs top to bottom; the stack is saved in the project, so a reviewer can see exactly what the tracer was given. Points are always drawn over the original pixels, and only the tracers read the processed ones.
 
+## Using the panel
+
+The **Pre-processing** panel is in the inspector, below **Points**.
+
+- **Enhance for tracing** replaces the stack with a preset for scans and busy charts: Grayscale, Despeckle, Suppress grid lines and an automatic contrast stretch. It also turns on the preview.
+- **Add filter** appends a filter to the bottom of the stack. Each filter has its settings under its name, and buttons to move it up or down or remove it.
+- **Show processed image** swaps the canvas to the processed image, so you can compare before and after. It is computed in the background and updates as you change settings. Turn it off to see the original again.
+- On a chart with a dark background the panel suggests **Add Invert**.
+
+Every change to the stack can be undone with Ctrl+Z.
+
 ## Filters
 
 | Filter | What it does | Settings |

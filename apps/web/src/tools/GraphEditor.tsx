@@ -4,18 +4,24 @@ import { paintCalibration } from '../calibration/overlay';
 import { useCalibrateTool } from '../calibration/useCalibrateTool';
 import { useCalibrationEditor } from '../calibration/useCalibrationEditor';
 import { GraphCanvas } from '../canvas/GraphCanvas';
-import { useGraphBitmap } from '../canvas/useGraphBitmap';
+import { type BitmapState, useGraphBitmap } from '../canvas/useGraphBitmap';
 import type { ViewTransform } from '../canvas/viewTransform';
 import { bitmapPixels } from '../points/pixels';
 import { paintMarquee, usePointTools } from '../points/usePointTools';
+import { useProcessedImage } from '../processing/processedImage';
 import { useUiStore } from '../ui/uiStore';
 
 /** The canvas with the rail's active tool plugged in. */
 export function GraphEditor({ graph }: { graph: Graph }) {
   const tool = useUiStore((s) => s.tool);
   const selection = useUiStore((s) => s.selection);
-  const bitmapState = useGraphBitmap(graph);
-  const bitmap = bitmapState.status === 'ready' ? bitmapState.bitmap : null;
+  const original = useGraphBitmap(graph);
+  const bitmap = original.status === 'ready' ? original.bitmap : null;
+  const showProcessed = useUiStore((s) => s.showProcessed);
+  const processed = useProcessedImage(graph, showProcessed);
+  // The preview swaps only what is drawn; snapping and every other tool keep reading the original pixels.
+  const bitmapState: BitmapState =
+    showProcessed && processed.status === 'ready' ? { status: 'ready', bitmap: processed.bitmap } : original;
   const pixels = useMemo(() => (bitmap ? bitmapPixels(bitmap) : null), [bitmap]);
   const points = usePointTools(graph, pixels);
   const editor = useCalibrationEditor(graph);
