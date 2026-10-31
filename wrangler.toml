@@ -1,5 +1,11 @@
-# Cloudflare Pages project for curve-digitizer.openengtools.com (docs/DEPLOY.md, ADR 32).
-# Static files only: no Functions, no bindings. Response headers come from apps/web/dist/_headers.
+# Cloudflare Workers static assets for curve-digitizer.openengtools.com (docs/DEPLOY.md, ADR 46).
+# Static files only: no Worker script, no bindings. Response headers come from apps/web/dist/_headers.
 name = "curve-digitizer"
-pages_build_output_dir = "apps/web/dist"
 compatibility_date = "2026-10-01"
+# Wrangler's own usage reporting stays off, as for everything else in this project.
+send_metrics = false
+
+[assets]
+directory = "./apps/web/dist"
+# Unknown paths (the /docs/<page> deep links on a first visit) get index.html.
+not_found_handling = "single-page-application"
