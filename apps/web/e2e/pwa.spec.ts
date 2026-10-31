@@ -51,8 +51,8 @@ test.describe('PWA', () => {
     expect(await page.evaluate(() => crossOriginIsolated)).toBe(true);
 
     // Deep links fall back to the precached shell too.
-    await page.goto('/docs');
-    await expect(page.getByRole('banner').getByText('Curve Digitizer')).toBeVisible();
+    await page.goto('/docs/calibration');
+    await expect(page.getByRole('heading', { level: 1, name: 'Calibration' })).toBeVisible();
   });
 
   test('enforces a CSP that the shell runs under without violations', async ({ page }) => {

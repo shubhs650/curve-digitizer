@@ -48,6 +48,18 @@ const useStyles = makeStyles({
     justifyContent: 'center',
     padding: tokens.spacingHorizontalL,
   },
+  crosshair: {
+    position: 'absolute',
+    width: '21px',
+    height: '21px',
+    marginLeft: '-10px',
+    marginTop: '-10px',
+    pointerEvents: 'none',
+    backgroundImage: `linear-gradient(${tokens.colorBrandStroke1}, ${tokens.colorBrandStroke1}), linear-gradient(${tokens.colorBrandStroke1}, ${tokens.colorBrandStroke1})`,
+    backgroundSize: '1px 100%, 100% 1px',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
+  },
   readout: {
     position: 'absolute',
     left: tokens.spacingHorizontalS,
@@ -62,6 +74,8 @@ const useStyles = makeStyles({
 
 /** Keyboard pan step in CSS px; Shift pans five times as far. */
 const PAN_STEP = 40;
+/** Keyboard crosshair step in image px; Shift moves ten times as far. */
+const CROSSHAIR_STEP = 1;
 
 const NO_SELECTION: ReadonlySet<string> = new Set();
 
@@ -107,6 +121,8 @@ export function GraphCanvas({
   const [cursor, setCursor] = useState<Vec2 | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [spaceDown, setSpaceDown] = useState(false);
+  /** The cursor is driven by the keyboard (Enter shows it, arrows move it, Enter clicks, Esc hides it). */
+  const [keyCursor, setKeyCursor] = useState(false);
   const drag = useRef<Drag | null>(null);
   const [dragging, setDragging] = useState<Drag['kind'] | null>(null);
 
@@ -164,18 +180,66 @@ export function GraphCanvas({
     };
   }, []);
 
-  const pointerFrom = (event: ReactPointerEvent<HTMLCanvasElement>, v: ViewTransform): CanvasPointer => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const screen: Vec2 = [event.clientX - rect.left, event.clientY - rect.top];
+  const pointerAt = (
+    screen: Vec2,
+    v: ViewTransform,
+    keys: { readonly shiftKey: boolean; readonly ctrlKey: boolean; readonly metaKey: boolean },
+  ): CanvasPointer => {
     const image = toImage(v, screen);
     return {
       screen,
       image,
       scale: v.scale,
       hit: model.hits.nearest(image, HIT_RADIUS / v.scale),
-      shiftKey: event.shiftKey,
-      ctrlKey: event.ctrlKey || event.metaKey,
+      shiftKey: keys.shiftKey,
+      ctrlKey: keys.ctrlKey || keys.metaKey,
     };
+  };
+
+  const pointerFrom = (event: ReactPointerEvent<HTMLCanvasElement>, v: ViewTransform): CanvasPointer => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    return pointerAt([event.clientX - rect.left, event.clientY - rect.top], v, event);
+  };
+
+  /**
+   * Keyboard access to every tool (U2): Enter shows a crosshair, the arrow keys move it by 1 image px (Shift:
+   * 10) with the loupe following, Enter clicks there, Esc hides it.
+   */
+  const onCrosshairKey = (event: React.KeyboardEvent<HTMLCanvasElement>): boolean => {
+    if (!view || !viewport) return false;
+    if (event.key === 'Enter') {
+      if (!keyCursor || !cursor) {
+        setKeyCursor(true);
+        setCursor((c) => c ?? [viewport.width / 2, viewport.height / 2]);
+        return true;
+      }
+      const pointer = pointerAt(cursor, view, event);
+      if (tool.onDown?.(pointer) === true) tool.onUp?.(pointer);
+      setHovered(pointer.hit?.key ?? null);
+      return true;
+    }
+    if (!keyCursor || !cursor) return false;
+    if (event.key === 'Escape') {
+      setKeyCursor(false);
+      setCursor(null);
+      return true;
+    }
+    const step = (event.shiftKey ? 10 : 1) * CROSSHAIR_STEP * view.scale;
+    const moves: Record<string, Vec2> = {
+      ArrowLeft: [-step, 0],
+      ArrowRight: [step, 0],
+      ArrowUp: [0, -step],
+      ArrowDown: [0, step],
+    };
+    const move = moves[event.key];
+    if (!move) return false;
+    const next: Vec2 = [
+      Math.max(0, Math.min(viewport.width, cursor[0] + move[0])),
+      Math.max(0, Math.min(viewport.height, cursor[1] + move[1])),
+    ];
+    setCursor(next);
+    setHovered(pointerAt(next, view, event).hit?.key ?? null);
+    return true;
   };
 
   const startDrag = (event: ReactPointerEvent<HTMLCanvasElement>, kind: Drag['kind'], at: Vec2) => {
@@ -197,6 +261,10 @@ export function GraphCanvas({
     if (event.key === ' ') {
       event.preventDefault();
       setSpaceDown(true);
+      return;
+    }
+    if (onCrosshairKey(event)) {
+      event.preventDefault();
       return;
     }
     if (tool.onKeyDown?.(event.nativeEvent) === true) {
@@ -265,6 +333,7 @@ export function GraphCanvas({
         onPointerMove={(event) => {
           if (!view) return;
           const pointer = pointerFrom(event, view);
+          setKeyCursor(false);
           setCursor(pointer.screen);
           const current = drag.current;
           if (current?.pointerId === event.pointerId && current.kind === 'pan') {
@@ -284,7 +353,7 @@ export function GraphCanvas({
         }}
         onPointerCancel={endDrag}
         onPointerLeave={() => {
-          if (!drag.current) {
+          if (!drag.current && !keyCursor) {
             setCursor(null);
             setHovered(null);
           }
@@ -295,12 +364,26 @@ export function GraphCanvas({
         }}
         onBlur={() => {
           setSpaceDown(false);
+          if (keyCursor) {
+            setKeyCursor(false);
+            setCursor(null);
+          }
         }}
       />
       <span id={helpId} hidden>
         Mouse wheel or plus and minus keys zoom, zero fits the image, one shows actual size. Drag with the
-        middle button, with Space held, or with the pan tool to pan; arrow keys pan too.
+        middle button, with Space held, or with the pan tool to pan; arrow keys pan too. Press Enter for a
+        keyboard crosshair: arrow keys move it one pixel, Shift ten, Enter clicks with the current tool,
+        Escape hides it.
       </span>
+      {keyCursor && cursor && (
+        <div
+          className={styles.crosshair}
+          style={{ left: `${String(cursor[0])}px`, top: `${String(cursor[1])}px` }}
+          data-testid="keyboard-crosshair"
+          aria-hidden="true"
+        />
+      )}
       {bitmap && view && viewport && cursor && cursorImage && loupeOn && dragging !== 'pan' && (
         <Loupe
           bitmap={bitmap}

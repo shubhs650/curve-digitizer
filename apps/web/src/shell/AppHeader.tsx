@@ -4,12 +4,14 @@ import {
   BugRegular,
   CodeRegular,
   HomeRegular,
+  KeyboardRegular,
   PanelLeftContractRegular,
   PanelLeftExpandRegular,
   WeatherMoonRegular,
 } from '@fluentui/react-icons';
 import { DOCS_PATH, OET_HOME_URL, REPO_URL, reportIssueUrl } from '../links';
 import type { ThemeName } from '../theme';
+import { useUiStore } from '../ui/uiStore';
 import { APP_VERSION } from '../version';
 
 export const SIDEBAR_ID = 'project-sidebar';
@@ -47,6 +49,7 @@ export interface AppHeaderProps {
 export function AppHeader({ theme, onToggleTheme, sidebarOpen, onToggleSidebar }: AppHeaderProps) {
   const styles = useStyles();
   const issueUrl = reportIssueUrl({ version: APP_VERSION, userAgent: navigator.userAgent });
+  const setShortcutsOpen = useUiStore((s) => s.setShortcutsOpen);
 
   return (
     <header className={styles.header}>
@@ -77,6 +80,16 @@ export function AppHeader({ theme, onToggleTheme, sidebarOpen, onToggleSidebar }
             aria-label="Open Engineering Tools home"
           />
         </Tooltip>
+        <Button
+          appearance="subtle"
+          icon={<KeyboardRegular />}
+          aria-keyshortcuts="?"
+          onClick={() => {
+            setShortcutsOpen(true);
+          }}
+        >
+          Shortcuts
+        </Button>
         <Button as="a" href={DOCS_PATH} appearance="subtle" icon={<BookOpenRegular />}>
           Docs
         </Button>

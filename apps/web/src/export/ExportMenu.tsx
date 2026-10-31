@@ -5,6 +5,7 @@ import type { ExportFormat } from '@cd/workers';
 import { useState } from 'react';
 import { useWorkspace } from '../session/context';
 import { useNotify } from '../ui/notices';
+import { useUiStore } from '../ui/uiStore';
 import { downloadFile } from './download';
 import { runExport } from './runExport';
 
@@ -17,6 +18,7 @@ export interface ExportMenuProps {
 export function ExportMenu({ project, graph }: ExportMenuProps) {
   const workspace = useWorkspace();
   const notify = useNotify();
+  const markExported = useUiStore((s) => s.markExported);
   const [busy, setBusy] = useState(false);
   const calibrated = graph?.calibration != null;
   const anyCalibrated = project.graphs.some((g) => g.calibration !== null);
@@ -26,6 +28,7 @@ export function ExportMenu({ project, graph }: ExportMenuProps) {
     runExport(format, project, graph, (path) => workspace.readFile(path))
       .then((file) => {
         downloadFile(file.bytes, file.fileName, file.mimeType);
+        markExported(project.id);
       })
       .catch((error: unknown) => {
         notify({

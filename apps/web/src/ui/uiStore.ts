@@ -7,6 +7,7 @@ import { create } from 'zustand';
 export type ToolId = 'select' | 'point' | 'pan' | 'calibrate';
 
 const NO_POINTS: ReadonlySet<string> = new Set();
+const NO_PROJECTS: ReadonlySet<string> = new Set();
 
 /** A page of a source PDF shown for cropping, in place of the active graph. */
 export interface CropPage {
@@ -26,6 +27,10 @@ export interface UiState {
   /** Selected points of the active graph, as overlay keys `${datasetId}/${pointId}`. */
   readonly selection: ReadonlySet<string>;
   readonly cropPage: CropPage | null;
+  /** The keyboard shortcut cheat sheet is open. */
+  readonly shortcutsOpen: boolean;
+  /** Projects exported at least once this session, which ticks the guide's last step. */
+  readonly exportedProjects: ReadonlySet<string>;
   /** Shows a graph; also leaves the crop view. */
   readonly setActiveGraph: (graphId: string | null) => void;
   readonly setActiveDataset: (graphId: string, datasetId: string) => void;
@@ -34,6 +39,8 @@ export interface UiState {
   readonly toggleSnap: () => void;
   readonly setSelection: (selection: ReadonlySet<string>) => void;
   readonly setCropPage: (page: CropPage | null) => void;
+  readonly setShortcutsOpen: (open: boolean) => void;
+  readonly markExported: (projectId: string) => void;
 }
 
 export const useUiStore = create<UiState>()((set) => ({
@@ -44,6 +51,8 @@ export const useUiStore = create<UiState>()((set) => ({
   snap: true,
   selection: NO_POINTS,
   cropPage: null,
+  shortcutsOpen: false,
+  exportedProjects: NO_PROJECTS,
   setActiveGraph: (activeGraphId) => {
     set((s) =>
       s.activeGraphId === activeGraphId
@@ -68,5 +77,15 @@ export const useUiStore = create<UiState>()((set) => ({
   },
   setCropPage: (cropPage) => {
     set({ cropPage });
+  },
+  setShortcutsOpen: (shortcutsOpen) => {
+    set({ shortcutsOpen });
+  },
+  markExported: (projectId) => {
+    set((s) =>
+      s.exportedProjects.has(projectId)
+        ? {}
+        : { exportedProjects: new Set([...s.exportedProjects, projectId]) },
+    );
   },
 }));

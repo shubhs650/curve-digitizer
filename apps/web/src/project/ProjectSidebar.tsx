@@ -1,6 +1,7 @@
 import { Button, Caption1, Caption1Strong, makeStyles, Text, tokens } from '@fluentui/react-components';
 import { ArrowLeftRegular, ImageRegular } from '@fluentui/react-icons';
 import { ExportMenu } from '../export/ExportMenu';
+import { GuideChecklist } from '../help/GuideChecklist';
 import { OpenFileButton } from '../input/OpenFileButton';
 import { PdfSources } from '../pdf/PdfSources';
 import { useActiveGraph, useProject, useWorkspace } from '../session/context';
@@ -47,6 +48,7 @@ export function ProjectSidebar({ onFiles }: ProjectSidebarProps) {
     return (
       <div className={styles.sidebar}>
         <Caption1>No project open.</Caption1>
+        <GuideChecklist />
       </div>
     );
   }
@@ -66,6 +68,7 @@ export function ProjectSidebar({ onFiles }: ProjectSidebarProps) {
       <Text weight="semibold" truncate wrap={false} title={project.name}>
         {project.name}
       </Text>
+      <GuideChecklist />
       <Caption1Strong id="graphs-heading">Graphs</Caption1Strong>
       {project.graphs.length === 0 ? (
         <Caption1>No graphs yet.</Caption1>
