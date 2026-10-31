@@ -5,6 +5,7 @@ import { MaskPanel } from '../mask/MaskPanel';
 import { GraphSourcePanel } from '../pdf/GraphSourcePanel';
 import { PointsPanel } from '../points/PointsPanel';
 import { ProcessingPanel } from '../processing/ProcessingPanel';
+import { ReferencePanel } from '../reference/ReferencePanel';
 import { XStepPanel } from '../xstep/XStepPanel';
 import { TracePanel } from '../trace/TracePanel';
 import { DatasetsPanel } from './DatasetsPanel';
@@ -30,6 +31,7 @@ export function Inspector({ graph }: { graph: Graph }) {
       <TracePanel graph={graph} />
       <MaskPanel graph={graph} />
       <XStepPanel graph={graph} />
+      <ReferencePanel graph={graph} />
     </div>
   );
 }

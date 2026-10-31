@@ -15,12 +15,15 @@ import {
   ArrowRotateCounterclockwiseRegular,
   CropRegular,
   FullScreenMaximizeRegular,
+  ImageSplitRegular,
 } from '@fluentui/react-icons';
 import { capDpi, cropPixelSize } from '@cd/pdf/geometry';
 import { useState } from 'react';
 import { useProject, useWorkspace, useWorkspaceState } from '../session/context';
 import { type CropPage, useUiStore } from '../ui/uiStore';
 import { useNotify } from '../ui/notices';
+import { decodeReference } from '../reference/ReferencePanel';
+import { useReferenceStore } from '../reference/referenceStore';
 import { cropRotation, DPI_CHOICES, turn, useCropDraft, wholePage } from './cropDraft';
 
 const useStyles = makeStyles({
@@ -50,13 +53,17 @@ export function CropPanel({ page }: { readonly page: CropPage }) {
   const styles = useStyles();
   const workspace = useWorkspace();
   const notify = useNotify();
-  const source = useProject()?.sources.find((s) => s.id === page.sourceId);
+  const project = useProject();
+  const source = project?.sources.find((s) => s.id === page.sourceId);
   const state = useWorkspaceState().pdf[page.sourceId];
   const geometry = state?.status === 'open' ? state.pages[page.pageIndex] : undefined;
   const draft = useCropDraft((s) => s.draft);
   const update = useCropDraft((s) => s.update);
   const setActiveGraph = useUiStore((s) => s.setActiveGraph);
   const setCropPage = useUiStore((s) => s.setCropPage);
+  const activeGraphId = useUiStore((s) => s.activeGraphId);
+  const target = project?.graphs.find((g) => g.id === activeGraphId);
+  const setReference = useReferenceStore((s) => s.setReference);
   const [busy, setBusy] = useState(false);
 
   const fileName = source?.fileName ?? 'PDF';
@@ -80,6 +87,30 @@ export function CropPanel({ page }: { readonly page: CropPage }) {
       notify({
         intent: 'error',
         title: 'Could not crop the page',
+        body: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /** Lays the crop over the active graph instead of adding a graph (task 3.6). */
+  const applyAsReference = async () => {
+    if (!draft.rectPt || !target) return;
+    setBusy(true);
+    try {
+      const { png } = await workspace.renderCropPng(page.sourceId, {
+        pageIndex: page.pageIndex,
+        rectPt: draft.rectPt,
+        dpi: draft.dpi,
+        rotation,
+      });
+      setReference(target.id, `${fileName} p${String(page.pageIndex + 1)}`, await decodeReference(png));
+      setCropPage(null);
+    } catch (error) {
+      notify({
+        intent: 'error',
+        title: 'Could not use the crop as a reference',
         body: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -169,6 +200,17 @@ export function CropPanel({ page }: { readonly page: CropPage }) {
         >
           Crop to new graph
         </Button>
+        {target && (
+          <Button
+            icon={<ImageSplitRegular />}
+            disabled={!draft.rectPt || !canCopy || busy}
+            onClick={() => {
+              void applyAsReference();
+            }}
+          >
+            Use as reference for {target.name}
+          </Button>
+        )}
         <Button
           onClick={() => {
             setCropPage(null);

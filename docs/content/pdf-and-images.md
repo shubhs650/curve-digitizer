@@ -25,6 +25,17 @@ Very large crops are capped so the image fits in memory; the panel says when tha
 
 The **Source** panel of a graph cropped from a PDF offers **Re-render at** a higher DPI. Calibration clicks and points move with the image, so nothing has to be redone. The PDF must still be stored with the project, or be opened again.
 
+## Comparing with a reference image
+
+To compare a graph with another crop or another edition of the same figure, lay a second image over it:
+
+- From an image file: in the inspector's **Reference overlay** section, choose **Load reference image…**.
+- From a PDF page: with the graph selected, open the page, drag a rectangle and choose **Use as reference for** the graph, instead of **Crop to new graph**.
+
+The reference starts half see-through at the image's top-left corner. Set its **Opacity**, move it with **Offset X** and **Offset Y** (in image pixels) until the two line up, and turn it off with **Show reference**. It is drawn at the same pixel size as the graph, so crop both at the same resolution.
+
+The reference is a viewing aid only: it is not saved with the project and is gone when the page is reloaded.
+
 ## Images
 
 PNG, JPEG and WebP images become graphs as they are. A photo of a page taken at an angle can still be calibrated: turn on **Projective** in the calibration panel.

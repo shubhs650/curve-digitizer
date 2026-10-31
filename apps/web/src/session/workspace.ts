@@ -416,6 +416,19 @@ export class Workspace {
     path: string,
   ): Promise<RenderResult & { readonly image: ImageRef }> {
     const store = this.#requireStore();
+    const { png, width, height, ...result } = await this.renderCropPng(sourceId, request);
+    await this.#deps.repo.writeFile(store.project.id, path, png);
+    return { ...result, image: { path, width, height } };
+  }
+
+  /**
+   * Renders a region of a page of an open source PDF as PNG without adding anything to the project, e.g. for a
+   * reference overlay. The DPI is capped to the pixel budget (R7), as for a graph.
+   */
+  async renderCropPng(
+    sourceId: string,
+    request: CropRequest,
+  ): Promise<RenderResult & { readonly png: Uint8Array; readonly width: number; readonly height: number }> {
     const state = this.#state.pdf[sourceId];
     if (state?.status !== 'open') throw new Error('The PDF is not open');
     if (!state.permissions.copy) {
@@ -425,8 +438,7 @@ export class Workspace {
     const start = performance.now();
     const { png, width, height, renderMs } = await this.#deps.pdf.cropPng({ key: sourceId, ...request, dpi });
     performance.measure(CROP_RENDER_MEASURE, { start, duration: renderMs, detail: { width, height, dpi } });
-    await this.#deps.repo.writeFile(store.project.id, path, png);
-    return { dpi, capped, renderMs, image: { path, width, height } };
+    return { dpi, capped, renderMs, png, width, height };
   }
 
   /**

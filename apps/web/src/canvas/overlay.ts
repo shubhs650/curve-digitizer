@@ -2,6 +2,7 @@ import type { Fit, Graph } from '@cd/core';
 import { fitPathPx } from '../fit/fitInputs';
 import { HitIndex } from './hitIndex';
 import { toScreen, type Vec2, type ViewTransform } from './viewTransform';
+import type { Reference } from '../reference/referenceStore';
 
 /** A digitized point as the overlay sees it. */
 export interface OverlayPoint {
@@ -117,4 +118,26 @@ export function paintOverlay(
       ctx.stroke();
     }
   }
+}
+
+/**
+ * The reference overlay (task 3.6) over the graph image: its pixels sit on the graph's at `offsetPx`, scaled
+ * with the view, at the chosen opacity.
+ */
+export function paintReference(
+  ctx: CanvasRenderingContext2D,
+  view: ViewTransform,
+  reference: Pick<Reference, 'bitmap' | 'opacity' | 'offsetPx'>,
+): void {
+  const { bitmap, opacity, offsetPx } = reference;
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.drawImage(
+    bitmap,
+    view.offset[0] + offsetPx[0] * view.scale,
+    view.offset[1] + offsetPx[1] * view.scale,
+    bitmap.width * view.scale,
+    bitmap.height * view.scale,
+  );
+  ctx.restore();
 }

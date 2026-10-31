@@ -5,7 +5,8 @@ import { calibratedReadout } from '../calibration/format';
 import { usePreviewFit } from '../fit/fitStore';
 import { useUiStore } from '../ui/uiStore';
 import { Loupe } from './Loupe';
-import { HIT_RADIUS, overlayModel, type OverlayState, paintOverlay } from './overlay';
+import { HIT_RADIUS, overlayModel, type OverlayState, paintOverlay, paintReference } from './overlay';
+import { useReference } from '../reference/referenceStore';
 import { type CanvasPointer, SELECT_TOOL, type ToolHandlers } from './tools';
 import type { BitmapState } from './useGraphBitmap';
 import {
@@ -128,6 +129,7 @@ export function GraphCanvas({
   const [dragging, setDragging] = useState<Drag['kind'] | null>(null);
 
   const preview = usePreviewFit(graph.id);
+  const reference = useReference(graph.id);
   const model = useMemo(() => overlayModel(graph, preview), [graph, preview]);
   const overlay = useMemo<OverlayState>(() => ({ hovered, selected: selection }), [hovered, selection]);
   const imageSize = graph.image;
@@ -148,7 +150,7 @@ export function GraphCanvas({
     if (viewport && view === null) setView(fitView(imageSize, viewport));
   }, [viewport, view, imageSize]);
 
-  useLayerPaint(imageLayer, viewport, [bitmap, view], (ctx) => {
+  useLayerPaint(imageLayer, viewport, [bitmap, view, reference], (ctx) => {
     if (!bitmap || !view) return;
     // Square pixels once a pixel covers two screen pixels: exact positions matter more than smoothness there.
     ctx.imageSmoothingEnabled = view.scale < 2;
@@ -159,6 +161,7 @@ export function GraphCanvas({
       bitmap.width * view.scale,
       bitmap.height * view.scale,
     );
+    if (reference?.visible) paintReference(ctx, view, reference);
   });
   useLayerPaint(overlayLayer, viewport, [model, overlay, view, decorate], (ctx) => {
     if (!view) return;
