@@ -104,7 +104,8 @@ test.describe('canvas', () => {
 
   test('keeps every move of a pan that arrives before the next render', async ({ page }) => {
     const start = (await canvasView(page)).view.offset;
-    const [x, y] = await pageXY(page, [1200, 800]);
+    // Whole pixels: some engines round the real press, which would offset it from the synthetic moves.
+    const [x, y] = (await pageXY(page, [1200, 800])).map(Math.round) as [number, number];
     await page.mouse.move(x, y);
     await page.evaluate(() => {
       document.addEventListener(
