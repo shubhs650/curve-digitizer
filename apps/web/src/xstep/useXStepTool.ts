@@ -2,8 +2,8 @@ import type { Graph } from '@cd/core';
 import { useCallback, useMemo } from 'react';
 import type { CanvasPointer, ToolHandlers } from '../canvas/tools';
 import { toScreen, type ViewTransform } from '../canvas/viewTransform';
-import { useWorkspace } from '../session/context';
-import { clearXStep, runXStep } from './runXStep';
+import { useActiveDataset, useWorkspace } from '../session/context';
+import { clearXStep, pathDatasetBlock, runXStep } from './runXStep';
 import { resolveXs } from './xValues';
 import { type XStepSession, useXStepSession, useXStepStore } from './xstepStore';
 
@@ -20,13 +20,14 @@ export function useXStepTool(graph: Graph): XStepTool {
   const workspace = useWorkspace();
   const session = useXStepSession(graph.id);
   const settings = useXStepStore((s) => s.settings);
+  const blocked = pathDatasetBlock(useActiveDataset(graph));
 
   const tool = useMemo<ToolHandlers>(
     () => ({
       cursor: 'crosshair',
       onDown: (pointer: CanvasPointer) => {
         if (graph.calibration === null || session?.running === true) return false;
-        const xs = resolveXs(graph, settings);
+        const xs = blocked === null ? resolveXs(graph, settings) : { ok: false as const, message: blocked };
         if (xs.ok) void runXStep(graph, (path) => workspace.readFile(path), pointer.image, xs.xs);
         else {
           useXStepStore.getState().setSession(() => ({
@@ -46,7 +47,7 @@ export function useXStepTool(graph: Graph): XStepTool {
         return true;
       },
     }),
-    [graph, session, settings, workspace],
+    [blocked, graph, session, settings, workspace],
   );
 
   const decorate = useCallback(

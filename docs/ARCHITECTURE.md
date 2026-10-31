@@ -108,6 +108,8 @@ As built (task 2.3, ADR 34): a colour ink model and a ray-cone corridor search w
 Colour distance in CIELAB; threshold → mask; morphological open; Zhang-Suen thinning; connected components; order each component by walking; drop components below a length threshold; user picks components to keep. Details as built (open by reconstruction, Lü–Wang thinning, joining pieces across gaps) are in ADR 35.
 
 ### 8.3 X-step sampler
+As built (task 2.6, ADR 37): the X values are read along the guided tracer's path rather than by searching pixel columns, and outliers are judged against the chord between neighbours; the outline below is the original design it refines.
+
 For each requested X: compute the pixel column (through `M`), find curve crossings in the processed image near the previously found Y (continuity), snap to centerline, emit point; mark outliers where the jump exceeds a threshold.
 
 ### 8.4 Magnetic snap

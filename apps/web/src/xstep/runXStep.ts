@@ -1,9 +1,16 @@
-import type { Graph, Vec2 } from '@cd/core';
+import type { Dataset, Graph, Vec2 } from '@cd/core';
 import { imageSource } from '../processing/processedImage';
 import { computePool } from '../session/compute';
 import { useXStepStore } from './xstepStore';
 
 let current: AbortController | null = null;
+
+/** Why X-step cannot add to this dataset, or null: path datasets (loops) have no single Y per X (PRD §4.7). */
+export function pathDatasetBlock(dataset: Dataset | null): string | null {
+  return dataset?.mode === 'path'
+    ? `X-step needs a function dataset; ${dataset.name} is a path. Choose or add a function dataset`
+    : null;
+}
 
 export function cancelXStep(): void {
   current?.abort();

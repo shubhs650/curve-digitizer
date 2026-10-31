@@ -1,8 +1,9 @@
-import { setCalibration } from '@cd/core';
+import { addDataset, setCalibration } from '@cd/core';
 import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '../App';
+import { newDataset } from '../inspector/DatasetsPanel';
 import { EMPTY_DRAFT, evaluateDraft } from '../calibration/draft';
 import { workspaceWithGraph } from '../test/workspace';
 import { useUiStore } from '../ui/uiStore';
@@ -46,6 +47,18 @@ describe('XStepPanel', () => {
   it('waits for a calibration', async () => {
     const { panel } = await setup();
     expect(panel().getByText(/Calibrate the graph first/)).toBeTruthy();
+  });
+
+  it('refuses a path dataset, which has no single Y per X', async () => {
+    const { store, panel, graph, calibrate } = await setup();
+    calibrate();
+    const g = graph();
+    if (!g) throw new Error('expected a graph');
+    act(() => {
+      store.dispatch(addDataset(g.id, { ...newDataset(g, 'loop'), mode: 'path' }));
+    });
+    expect(panel().getByText(/^X-step needs a function dataset; .+ is a path\./)).toBeTruthy();
+    expect(panel().queryByRole('button', { name: 'X-step (X)' })).toBeNull();
   });
 
   it('counts the X values from a step or a list, and offers the tool', async () => {

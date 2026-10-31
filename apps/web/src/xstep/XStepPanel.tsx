@@ -17,7 +17,7 @@ import { DataScatterRegular } from '@fluentui/react-icons';
 import { newDataset } from '../inspector/DatasetsPanel';
 import { useActiveDataset, useDispatch } from '../session/context';
 import { useUiStore } from '../ui/uiStore';
-import { cancelXStep, clearXStep } from './runXStep';
+import { cancelXStep, clearXStep, pathDatasetBlock } from './runXStep';
 import { defaultRange, resolveXs } from './xValues';
 import { type XStepSession, useXStepSession, useXStepStore } from './xstepStore';
 import { xstepPoints } from './xstepPoints';
@@ -53,13 +53,16 @@ export function XStepPanel({ graph }: { graph: Graph }) {
   const setSettings = useXStepStore((s) => s.setSettings);
   const tool = useUiStore((s) => s.tool);
   const setTool = useUiStore((s) => s.setTool);
+  const blocked = pathDatasetBlock(useActiveDataset(graph));
 
-  if (graph.calibration === null) {
+  if (graph.calibration === null || blocked !== null) {
     return (
       <section aria-labelledby="xstep-heading" className={styles.panel}>
         <Caption1Strong id="xstep-heading">X-step</Caption1Strong>
         <Caption1 className={styles.muted}>
-          Calibrate the graph first: the X values are read through the axes.
+          {graph.calibration === null
+            ? 'Calibrate the graph first: the X values are read through the axes.'
+            : `${blocked ?? ''}.`}
         </Caption1>
       </section>
     );
