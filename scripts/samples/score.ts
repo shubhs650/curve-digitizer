@@ -3,16 +3,21 @@
 import { coveredIntervals, coveredLengthFraction, polyline, project, rms, type Polyline, type Vec2 } from './geometry.ts';
 import type { GroundTruth, Op, OpKind, TargetId, TruthDataset } from './truth.ts';
 
+/** The stroke widths (px) the feature measured for its points' uncertainty (task 2.7); not part of any A-score. */
+interface Widths {
+  readonly widths?: readonly number[];
+}
+
 /** What a replayer must return for each op kind. */
 export interface ReplayOutputs {
   readonly calibrate: { readonly residualPx: number };
-  readonly manualPick: { readonly points: readonly Vec2[] };
+  readonly manualPick: { readonly points: readonly Vec2[] } & Widths;
   /** `prompted`: the tracer stopped to ask the user which branch to follow. */
-  readonly trace: { readonly points: readonly Vec2[]; readonly prompted: boolean };
+  readonly trace: { readonly points: readonly Vec2[]; readonly prompted: boolean } & Widths;
   /** The ordered centerline of each component the user keeps. */
-  readonly colourMask: { readonly paths: readonly (readonly Vec2[])[] };
+  readonly colourMask: { readonly paths: readonly (readonly Vec2[])[] } & Widths;
   /** One point per requested X, in the op's order, and how many the sampler flagged as outliers. */
-  readonly xStep: { readonly points: readonly Vec2[]; readonly outliers: number };
+  readonly xStep: { readonly points: readonly Vec2[]; readonly outliers: number } & Widths;
 }
 
 export interface TargetSpec {

@@ -119,6 +119,16 @@ describe('parseProject', () => {
     expect(errorPath(() => parseProject(json))).toBe('graphs[0].fits[0].datasetId');
   });
 
+  it('rejects a negative point line width, which has no uncertainty (task 2.7)', () => {
+    const json = mutableFixture();
+    const datasets = json.graphs[0]?.datasets as { points: Record<string, unknown>[] }[];
+    const points = datasets[0]?.points ?? [];
+    points[0] = { ...points[0], lineWidthPx: -1 };
+    expect(errorPath(() => parseProject(json))).toBe('graphs[0].datasets[0].points[0].lineWidthPx');
+    points[0] = { ...points[0], lineWidthPx: 0 };
+    expect(parseProject(json).graphs[0]?.datasets[0]?.points[0]?.lineWidthPx).toBe(0);
+  });
+
   it('rejects non-objects', () => {
     expect(errorPath(() => parseProject(null))).toBe('$');
     expect(errorPath(() => parseProject([]))).toBe('$');

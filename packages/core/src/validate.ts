@@ -54,6 +54,12 @@ function num(value: unknown, path: string): number {
   return value;
 }
 
+function nonNegative(value: unknown, path: string): number {
+  const n = num(value, path);
+  if (n < 0) throw new ProjectFormatError(path, 'expected a number ≥ 0');
+  return n;
+}
+
 function bool(value: unknown, path: string): boolean {
   if (typeof value !== 'boolean') throw new ProjectFormatError(path, 'expected a boolean');
   return value;
@@ -184,7 +190,7 @@ function point(value: unknown, path: string): Point {
     excludedFromFit: bool(o.excludedFromFit, `${path}.excludedFromFit`),
     outOfRange: bool(o.outOfRange, `${path}.outOfRange`),
     origin: oneOf(o.origin, ['manual', 'trace', 'xstep', 'snap'] as const, `${path}.origin`),
-    ...optional(o, 'lineWidthPx', path, num),
+    ...optional(o, 'lineWidthPx', path, nonNegative),
   };
 }
 

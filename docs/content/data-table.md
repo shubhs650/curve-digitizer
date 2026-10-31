@@ -10,6 +10,12 @@ Focus a cell and press Enter or F2, or start typing a number. Enter keeps the ed
 
 Tick **Excluded** to keep a point but leave it out of curve fits. Exports still include it, flagged in an `excluded_from_fit` column. Space toggles it on a focused Excluded cell.
 
+## Uncertainty
+
+The **σx** and **σy** columns give each point's standard uncertainty in data units, once the graph is calibrated. It combines how precisely a point can be placed (half a pixel) with the width of the line it sits on: σ = √(0.5² + (line width / 2)²) pixels, carried through the calibration. On a log axis it grows with the value, because a pixel spans more units further up a decade.
+
+The line width is measured from the image when a point is snapped, traced, found by the colour mask or placed by X-step, so a thick or blurred line gives a larger σ. A point placed without snap, or moved by hand, assumes a 2 pixel line. Exports carry the same values in `sigma_x` and `sigma_y`.
+
 ## Copying
 
 **Copy table** (or Ctrl+C) copies the selected rows, or the whole table, as tab-separated text at full precision. It pastes into Excel or a spreadsheet as columns.
