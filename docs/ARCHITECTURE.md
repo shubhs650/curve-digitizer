@@ -96,6 +96,8 @@ Transfer `ImageBitmap`/`ArrayBuffer` by ownership, never copy. The UI holds only
 ## 8. Algorithms
 
 ### 8.1 Guided trace (cost-map path search)
+As built (task 2.3, ADR 34): a colour ink model and a ray-cone corridor search with sub-pixel re-centring; the outline below is the original design it refines.
+
 1. Input: processed grayscale/colour crop, start px, optional end px, target colour (from eyedropper or sampled at start), direction prior (none at start).
 2. Cost per pixel = `wc * colorDistance + wt * (1 - thinness)` where thinness comes from a distance transform of the binarized image (penalizes thick blobs and grid intersections).
 3. Search: A* / Dijkstra over an 8-connected grid within a corridor around the predicted direction; the predicted direction is a smoothed tangent from the last k accepted points; a turn penalty `wd * angle` keeps crossings going straight through; gap bridging allows up to `g` px of high-cost pixels (dashed lines).

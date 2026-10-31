@@ -31,3 +31,4 @@ export type { ExportFileInput, ExportFileOutput, ExportFormat } from './tasks/ex
 export type { CdzFiles, FileBuffers } from './tasks/cdz.ts';
 export type { ProcessImageInput, ProcessImageOutput } from './tasks/process.ts';
 export type { ImageSource } from './tasks/source.ts';
+export type { TraceCurveInput } from './tasks/trace.ts';
