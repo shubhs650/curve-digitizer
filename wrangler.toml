@@ -1,0 +1,5 @@
+# Cloudflare Pages project for curve-digitizer.openengtools.com (docs/DEPLOY.md, ADR 32).
+# Static files only: no Functions, no bindings. Response headers come from apps/web/dist/_headers.
+name = "curve-digitizer"
+pages_build_output_dir = "apps/web/dist"
+compatibility_date = "2026-10-01"

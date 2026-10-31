@@ -11,6 +11,8 @@ import {
 } from '@fluentui/react-icons';
 import { DOCS_PATH, OET_HOME_URL, REPO_URL, reportIssueUrl } from '../links';
 import type { ThemeName } from '../theme';
+import { OfflineBadge } from '../pwa/OfflineBadge';
+import { useOfflineReadiness } from '../pwa/offlineReadiness';
 import { useUiStore } from '../ui/uiStore';
 import { APP_VERSION } from '../version';
 
@@ -50,6 +52,7 @@ export function AppHeader({ theme, onToggleTheme, sidebarOpen, onToggleSidebar }
   const styles = useStyles();
   const issueUrl = reportIssueUrl({ version: APP_VERSION, userAgent: navigator.userAgent });
   const setShortcutsOpen = useUiStore((s) => s.setShortcutsOpen);
+  const offline = useOfflineReadiness();
 
   return (
     <header className={styles.header}>
@@ -107,6 +110,7 @@ export function AppHeader({ theme, onToggleTheme, sidebarOpen, onToggleSidebar }
           />
         </Tooltip>
       </nav>
+      <OfflineBadge readiness={offline} />
       <ToggleButton
         appearance="subtle"
         icon={<WeatherMoonRegular />}

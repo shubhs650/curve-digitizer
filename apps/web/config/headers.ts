@@ -7,6 +7,10 @@ export const CROSS_ORIGIN_ISOLATION_HEADERS: Readonly<Record<string, string>> = 
   'Cross-Origin-Embedder-Policy': 'require-corp',
 };
 
+// Vite names every file under /assets by its content hash, so a cached copy never goes stale. Everything else
+// (index.html, sw.js, the manifest) keeps Pages' default of revalidating on each load, so updates are found.
+const IMMUTABLE_ASSETS = '/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n';
+
 /**
  * Cloudflare Pages `_headers` file, emitted into dist by vite.config.ts. The CSP repeats the <meta> policy
  * (both apply) and adds frame-ancestors, which a meta tag cannot carry.
@@ -19,5 +23,5 @@ export function hostHeadersFile(): string {
   };
   return `/*\n${Object.entries(headers)
     .map(([name, value]) => `  ${name}: ${value}\n`)
-    .join('')}`;
+    .join('')}${IMMUTABLE_ASSETS}`;
 }
