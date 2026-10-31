@@ -120,7 +120,7 @@ describe('getting-started guide', () => {
 });
 
 describe('shortcut cheat sheet', () => {
-  it('opens on ? and from the header, listing every group', async () => {
+  it('opens on ?, listing every group, and closes on Escape', async () => {
     const user = userEvent.setup();
     render(<App workspace={testWorkspace()} />);
     // The shortcut listener is attached once the app has rendered; a key pressed earlier goes nowhere.
@@ -137,8 +137,14 @@ describe('shortcut cheat sheet', () => {
     await vi.waitFor(() => {
       expect(screen.queryByRole('dialog')).toBeNull();
     });
-    await user.click(screen.getByRole('button', { name: 'Shortcuts' }));
-    // Reopening renders every group again, as slow as the first open.
+  });
+
+  // A separate render: in jsdom, reopening right after Escape can race tabster's deferred aria-hidden pass for
+  // the closed dialog and leave the new one aria-hidden (15 quick reopen cycles in Chromium never do).
+  it('opens from the header button', async () => {
+    const user = userEvent.setup();
+    render(<App workspace={testWorkspace()} />);
+    await user.click(await screen.findByRole('button', { name: 'Shortcuts' }));
     expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' }, { timeout: 5000 })).toBeTruthy();
   });
 
