@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { MemoryRepository } from '../storage/memory';
 import type { ProjectRepository } from '../storage/repository';
 import { FAKE_PASSWORD, FakePdfBackend, LOCKED_PDF, NO_COPY_PDF, pdfFile, PLAIN_PDF } from '../test/fakePdf';
+import { inProcessCdz, memorySession } from '../test/session';
 import { baseName, type PngEncoder, sourcePath, Workspace } from './workspace';
 
 /** Signature + IHDR of a 3 × 2 PNG; enough for the workspace, which stores PNG bytes as they are. */
@@ -12,7 +13,7 @@ const PNG = new Uint8Array([
 ]);
 const JPEG = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]);
 
-function setup(repo: ProjectRepository = new MemoryRepository()) {
+function setup(repo: ProjectRepository = new MemoryRepository(), session = memorySession()) {
   let id = 0;
   let tick = 0;
   const encodePng = vi.fn<PngEncoder>(() => Promise.resolve({ png: PNG, width: 3, height: 2 }));
@@ -21,11 +22,13 @@ function setup(repo: ProjectRepository = new MemoryRepository()) {
     repo,
     encodePng,
     pdf,
+    cdz: inProcessCdz,
+    session,
     newId: () => `id${String(++id)}`,
     now: () => new Date(Date.UTC(2026, 10, 1, 0, 0, tick++)).toISOString(),
     appVersion: '0.0.0-test',
   });
-  return { workspace, repo, encodePng, pdf };
+  return { workspace, repo, encodePng, pdf, session };
 }
 
 describe('baseName', () => {
@@ -349,5 +352,108 @@ describe('Workspace PDF crops', () => {
     await workspace.importImages([{ name: 'x.png', bytes: PNG }]);
     const image = workspace.state.store?.project.graphs[1]?.id ?? '';
     await expect(workspace.rerenderGraph(image, 600)).rejects.toThrow(/not a PDF crop/);
+  });
+});
+
+describe('Workspace autosave and crash recovery (R3)', () => {
+  it('starts saving a change at once, so a reload right after an edit keeps it', async () => {
+    const repo = new MemoryRepository();
+    const save = vi.spyOn(repo, 'saveProject');
+    const { workspace } = setup(repo);
+    const store = await workspace.createProject('v0');
+    save.mockClear();
+    store.dispatch(renameProject('v1'));
+    expect(save).not.toHaveBeenCalled();
+    // One microtask later the write is under way, with no timer in between.
+    await Promise.resolve();
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(save.mock.calls[0]?.[0].name).toBe('v1');
+  });
+
+  it('reopens the project that was open when the tab went away, but not one that was closed', async () => {
+    const repo = new MemoryRepository();
+    const session = memorySession();
+    const first = setup(repo, session).workspace;
+    const store = await first.createProject('Pump curves');
+    store.dispatch(renameProject('Pump curves v2'));
+    await first.flush();
+
+    // The tab is killed: a new workspace over the same storage.
+    const second = setup(repo, session).workspace;
+    expect((await second.restoreSession())?.project).toEqual(store.project);
+    second.closeProject();
+    expect(await setup(repo, session).workspace.restoreSession()).toBeNull();
+  });
+
+  it('forgets a remembered project that has been deleted', async () => {
+    const repo = new MemoryRepository();
+    const { workspace } = setup(repo, memorySession('gone'));
+    expect(await workspace.restoreSession()).toBeNull();
+  });
+});
+
+describe('Workspace .cdz (R2)', () => {
+  it('round-trips a project through a .cdz onto another device', async () => {
+    const { workspace, repo } = setup();
+    await workspace.importImages([{ name: 'chart.png', bytes: PNG }]);
+    const store = workspace.state.store;
+    if (!store) throw new Error('no project');
+    const saved = await workspace.saveCdz({ embedSources: false });
+    expect(saved.fileName).toBe('chart');
+
+    const other = setup();
+    const opened = await other.workspace.importCdz({ name: 'chart.cdz', bytes: saved.bytes });
+    expect(opened.project).toEqual(store.project);
+    const path = store.project.graphs[0]?.image.path ?? '';
+    expect(await other.repo.readFile(opened.project.id, path)).toEqual(
+      await repo.readFile(store.project.id, path),
+    );
+    expect(other.workspace.state.projects.map((p) => p.name)).toEqual(['chart']);
+  });
+
+  it('opens a .cdz of a project already on this device as a copy, keeping the original', async () => {
+    const { workspace } = setup();
+    await workspace.importImages([{ name: 'chart.png', bytes: PNG }]);
+    const originalId = workspace.state.store?.project.id;
+    const saved = await workspace.saveCdz({ embedSources: false });
+    const copy = await workspace.importCdz({ name: 'chart.cdz', bytes: saved.bytes });
+    expect(copy.project.id).not.toBe(originalId);
+    expect(copy.project.name).toBe('chart (copy)');
+    expect(workspace.state.projects).toHaveLength(2);
+  });
+
+  it('carries source PDFs only when asked, and re-attaches a missing one by its content', async () => {
+    const { workspace } = setup();
+    await workspace.importPdf(pdfFile(PLAIN_PDF, 'pump.pdf'));
+
+    const withPdfs = setup();
+    const full = await withPdfs.workspace.importCdz({
+      name: 'a.cdz',
+      bytes: (await workspace.saveCdz({ embedSources: true })).bytes,
+    });
+    expect(full.project.sources[0]?.embedded).toBe(true);
+    expect(await withPdfs.workspace.openSource('id1')).toMatchObject({ status: 'open' });
+
+    const without = setup();
+    const lean = await without.workspace.importCdz({
+      name: 'b.cdz',
+      bytes: (await workspace.saveCdz({ embedSources: false })).bytes,
+    });
+    expect(lean.project.sources[0]?.embedded).toBe(false);
+    expect(await without.workspace.openSource('id1')).toMatchObject({
+      status: 'failed',
+      message: expect.stringMatching(/pump\.pdf is not stored with this project.*re-attach/) as string,
+    });
+    expect(await without.workspace.importPdf(pdfFile(PLAIN_PDF, 'pump (1).pdf'))).toEqual({
+      status: 'existing',
+      sourceId: 'id1',
+    });
+    expect(await without.repo.readFile(lean.project.id, sourcePath('id1'))).toEqual(PLAIN_PDF);
+  });
+
+  it('reports a file that is not a .cdz', async () => {
+    const { workspace } = setup();
+    await expect(workspace.importCdz({ name: 'x.cdz', bytes: PNG })).rejects.toThrow(/Not a zip archive/);
+    expect(workspace.state.store).toBeNull();
   });
 });

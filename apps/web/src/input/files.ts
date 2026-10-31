@@ -1,7 +1,12 @@
 import type { InputFile } from '../session/workspace';
 
-/** What the file picker offers: PDFs and the image types a Graph can come from (PRD §4.1). */
-export const OPEN_ACCEPT = 'application/pdf,.pdf,image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
+/** What the file picker offers: projects, PDFs and the image types a Graph can come from (PRD §4.1). */
+export const OPEN_ACCEPT = '.cdz,application/pdf,.pdf,image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp';
+
+/** Curve Digitizer projects (PROJECT_SCHEMA "Container"), by name: browsers know no MIME type for them. */
+export function isCdzFile(file: File): boolean {
+  return /\.cdz$/i.test(file.name);
+}
 
 /** PDFs go to PDFium; everything else is tried as an image. By type or name: content sniffing would read the file. */
 export function isPdfFile(file: File): boolean {

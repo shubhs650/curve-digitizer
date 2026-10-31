@@ -51,7 +51,10 @@ test.describe('image input', () => {
     await page.getByTestId('open-file-input').setInputFiles(SAMPLE.pathname);
     await expectGraphShown(page, 'source', '2400 × 1600 px');
 
+    // A reload reopens the project that was open (R3); it is also listed with the saved projects.
     await page.reload();
+    await expectGraphShown(page, 'source', '2400 × 1600 px');
+    await page.getByRole('button', { name: 'All projects' }).click();
     const saved = page.getByRole('list', { name: 'Saved projects' });
     await expect(saved.getByText('source', { exact: true })).toBeVisible();
     await expect(saved.getByText(/1 graph$/)).toBeVisible();

@@ -1,4 +1,5 @@
 import type { TaskSet } from './api.ts';
+import { cdzRead, cdzWrite } from './tasks/cdz.ts';
 import { exportFile } from './tasks/export.ts';
 import { imageToPng } from './tasks/image.ts';
 import { pdfClose, pdfCrop, pdfCropPng, pdfOpen, pdfThumbnail } from './tasks/pdf.ts';
@@ -15,5 +16,5 @@ export const renderTasks = {
 } satisfies TaskSet;
 export type RenderTasks = typeof renderTasks;
 
-export const computeTasks = { exportFile } satisfies TaskSet;
+export const computeTasks = { exportFile, cdzWrite, cdzRead } satisfies TaskSet;
 export type ComputeTasks = typeof computeTasks;

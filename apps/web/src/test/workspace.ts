@@ -2,6 +2,7 @@ import { Workspace } from '../session/workspace';
 import { MemoryRepository } from '../storage/memory';
 import { FakePdfBackend } from './fakePdf';
 import { TINY_PNG } from './png';
+import { inProcessCdz, memorySession } from './session';
 
 export { TINY_PNG };
 
@@ -12,6 +13,8 @@ export function testWorkspace(pdf = new FakePdfBackend()): Workspace {
     repo: new MemoryRepository(),
     encodePng: () => Promise.reject(new Error('not used in tests')),
     pdf,
+    cdz: inProcessCdz,
+    session: memorySession(),
     newId: () => `id${String(++id)}`,
     now: () => new Date().toISOString(),
     appVersion: 'test',

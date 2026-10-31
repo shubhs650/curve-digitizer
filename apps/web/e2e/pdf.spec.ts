@@ -53,8 +53,8 @@ test.describe('PDF input', () => {
     await expectRenderedPages(page, 'chart.pdf', 3);
     await expect(sidebar(page).getByText('3 pages')).toBeVisible();
 
+    // A reload reopens the project that was open (R3).
     await page.reload();
-    await page.getByRole('button', { name: 'Open chart' }).click();
     await expectRenderedPages(page, 'chart.pdf', 3);
   });
 
@@ -75,7 +75,6 @@ test.describe('PDF input', () => {
 
     // Passwords are never stored, so a reopened project asks again.
     await page.reload();
-    await page.getByRole('button', { name: 'Open chart-password' }).click();
     await sidebar(page).getByRole('button', { name: 'Unlock…' }).click();
     await dialog.getByLabel('Password').fill('open-sesame');
     await dialog.getByRole('button', { name: 'Open' }).click();

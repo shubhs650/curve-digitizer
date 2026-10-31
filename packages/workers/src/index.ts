@@ -28,3 +28,4 @@ export type {
 } from './tasks/pdf.ts';
 export type { PageGeometry, PdfPermissions, RgbaImage } from '@cd/pdf';
 export type { ExportFileInput, ExportFileOutput, ExportFormat } from './tasks/export.ts';
+export type { CdzFiles, FileBuffers } from './tasks/cdz.ts';

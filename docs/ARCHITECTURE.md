@@ -82,7 +82,7 @@ PDF page space (pt) --crop rect + DPI--> crop pixel space --calibration matrix--
 
 ## 6. Command pattern and undo
 
-Every mutation of a `Project` is a `Command { apply(project), invert(project), label, coalesceKey? }` executed through `ProjectStore.dispatch`. The store keeps undo/redo stacks (cap 200), coalesces consecutive drags by `coalesceKey`, and emits a change event that triggers autosave (debounced 1 s, forced within 5 s). UI never mutates the project directly. This is what makes undo, autosave and audit export trivial.
+Every mutation of a `Project` is a `Command { apply(project), invert(project), label, coalesceKey? }` executed through `ProjectStore.dispatch`. The store keeps undo/redo stacks (cap 200), coalesces consecutive drags by `coalesceKey`, and emits a change event that triggers autosave (written as soon as no write is in flight, changes during a write collapsing into the next; ADR 31). UI never mutates the project directly. This is what makes undo, autosave and audit export trivial.
 
 ## 7. Workers
 

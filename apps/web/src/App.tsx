@@ -124,12 +124,12 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
   );
 }
 
-/** Loads the saved-project list once at startup. */
+/** Loads the saved-project list once at startup and reopens the project that was open last time (R3). */
 function useProjectList(): void {
   const workspace = useWorkspace();
   const notify = useNotify();
   useEffect(() => {
-    workspace.refreshProjects().catch((error: unknown) => {
+    Promise.all([workspace.refreshProjects(), workspace.restoreSession()]).catch((error: unknown) => {
       notify({
         intent: 'error',
         title: 'Could not read saved projects',

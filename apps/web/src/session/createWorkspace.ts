@@ -1,6 +1,7 @@
 import { MemoryRepository } from '../storage/memory';
 import { hasOpfs, OpfsRepository } from '../storage/opfs';
 import { APP_VERSION } from '../version';
+import { localSession, workerCdz } from './cdz';
 import { workerPdfBackend } from './pdf';
 import { workerPngEncoder } from './pngEncoder';
 import { Workspace } from './workspace';
@@ -11,6 +12,8 @@ export function createWorkspace(): Workspace {
     repo: hasOpfs() ? new OpfsRepository() : new MemoryRepository(),
     encodePng: workerPngEncoder,
     pdf: workerPdfBackend,
+    cdz: workerCdz,
+    session: localSession,
     newId: () => crypto.randomUUID(),
     now: () => new Date().toISOString(),
     appVersion: APP_VERSION,
