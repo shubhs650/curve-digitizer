@@ -1,6 +1,6 @@
 # Getting started
 
-Curve Digitizer turns a graph in a PDF or an image into numbers. Everything happens in your browser: files are never uploaded, and the app works offline once it has loaded.
+Curve Digitizer turns a graph in a PDF or an image into numbers. Everything happens in your browser: files are never uploaded, and the app works offline once it has loaded. It works best in Chromium browsers such as Chrome and Edge.
 
 The sidebar shows a **Getting started** checklist with the four steps below. Each step ticks itself when it is done, and the current step says what to do next. You can hide the checklist with its close button and bring it back with **Show the getting-started guide**.
 

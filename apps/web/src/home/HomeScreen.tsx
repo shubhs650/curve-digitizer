@@ -84,6 +84,7 @@ export function HomeScreen({ onFiles }: HomeScreenProps) {
         Open a PDF or a PNG, JPEG or WebP image of a graph, drop it anywhere on this window, or paste an image
         with Ctrl+V. A saved .cdz project opens the same way. Everything stays on this device.
       </Body1>
+      <Caption1>Works best with Chromium browsers (Chrome, Edge).</Caption1>
       <div className={styles.actions}>
         <OpenFileButton appearance="primary" onFiles={onFiles} />
         <Button

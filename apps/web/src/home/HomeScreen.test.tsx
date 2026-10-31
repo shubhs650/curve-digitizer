@@ -20,6 +20,11 @@ describe('home screen and image input', () => {
     expect(screen.getByText('No project open.')).toBeTruthy();
   });
 
+  it('says which browsers it works best in', async () => {
+    setup();
+    expect(await screen.findByText('Works best with Chromium browsers (Chrome, Edge).')).toBeTruthy();
+  });
+
   it('opens a picked image as a graph of a new project and goes back to the list', async () => {
     const { user } = setup();
     await user.upload(
