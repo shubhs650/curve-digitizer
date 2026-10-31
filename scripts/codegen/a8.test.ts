@@ -13,6 +13,8 @@ import { formulaNumber } from './excelFormula.ts';
 
 const RELATIVE = 1e-9;
 const COUNT = 50;
+/** Python and C run as child processes over every case (the C file is compiled twice); a loaded CI runner needs well over vitest's 5 s default. */
+const EXTERNAL_MS = 60_000;
 
 interface Case {
   readonly label: string;
@@ -165,75 +167,85 @@ describe('A8: generated code agrees with the app', () => {
     expectAgreement('JavaScript', results);
   });
 
-  it.runIf(python !== null)('Python (NumPy), arrays in and out', () => {
-    const script = [
-      'import math',
-      ...CASES.map((c) => generateCode(c.fit, 'python', { datasetName: c.datasetName })),
-      'CASES = [',
-      ...CASES.map((c) => `    (${identifier(c.datasetName)}, [${c.xs.map((x) => String(x)).join(', ')}]),`),
-      ']',
-      'for f, xs in CASES:',
-      '    print(" ".join("nan" if math.isnan(y) else repr(float(y)) for y in f(np.array(xs))))',
-    ].join('\n');
-    const file = join(dir, 'a8.py');
-    writeFileSync(file, script);
-    const out = execFileSync(python ?? 'python3', ['-I', file], { encoding: 'utf8', maxBuffer: 64 << 20 });
-    expectAgreement(
-      'Python',
-      out
-        .trimEnd()
-        .split('\n')
-        .map((line) => line.split(' ').map(Number)),
-    );
-  });
-
-  it.runIf(available('cc', ['--version']))('C, compiled with -std=c99 -Wall -Werror (and as C++)', () => {
-    const functions = CASES.map((c) => generateCode(c.fit, 'c', { datasetName: c.datasetName }));
-    const main = [
-      '#include <stdio.h>',
-      ...functions,
-      'int main(void)',
-      '{',
-      ...CASES.flatMap((c) => [
-        `    { static const double xs[] = {${c.xs.map((x) => (Number.isInteger(x) ? `${String(x)}.0` : String(x))).join(', ')}};`,
-        `      for (int i = 0; i < ${String(c.xs.length)}; i++) printf("%.17g ", ${identifier(c.datasetName)}(xs[i]));`,
-        '      printf("\\n"); }',
-      ]),
-      '    return 0;',
-      '}',
-      '',
-    ].join('\n');
-    const source = join(dir, 'a8.c');
-    const binary = join(dir, 'a8');
-    writeFileSync(source, main);
-    execFileSync('cc', [
-      '-std=c99',
-      '-pedantic',
-      '-Wall',
-      '-Wextra',
-      '-Werror',
-      '-O1',
-      source,
-      '-o',
-      binary,
-      '-lm',
-    ]);
-    if (has('c++', ['--version']))
-      execFileSync('c++', ['-x', 'c++', '-fsyntax-only', '-Wall', '-Werror', source]);
-    const out = execFileSync(binary, { encoding: 'utf8', maxBuffer: 64 << 20 });
-    expectAgreement(
-      'C',
-      out
-        .trimEnd()
-        .split('\n')
-        .map((line) =>
-          line
-            .trim()
-            .split(' ')
-            .map((t) => (/nan/i.test(t) ? Number.NaN : Number(t))),
+  it.runIf(python !== null)(
+    'Python (NumPy), arrays in and out',
+    () => {
+      const script = [
+        'import math',
+        ...CASES.map((c) => generateCode(c.fit, 'python', { datasetName: c.datasetName })),
+        'CASES = [',
+        ...CASES.map(
+          (c) => `    (${identifier(c.datasetName)}, [${c.xs.map((x) => String(x)).join(', ')}]),`,
         ),
-    );
-  });
+        ']',
+        'for f, xs in CASES:',
+        '    print(" ".join("nan" if math.isnan(y) else repr(float(y)) for y in f(np.array(xs))))',
+      ].join('\n');
+      const file = join(dir, 'a8.py');
+      writeFileSync(file, script);
+      const out = execFileSync(python ?? 'python3', ['-I', file], { encoding: 'utf8', maxBuffer: 64 << 20 });
+      expectAgreement(
+        'Python',
+        out
+          .trimEnd()
+          .split('\n')
+          .map((line) => line.split(' ').map(Number)),
+      );
+    },
+    EXTERNAL_MS,
+  );
+
+  it.runIf(available('cc', ['--version']))(
+    'C, compiled with -std=c99 -Wall -Werror (and as C++)',
+    () => {
+      const functions = CASES.map((c) => generateCode(c.fit, 'c', { datasetName: c.datasetName }));
+      const main = [
+        '#include <stdio.h>',
+        ...functions,
+        'int main(void)',
+        '{',
+        ...CASES.flatMap((c) => [
+          `    { static const double xs[] = {${c.xs.map((x) => (Number.isInteger(x) ? `${String(x)}.0` : String(x))).join(', ')}};`,
+          `      for (int i = 0; i < ${String(c.xs.length)}; i++) printf("%.17g ", ${identifier(c.datasetName)}(xs[i]));`,
+          '      printf("\\n"); }',
+        ]),
+        '    return 0;',
+        '}',
+        '',
+      ].join('\n');
+      const source = join(dir, 'a8.c');
+      const binary = join(dir, 'a8');
+      writeFileSync(source, main);
+      execFileSync('cc', [
+        '-std=c99',
+        '-pedantic',
+        '-Wall',
+        '-Wextra',
+        '-Werror',
+        '-O1',
+        source,
+        '-o',
+        binary,
+        '-lm',
+      ]);
+      if (has('c++', ['--version']))
+        execFileSync('c++', ['-x', 'c++', '-fsyntax-only', '-Wall', '-Werror', source]);
+      const out = execFileSync(binary, { encoding: 'utf8', maxBuffer: 64 << 20 });
+      expectAgreement(
+        'C',
+        out
+          .trimEnd()
+          .split('\n')
+          .map((line) =>
+            line
+              .trim()
+              .split(' ')
+              .map((t) => (/nan/i.test(t) ? Number.NaN : Number(t))),
+          ),
+      );
+    },
+    EXTERNAL_MS,
+  );
 
   it('Excel formula, through the evaluator (15-digit numbers, Excel precedence)', () => {
     const results = CASES.map((c) => {

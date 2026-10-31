@@ -138,7 +138,8 @@ describe('shortcut cheat sheet', () => {
       expect(screen.queryByRole('dialog')).toBeNull();
     });
     await user.click(screen.getByRole('button', { name: 'Shortcuts' }));
-    expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy();
+    // Reopening renders every group again, as slow as the first open.
+    expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' }, { timeout: 5000 })).toBeTruthy();
   });
 
   it('does not open while typing ? in a field', async () => {

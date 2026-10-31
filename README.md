@@ -9,7 +9,7 @@ Part of [Open Engineering Tools](https://openengtools.com) · Live at [curve-dig
 - **Traceable.** Every value carries its calibration, pick points, transform, uncertainty, fit and valid range. Export a plain-JSON audit record for QA.
 - **Engineer-ready.** Log axes, skew correction for scans, Y at your chosen X values, curve families with a parameter, Excel with working formulas and a chart, equations for Python / JS / Excel / VBA / MATLAB / C.
 
-> Status: Rev 0 in development. See [docs/MILESTONES.md](docs/MILESTONES.md).
+> Status: Rev 0 complete (0.3.0). See [CHANGELOG.md](CHANGELOG.md) and the [roadmap](docs/ROADMAP.md).
 
 ## Documentation
 
@@ -22,6 +22,7 @@ Part of [Open Engineering Tools](https://openengtools.com) · Live at [curve-dig
 | [docs/MILESTONES.md](docs/MILESTONES.md) | Work breakdown M0–M3 |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Decision log (ADRs) |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Rev 1 candidates |
+| [docs/PUBLIC-RELEASE.md](docs/PUBLIC-RELEASE.md) | Checklist for making the repository public |
 
 ## Development
 
