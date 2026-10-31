@@ -36,6 +36,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { keys: ['C'], action: 'Calibrate tool' },
       { keys: ['T'], action: 'Guided trace tool' },
       { keys: ['M'], action: 'Colour mask tool' },
+      { keys: ['X'], action: 'X-step tool' },
       { keys: ['L'], action: 'Loupe on or off' },
       { keys: ['S'], action: 'Magnetic snap on or off' },
     ],
