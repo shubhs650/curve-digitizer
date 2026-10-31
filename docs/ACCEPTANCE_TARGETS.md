@@ -35,7 +35,7 @@ A milestone is done only when every target tagged with it passes in CI (automate
 | R1 | Offline proof: after first load and one PDF open, reload in airplane mode and complete the full workflow | M1 | Playwright `context.setOffline(true)` |
 | R2 | `.cdz` round-trip: export → reopen → `project.json` deep-equal (ignoring `modified`) and images byte-equal | M1 | e2e |
 | R3 | Crash-recovery autosave ≤ 5 s after last edit; killing the tab and reopening restores the project | M1 | e2e |
-| R4 | Works in current Chrome, Edge, Firefox, Safari | M1 | Playwright matrix (WebKit for Safari) |
+| R4 | Works in current Chrome, Edge, Firefox, Safari | M1 | Playwright matrix (WebKit for Safari); only Chromium blocks a merge (ADR 45) |
 | R5 | PDFium load failure → image-only mode with message; all image-only tests still pass | M1 | e2e with WASM blocked |
 | R6 | Protected PDF: wrong password → clear error; permission-restricted → honoured | M1 | e2e fixture |
 | R7 | Pixel budget: crop that would exceed 50 Mpx is capped and the user is told the effective DPI | M1 | unit + e2e |
