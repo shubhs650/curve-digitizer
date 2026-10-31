@@ -20,6 +20,7 @@ import { ShellLayout } from './shell/ShellLayout';
 import { GraphEditor } from './tools/GraphEditor';
 import { ToolRail } from './tools/ToolRail';
 import { useToolShortcuts } from './tools/useToolShortcuts';
+import { DataDock } from './table/DataTable';
 import { DEFAULT_THEME, otherTheme, themes } from './theme';
 import type { ThemeName } from './theme';
 import { Notices, useNotify } from './ui/notices';
@@ -104,6 +105,7 @@ function Shell({ theme, onToggleTheme }: { theme: ThemeName; onToggleTheme: () =
             graph !== null && <Inspector key={graph.id} graph={graph} />
           )
         }
+        dock={project !== null && <DataDock />}
         canvas={
           project === null ? (
             <HomeScreen onFiles={onFiles} />
