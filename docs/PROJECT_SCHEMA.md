@@ -26,7 +26,7 @@ Rules: `project.json` is the source of truth; images are referenced by relative 
 ```jsonc
 {
   "schemaVersion": 1,
-  "app": { "name": "curve-digitizer", "version": "0.3.0" },
+  "app": { "name": "curve-digitizer", "version": "0.4.0" },
   "id": "uuid",
   "name": "ASME VIII-2 fatigue curves",
   "created": "2026-11-02T10:12:00Z",
