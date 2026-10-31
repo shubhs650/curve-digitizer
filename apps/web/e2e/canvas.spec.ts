@@ -137,7 +137,7 @@ test.describe('canvas', () => {
           );
         }
       },
-      [x, y],
+      [x, y] as const,
     );
     await page.mouse.up({ button: 'middle' });
     const panned = (await canvasView(page)).view.offset;
