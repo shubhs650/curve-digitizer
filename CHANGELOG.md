@@ -4,7 +4,34 @@ All notable user-visible changes. Format: Keep a Changelog; versioning: SemVer (
 
 ## Unreleased
 
+## [0.1.0] - 2026-10-31
+
+First release (milestone M1, manual core): open a PDF or image, crop, calibrate, digitize by hand with magnetic snap, edit in the data table, export CSV/Excel/audit JSON, and keep projects on this device or in `.cdz` files. Runs entirely in the browser and works offline.
+
+### Acceptance (docs/ACCEPTANCE_TARGETS.md, M1)
+
+| Target | Result | How |
+|---|---|---|
+| A1 calibration residual ≤ 0.3 px | pass | `test:samples` (vector-clean, sn-family) |
+| A2 snapped manual pick ≤ 0.5 px RMS | pass | `test:samples` replay, and through the UI in e2e |
+| P1 cold load ≤ 2 s; shell ≤ 1.5 MB gzip | 0.55 s to interactive (Chromium, CI-class machine); shell 292 kB gzip | e2e `acceptance.spec.ts`; size check |
+| P2 PDFium lazy, ≤ 15 MB | pass: not requested before the first PDF; 4.8 MB | e2e network assertions; size check |
+| P3 600-DPI crop ≤ 1.5 s | 0.24–0.89 s render | e2e timing |
+| P7 1000-page PDF + 5 crops, JS heap < 500 MB | 57 MB page heap (Chromium; the render worker's memory is not included) | e2e `memory.spec.ts` with `performance.memory` |
+| R1 full workflow offline after one PDF open | pass | e2e: reload offline, crop, calibrate, add points, export CSV |
+| R2 `.cdz` round-trip | pass | e2e and unit |
+| R3 autosave ≤ 5 s, restore after a killed tab | pass | e2e |
+| R4 Chrome/Edge, Firefox, Safari | pass on Chromium, Firefox and WebKit; Chromium is the main target and the app says so | Playwright matrix in CI |
+| R5 PDFium failure → image-only mode | pass | e2e with the WASM blocked |
+| R6 passwords and permissions | pass | e2e fixtures |
+| R7 50 Mpx pixel budget | pass | unit and e2e |
+| U1 first-time user PDF → CSV < 3 min (2 colleagues) | **not yet run**: needs two people new to the app | manual |
+| U2 every action by keyboard; cheat sheet complete | automated part passes: points placed with the keyboard crosshair alone, and a test keeps the cheat sheet and the docs page identical; the manual keyboard-only walkthrough is still to do | e2e, unit, manual |
+| U3 undo/redo for every command | pass | unit invert test per command |
+| U4 WCAG AA, light and dark | pass | axe in Playwright, all three browsers |
+
 ### Added
+- "Ready offline" in the header: "Ready offline for images" once the app is saved in the browser, "Ready offline" once PDF support is saved too (the first time a PDF is opened).
 - The home screen says the app works best with Chromium browsers (Chrome, Edge).
 - Getting started: a "1 Crop · 2 Calibrate · 3 Digitize · 4 Export" checklist in the sidebar ticks each step as you do it and says what to do next, with buttons for the calibrate and add points tools. Hide it with its close button; "Show the getting-started guide" brings it back.
 - Keyboard shortcuts: press ? (or Shortcuts in the header) for a cheat sheet of every shortcut. Every canvas tool works without a mouse: with the canvas focused, Enter shows a crosshair, the arrow keys move it 1 px (Shift: 10 px), Enter clicks with the current tool and Esc hides it.

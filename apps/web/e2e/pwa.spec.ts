@@ -53,6 +53,18 @@ test.describe('PWA', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Calibration' })).toBeVisible();
   });
 
+  test('says "Ready offline" once the shell, then PDF support, are cached', async ({ page }) => {
+    await page.goto('/');
+    await waitForServiceWorker(page);
+    const status = page.getByTestId('offline-status');
+    await expect(status).toHaveText('Ready offline for images');
+    await page
+      .getByTestId('open-file-input')
+      .first()
+      .setInputFiles(new URL('../../../packages/pdf/fixtures/chart.pdf', import.meta.url).pathname);
+    await expect(status).toHaveText('Ready offline', { timeout: 15_000 });
+  });
+
   test('enforces a CSP that the shell runs under without violations', async ({ page }) => {
     await page.addInitScript(() => {
       const violations: string[] = [];

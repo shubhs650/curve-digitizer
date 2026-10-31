@@ -8,6 +8,10 @@ Every change is saved as you make it. If the tab or browser closes, opening the 
 
 The home screen lists the projects stored in this browser. Delete a project there to remove it from the device.
 
+## Working offline
+
+After the first visit the app works without a connection. The header says **Ready offline for images** once the app itself is saved in the browser, and **Ready offline** once PDF support is saved too, which happens the first time you open a PDF.
+
 ## Saving a .cdz file
 
 Choose **Save .cdz** in the sidebar, or press Ctrl+S, to download the project as a single `.cdz` file. Keep it as a backup, move it to another computer, or send it to a colleague.
